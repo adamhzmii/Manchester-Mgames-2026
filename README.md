@@ -1,1 +1,158 @@
-# Manchester MGames 2026
+# MGames 2026
+
+Web app for **Manchester MGames 2026** — the Malaysian Students' Society of
+Manchester one-day multi-sport tournament, Saturday 24 October 2026 at the
+Trinity and Sugden sports centres.
+
+Two audiences, one app:
+
+- **Attendees** browse the schedule, live scores, venue info and food with no
+  account at all.
+- **Coordinators** sign in with a single shared committee credential, which
+  reveals inline edit controls on the schedule for pushing scores during the
+  day. There is no separate admin dashboard.
+
+Built from `mgames26_system_design_spec.md` and the Claude Design prototype.
+
+## Stack
+
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router, React 19, TypeScript) |
+| Data + auth | Supabase (Postgres, Auth, Realtime) |
+| Styling | CSS Modules over the design tokens in `src/app/globals.css` |
+| Hosting | Vercel (free tier is sufficient for this event's scale) |
+
+## Getting started
+
+```bash
+npm install
+cp .env.example .env.local     # then fill in your Supabase project settings
+npm run dev                    # http://localhost:3000
+```
+
+The app boots without configuration, but every data-backed page will report
+that it cannot reach Supabase until `.env.local` is filled in.
+
+### Running without Supabase
+
+`.env.local` points at the real project, so `npm run dev` is all you need.
+`tools/mock-supabase.mjs` remains as a local stand-in for Supabase's REST API,
+useful for working offline or on the UI without touching the live project:
+
+```bash
+npm run mock     # serves fixed rows on :54999
+npm run dev      # with NEXT_PUBLIC_SUPABASE_URL=http://localhost:54999
+```
+
+It returns a handful of canned rows in the shape `src/lib/queries.ts` expects.
+It is not a database: no filtering, no writes, no auth, no realtime — so
+coordinator sign-in and live score updates do nothing against it. Delete
+`tools/` once a real project is up.
+
+### Setting up the database
+
+The schema lives in `supabase/` as ordinary SQL, so it can be applied with the
+Supabase CLI or pasted into the dashboard's SQL editor.
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push                       # applies supabase/migrations/*
+psql "$DATABASE_URL" -f supabase/seed.sql   # optional: prototype data
+```
+
+- `migrations/20260822120000_init_schema.sql` — tables, enums, constraints, indexes
+- `migrations/20260822120100_rls_and_realtime.sql` — RLS policies and the realtime publication
+- `seed.sql` — a full day of realistic fixtures, vendors and announcements for
+  local development. Truncates first, so it is safe to re-run and **must not**
+  be run against production once real data exists.
+
+Both migrations have been applied to the **Manchester-Mgames-2026** project
+(`wtpujwtubqasofesvwki`, eu-west-2), and `seed.sql` has been loaded there.
+Verified after the push: all ten tables readable by `anon`, anonymous writes
+refused by RLS, the `fixtures` embed query resolving both team foreign keys,
+and a score change propagating over realtime to an open page without a reload.
+
+Then create the single coordinator account (Authentication → Users → *Add
+user*, with "auto-confirm" on) and share that email and password with the
+committee.
+
+### Regenerating database types
+
+`src/lib/supabase/types.ts` is currently hand-written to mirror the migrations.
+Once the project is linked it can be replaced wholesale:
+
+```bash
+npx supabase gen types typescript --linked > src/lib/supabase/types.ts
+```
+
+## Routes
+
+| Route | Realtime | Notes |
+|---|---|---|
+| `/` | ✅ | Hero, latest announcement, "Happening now" rail |
+| `/schedule` | ✅ | All fixtures; sport/venue/stage filters, My Games, coordinator editing |
+| `/scores` | ✅ | Group tables (computed client-side) and knockout brackets |
+| `/map` | — | Per-venue list of courts and stalls; **map embed still to build** |
+| `/food` | — | Vendors and menus |
+| `/info` | — | First aid, prayer rooms, emergency contacts, FAQ |
+| `/announcements` | ✅ | Committee feed, newest first |
+| `/login` | — | Shared coordinator sign-in |
+
+"My Games" is not a route — it is a toggle on `/schedule` backed by team ids in
+`localStorage`, so attendees never need an account.
+
+## How it fits together
+
+```
+src/
+  app/                    routes; each data page is force-dynamic
+  components/             presentational + client-interactive pieces
+  lib/
+    queries.ts            every server-side read, in one place
+    fixtures.ts           fixture row → view model, filtering, sorting
+    standings.ts          group tables computed from finished fixtures
+    use-live-fixtures.ts  realtime subscription that patches scores in place
+    use-favourite-teams.ts  localStorage store behind useSyncExternalStore
+    actions/              server actions (score updates, auth)
+    supabase/             browser + server clients, env, database types
+  proxy.ts                session refresh (Next 16's renamed middleware)
+```
+
+**Security model.** Every page is public and read-only for anonymous visitors.
+The only write is a coordinator updating a fixture, and the boundary that
+enforces it is the RLS policy on `fixtures` — not the UI. `canEdit` in the
+React tree decides whether buttons *render*; Postgres decides whether writes
+*land*. A forged client can show itself the edit sheet and still be refused.
+
+**Realtime.** Fixture payloads carry the bare row, with no joined team or venue,
+so `use-live-fixtures.ts` patches the three columns coordinators actually touch
+(`score_a`, `score_b`, `status`) onto data the page already holds, and falls
+back to `router.refresh()` for anything structural. Announcements are
+self-contained and are prepended straight from the payload.
+
+## Testing
+
+```bash
+npm test        # Node's test runner over the pure logic
+npm run lint
+npx tsc --noEmit
+```
+
+The tests cover the parts where a bug would be silent and wrong rather than
+loud and broken: standings maths (including the per-sport points rules and
+excluding in-progress matches), fixture filtering, and time formatting across
+the BST/GMT boundary — the event is on the last BST weekend of 2026.
+
+## Still open
+
+Carried over from the spec, none of them blocking:
+
+- **Maps provider** — Google Maps vs Mapbox vs Leaflet/OSM. `/map` ships the
+  venue content and a `geo:` directions link; the embed itself is a marked
+  placeholder in `src/components/map-view.tsx` and is the only thing that
+  changes when the decision lands.
+- **Announcements linking to a fixture** — deferred, no schema support yet.
+- **Splitting coordinator editing into `/coordinator`** — the route structure
+  supports it cleanly if the inline approach proves awkward on the day.
+- **`.live` vs `.com` domain** — currently `mgames26.live`.

@@ -1,0 +1,193 @@
+.head {
+  padding: 16px var(--mg-gutter) 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 0 var(--mg-gutter) 12px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 11px;
+  border: 0;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--mg-surface-alt);
+  color: #6b5fa0;
+}
+
+.tabOn {
+  background: var(--mg-purple);
+  color: #fff;
+}
+
+/* Stand-in for the interactive map. Reads as a deliberate placeholder rather
+   than a broken embed — the maps provider is still an open decision. */
+.placeholder {
+  margin: 0 var(--mg-gutter);
+  border-radius: var(--mg-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--mg-border);
+  box-shadow: var(--mg-shadow);
+  background: var(--mg-surface);
+}
+
+.canvas {
+  position: relative;
+  height: 220px;
+  background-color: #e9eee6;
+  background-image: linear-gradient(#dfe6db 1px, transparent 1px),
+    linear-gradient(90deg, #dfe6db 1px, transparent 1px);
+  background-size: 26px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 20px;
+}
+
+.canvasTitle {
+  font-weight: 700;
+  font-size: 14px;
+  color: #5b6355;
+}
+
+.canvasHint {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7d8479;
+  max-width: 34ch;
+  line-height: 1.4;
+}
+
+.directions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mg-purple);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  margin-top: 2px;
+}
+
+.address {
+  background: var(--mg-surface);
+  padding: 10px 13px;
+  font-size: 11px;
+  color: var(--mg-text-muted);
+  font-weight: 600;
+  border-top: 1px solid var(--mg-border);
+}
+
+.zones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 var(--mg-gutter);
+}
+
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: 12px;
+  padding: 11px 13px;
+}
+
+.zoneBadge {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+.zoneName {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.zoneWhere {
+  font-size: 11px;
+  color: var(--mg-text-muted);
+  font-weight: 600;
+}
+
+.travel {
+  margin: 18px var(--mg-gutter) 0;
+  background: var(--mg-purple);
+  border-radius: var(--mg-radius-lg);
+  padding: 15px;
+  color: #fff;
+}
+
+.travelHead {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #fff;
+}
+
+.travelGrid {
+  display: flex;
+  gap: 10px;
+}
+
+.travelCard {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  padding: 11px;
+}
+
+.travelBig {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--mg-gold);
+}
+
+.travelSmall {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.travelNote {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .zones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .canvas {
+    height: 300px;
+  }
+}

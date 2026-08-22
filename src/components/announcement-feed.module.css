@@ -1,0 +1,95 @@
+.feed {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px var(--mg-gutter) 0;
+}
+
+/* The vertical thread the dots sit on. Inset to line up with the dot centres. */
+.thread {
+  position: absolute;
+  left: calc(var(--mg-gutter) + 10px);
+  top: 20px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--mg-border-strong);
+}
+
+.item {
+  display: flex;
+  gap: 13px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.dotCell {
+  flex: 0 0 auto;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--mg-bg);
+  z-index: 1;
+}
+
+.card {
+  flex: 1;
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: 14px;
+  padding: 12px 13px;
+  box-shadow: var(--mg-shadow-sm);
+  min-width: 0;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mg-text-muted);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--mg-text-strong);
+  line-height: 1.25;
+}
+
+.body {
+  font-size: 13px;
+  color: #5a5470;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--mg-text-muted);
+  font-weight: 600;
+}

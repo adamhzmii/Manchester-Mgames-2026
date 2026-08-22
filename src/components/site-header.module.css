@@ -1,0 +1,141 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--mg-purple);
+  background-image: var(--mg-batik);
+  color: #fff;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--mg-gutter);
+  max-width: var(--mg-content-width-wide);
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  margin-right: auto;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--mg-gold);
+  color: var(--mg-purple-deep);
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.5px;
+}
+
+.wordmark {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.3px;
+}
+
+.year {
+  color: var(--mg-gold);
+}
+
+/* Inline nav replaces the bottom bar once there is room for it. */
+.deskNav {
+  display: none;
+  gap: 4px;
+}
+
+.deskLink {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--mg-radius-sm);
+}
+
+.deskLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.deskLinkActive {
+  color: var(--mg-purple-deep);
+  background: var(--mg-gold);
+}
+
+.deskLinkActive:hover {
+  background: var(--mg-gold);
+  color: var(--mg-purple-deep);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 4px 9px;
+  border-radius: var(--mg-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mg-online);
+  animation: mg-pulse 1.4s ease-in-out infinite;
+}
+
+.iconButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mg-live);
+  border: 1.5px solid var(--mg-purple);
+}
+
+@media (min-width: 768px) {
+  .deskNav {
+    display: flex;
+  }
+}

@@ -1,0 +1,79 @@
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px var(--mg-gutter) 12px;
+}
+
+.myGames {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid var(--mg-border-strong);
+  background: var(--mg-surface);
+  color: #5a5470;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: var(--mg-radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.myGamesOn {
+  border-color: var(--mg-gold);
+  background: var(--mg-gold);
+  color: var(--mg-purple-deep);
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px var(--mg-gutter);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mg-text-muted);
+}
+
+.reset {
+  background: none;
+  border: 0;
+  color: var(--mg-purple);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px var(--mg-gutter) 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--mg-text-muted);
+}
+
+.emptyTitle {
+  font-weight: 700;
+  color: var(--mg-purple);
+}
+
+.emptyBody {
+  font-size: 13px;
+}
+
+@media (min-width: 768px) {
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    align-items: start;
+  }
+}

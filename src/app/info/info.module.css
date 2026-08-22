@@ -1,0 +1,166 @@
+.emergency {
+  margin: 0 var(--mg-gutter) 14px;
+  background: var(--mg-live-bg);
+  border: 1px solid var(--mg-live-border);
+  border-radius: 15px;
+  padding: 13px;
+}
+
+.emergencyHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+  color: var(--mg-danger);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--mg-surface);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--mg-text-strong);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.contactUrgent {
+  background: var(--mg-danger);
+  color: #fff;
+}
+
+.contactAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mg-danger);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.contactUrgent .contactAction {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 var(--mg-gutter);
+}
+
+.card {
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: 14px;
+  padding: 13px;
+}
+
+.cardIcon {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 9px;
+}
+
+.iconRed {
+  background: var(--mg-live-bg);
+  color: var(--mg-danger);
+}
+
+.iconPurple {
+  background: var(--mg-surface-alt);
+  color: var(--mg-purple);
+}
+
+.iconGold {
+  background: var(--mg-surface-cream);
+  color: var(--mg-gold-deep);
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.cardLines {
+  font-size: 11px;
+  color: var(--mg-text-muted);
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 3px 0 0;
+}
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 var(--mg-gutter);
+}
+
+/* Native <details> — an accordion with no JavaScript and correct semantics. */
+.item {
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-border);
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--mg-text-strong);
+  list-style: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  color: var(--mg-purple);
+  transition: transform 0.2s;
+}
+
+.item[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.answer {
+  padding: 0 13px 13px;
+  font-size: 13px;
+  color: #5a5470;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

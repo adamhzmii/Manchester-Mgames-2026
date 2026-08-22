@@ -1,0 +1,16 @@
+.rail {
+  gap: 11px;
+  padding: 0 var(--mg-gutter) 4px;
+  scroll-snap-type: x mandatory;
+}
+
+.empty {
+  margin: 0 var(--mg-gutter);
+  padding: 18px;
+  border: 1px dashed var(--mg-border-strong);
+  border-radius: var(--mg-radius-lg);
+  color: var(--mg-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
