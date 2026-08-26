@@ -136,8 +136,17 @@ button {
   padding-inline: var(--mg-gutter);
 }
 
+/*
+ * A standalone container, not a modifier on .mg-container — every page that
+ * uses it applies it alone. It used to only set max-width, which centers
+ * nothing without `margin: 0 auto` alongside it: past 1040px wide, the whole
+ * page sat flush against the left edge instead of centering.
+ */
 .mg-container-wide {
+  width: 100%;
   max-width: var(--mg-content-width-wide);
+  margin: 0 auto;
+  padding-inline: var(--mg-gutter);
 }
 
 /* Standard vertical rhythm for a screen's content. */
