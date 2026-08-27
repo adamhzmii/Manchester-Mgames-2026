@@ -22,10 +22,12 @@ export function LiveRail({ fixtures: initial }: { fixtures: Fixture[] }) {
   }
 
   return (
-    <div className={`mg-rail ${styles.rail}`}>
-      {fixtures.map((fixture) => (
-        <LiveFixtureCard key={fixture.id} fixture={fixture} />
-      ))}
+    <div className={styles.board}>
+      <div className={styles.rail}>
+        {fixtures.map((fixture) => (
+          <LiveFixtureCard key={fixture.id} fixture={fixture} />
+        ))}
+      </div>
     </div>
   );
 }

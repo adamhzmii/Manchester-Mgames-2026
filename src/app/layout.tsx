@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Semi_Condensed } from "next/font/google";
+import { Barlow, Barlow_Semi_Condensed, Fraunces } from "next/font/google";
 
 import { BottomNav } from "@/components/bottom-nav";
 import { SiteHeader } from "@/components/site-header";
@@ -16,6 +16,17 @@ const barlowCondensed = Barlow_Semi_Condensed({
   variable: "--font-barlow-condensed",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
+});
+
+// The editorial display face — currently used only on the home page masthead.
+// Fraunces' optical-size axis is what makes it work at both a large headline
+// size and small in-text use without looking like two different typefaces.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -35,7 +46,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-GB" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+    <html
+      lang="en-GB"
+      className={`${barlow.variable} ${barlowCondensed.variable} ${fraunces.variable}`}
+    >
       <body>
         <SiteHeader />
         <main id="main">{children}</main>

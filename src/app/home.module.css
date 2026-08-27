@@ -1,8 +1,19 @@
+/*
+ * Home page — the one screen deliberately allowed a different typographic
+ * register from the rest of the app. Fraunces (an editorial serif) carries
+ * the masthead, the section index and the live scores; everywhere else in
+ * the app stays on Barlow. Two typefaces used with a clear division of
+ * labour reads as a considered choice — one typeface stretched to do
+ * everything, or three fighting for attention, both read as arbitrary.
+ */
+
+/* ------------------------------------------------------------------ hero --- */
+
 .hero {
   background: var(--mg-purple);
   background-image: var(--mg-batik-large);
   color: #fff;
-  padding: 18px var(--mg-gutter) 26px;
+  padding: 30px var(--mg-gutter) 26px;
 }
 
 .heroInner {
@@ -12,223 +23,274 @@
 
 .kicker {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  color: var(--mg-gold);
-  text-transform: uppercase;
-}
-
-.title {
-  font-family: var(--font-barlow-condensed), sans-serif;
-  font-weight: 800;
-  font-size: clamp(34px, 9vw, 48px);
-  line-height: 0.98;
-  margin: 8px 0 10px;
-  letter-spacing: -0.5px;
-  color: #fff;
-}
-
-.gold {
-  color: var(--mg-gold);
-}
-
-.facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--mg-gold);
+  text-transform: uppercase;
+  margin: 0 0 16px;
 }
 
-.fact {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 5px 11px;
-  border-radius: var(--mg-radius-pill);
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
 }
 
-.factIcon {
+.wordmarkMain {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(52px, 13vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.wordmarkYear {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(22px, 5.5vw, 36px);
   color: var(--mg-gold);
 }
 
-/* Pulled up over the hero's lower edge so the banner reads as the first item
-   of the page body rather than part of the hero. */
-.banner {
-  display: block;
-  max-width: calc(var(--mg-content-width-wide) - var(--mg-gutter) * 2);
-  margin: -14px auto 0;
-  width: calc(100% - var(--mg-gutter) * 2);
-  text-align: left;
-  background: var(--mg-gold);
-  border-radius: 15px;
-  padding: 12px 14px;
-  box-shadow: var(--mg-shadow-lg);
-  position: relative;
-  z-index: 2;
-  color: var(--mg-purple-deep);
-}
-
-.bannerHead {
+.dateline {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.bannerTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--mg-purple-deep);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 3px 8px;
-  border-radius: 6px;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  max-width: 480px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.78);
   text-transform: uppercase;
 }
 
-.bannerDot {
+.datelineDivider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--mg-gold);
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- ticker --- */
+/* A single-line strip below the hero, not a card floating over it — the
+   reference is a live-event masthead ticker, not a notification toast. */
+
+.ticker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 11px var(--mg-gutter);
+  max-width: var(--mg-content-width-wide);
+  margin: 0 auto;
+  border-bottom: 1px solid var(--mg-border);
+  color: var(--mg-text);
+}
+
+.tickerDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--mg-live);
+  flex: 0 0 auto;
   animation: mg-pulse 1.4s infinite;
 }
 
-.bannerTime {
-  font-size: 11px;
+.tickerLabel {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mg-live);
+  flex: 0 0 auto;
+}
+
+.tickerTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--mg-gold-text);
-  margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tickerMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mg-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.bannerTitle {
-  font-weight: 700;
-  font-size: 14px;
-  margin-top: 7px;
-  line-height: 1.25;
-}
+/* ----------------------------------------------------------- scoreboard --- */
 
-.bannerMore {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--mg-gold-text);
-  margin-top: 5px;
+.scoreboardHead {
   display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.sectionHead {
-  display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 20px var(--mg-gutter) 10px;
+  padding: 22px var(--mg-gutter) 12px;
   max-width: var(--mg-content-width-wide);
   margin: 0 auto;
 }
 
-.sectionTitle {
+.scoreboardTitle {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 20px;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .liveDot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--mg-live);
   animation: mg-pulse 1.4s infinite;
 }
 
 .sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   font-weight: 700;
   font-size: 12px;
   white-space: nowrap;
+  color: var(--mg-purple);
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 11px;
-  padding: 0 var(--mg-gutter);
+.loadingNote {
+  padding: 0 var(--mg-gutter) 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mg-text-muted);
+}
+
+/* -------------------------------------------------------------- explore --- */
+/* A numbered index, not a grid of icon tiles: two primary rows set larger,
+   the rest at a quieter, consistent scale — hierarchy instead of a uniform
+   grid where every destination is given equal visual weight. */
+
+.exploreSection {
+  margin-top: 6px;
+  padding-bottom: 12px;
+}
+
+.exploreTitle {
+  padding: 10px var(--mg-gutter) 6px;
   max-width: var(--mg-content-width-wide);
   margin: 0 auto;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-.tile {
-  display: block;
-  text-align: left;
-  background: var(--mg-surface);
-  border: 1px solid var(--mg-border);
-  border-radius: var(--mg-radius-lg);
-  padding: 15px;
-  box-shadow: var(--mg-shadow-sm);
+.index {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--mg-content-width-wide);
+  margin: 4px auto 0;
+  border-top: 1px solid var(--mg-border);
+}
+
+.indexRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px var(--mg-gutter);
+  border-bottom: 1px solid var(--mg-border);
   color: var(--mg-text);
 }
 
-.tile:hover {
-  border-color: var(--mg-border-strong);
-  box-shadow: var(--mg-shadow);
+.indexRow:hover {
+  background: var(--mg-surface);
 }
 
-.tileFeature {
-  background: var(--mg-purple);
-  border-color: var(--mg-purple);
-  color: #fff;
+.indexRowPrimary {
+  padding-block: 19px;
 }
 
-.tileIcon {
-  display: inline-flex;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  align-items: center;
-  justify-content: center;
-  background: var(--mg-surface-alt);
-  color: var(--mg-purple);
-  margin-bottom: 12px;
-}
-
-.tileIconGold {
-  background: var(--mg-surface-cream);
+.indexNum {
+  flex: 0 0 auto;
+  width: 22px;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 14px;
   color: var(--mg-gold-deep);
+  font-variant-numeric: tabular-nums;
 }
 
-.tileIconOnDark {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--mg-gold);
+.indexBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.tileTitle {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.tileHint {
-  font-size: 11px;
-  color: var(--mg-text-muted);
+.indexTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 600;
+  font-size: 18px;
+  color: var(--mg-text-strong);
 }
 
-.tileFeature .tileHint {
-  color: rgba(255, 255, 255, 0.65);
+.indexRowPrimary .indexTitle {
+  font-size: 22px;
+}
+
+.indexDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mg-live);
+  flex: 0 0 auto;
+}
+
+.indexHint {
+  font-size: 12.5px;
+  color: var(--mg-text-muted);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indexArrow {
+  flex: 0 0 auto;
+  color: var(--mg-text-faint);
+}
+
+.indexRow:hover .indexArrow {
+  color: var(--mg-purple);
+}
+
+@media (min-width: 640px) {
+  .indexHint {
+    white-space: normal;
+  }
 }
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: 40px 48px;
-  }
-
-  .tiles {
-    grid-template-columns: repeat(3, 1fr);
+    padding-block: 48px 40px;
   }
 }

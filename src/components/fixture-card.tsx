@@ -122,26 +122,25 @@ export function FixtureCard({
 }
 
 /**
- * Compact variant for the "Happening now" rail on the home page: no meta row
- * actions, no favourites — it is a glance, not a working surface.
+ * Compact variant for the "Happening now" rail on the home page: a scoreboard
+ * column separated by a rule from its neighbours, not a boxed card with its
+ * own border and shadow — every card on this page already has that
+ * treatment, and this rail is meant to read as one board, not a repeat of
+ * the same component five times.
  */
 export function LiveFixtureCard({ fixture }: { fixture: Fixture }) {
   return (
     <article className={styles.compact}>
       <div className={styles.compactHead}>
-        <span className={styles.sport}>
-          <SportBadge
-            code={fixture.sportCode}
-            color={fixture.sportColor}
-            name={fixture.sportName}
-            size={20}
+        <span className={styles.compactSport}>
+          <span
+            className={styles.compactDot}
+            style={{ background: fixture.sportColor }}
+            aria-hidden="true"
           />
-          <span className={styles.sportText}>{fixture.stageLabel}</span>
+          {fixture.sportName}
         </span>
-        <span className={`${styles.status} ${styles.statusLive}`}>
-          <span className={styles.pulse} />
-          LIVE
-        </span>
+        <span className={styles.compactPulse} aria-label="Live" />
       </div>
 
       <div className={styles.compactRow}>
@@ -153,12 +152,9 @@ export function LiveFixtureCard({ fixture }: { fixture: Fixture }) {
         <span className={styles.compactScore}>{scoreText(fixture, "b")}</span>
       </div>
 
-      <div className={styles.compactFoot}>
-        <span>
-          {fixture.venueShortName} · {fixture.courtName}
-        </span>
-        <span>{fixture.sportName}</span>
-      </div>
+      <p className={styles.compactFoot}>
+        {fixture.venueShortName} · {fixture.courtName}
+      </p>
     </article>
   );
 }
