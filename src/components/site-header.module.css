@@ -24,19 +24,13 @@
   margin-right: auto;
 }
 
+/* The crest's own aspect ratio (908×889 source) rather than a square — it
+   isn't a letterform anymore, so it doesn't need to pretend to be a tile. */
 .mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--mg-gold);
-  color: var(--mg-purple-deep);
-  font-family: var(--font-barlow-condensed), sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: -0.5px;
+  display: block;
+  width: 38px;
+  height: auto;
+  flex: 0 0 auto;
 }
 
 .wordmark {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -44,9 +45,14 @@ export function SiteHeader() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
-          <span className={styles.mark} aria-hidden="true">
-            M
-          </span>
+          <Image
+            src="/brand/logo-mark.png"
+            alt="MGames"
+            width={908}
+            height={889}
+            className={styles.mark}
+            priority
+          />
           <span className={styles.wordmark}>
             MGAMES <span className={styles.year}>&rsquo;26</span>
           </span>
