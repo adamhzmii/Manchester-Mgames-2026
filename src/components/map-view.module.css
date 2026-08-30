@@ -25,8 +25,6 @@
   color: #fff;
 }
 
-/* Stand-in for the interactive map. Reads as a deliberate placeholder rather
-   than a broken embed — the maps provider is still an open decision. */
 .placeholder {
   margin: 0 var(--mg-gutter);
   border-radius: var(--mg-radius-lg);
@@ -36,6 +34,15 @@
   background: var(--mg-surface);
 }
 
+/* The real Google Maps embed — same footprint as the .canvas fallback below
+   so nothing shifts depending on whether the API key is configured. */
+.mapCanvas {
+  position: relative;
+  height: 220px;
+}
+
+/* Fallback shown only when NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is missing. Reads
+   as a deliberate, calm placeholder rather than a broken embed. */
 .canvas {
   position: relative;
   height: 220px;
@@ -66,6 +73,17 @@
   line-height: 1.4;
 }
 
+.placeholderFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 13px;
+  border-top: 1px solid var(--mg-border);
+  background: var(--mg-surface);
+}
+
 .directions {
   display: inline-flex;
   align-items: center;
@@ -76,16 +94,12 @@
   font-size: 13px;
   padding: 9px 14px;
   border-radius: 10px;
-  margin-top: 2px;
 }
 
 .address {
-  background: var(--mg-surface);
-  padding: 10px 13px;
   font-size: 11px;
   color: var(--mg-text-muted);
   font-weight: 600;
-  border-top: 1px solid var(--mg-border);
 }
 
 .zones {
@@ -187,7 +201,8 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  .canvas {
+  .canvas,
+  .mapCanvas {
     height: 300px;
   }
 }

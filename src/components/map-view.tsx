@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 
 import { BusIcon, MapIcon, PinIcon } from "@/components/icons";
+import { GoogleVenueMap } from "@/components/google-venue-map";
 import type { Court, Vendor, Venue } from "@/lib/queries";
+import { googleMapsApiKey } from "@/lib/maps-env";
 
 import styles from "./map-view.module.css";
 
@@ -21,15 +23,13 @@ type MapViewProps = {
 /**
  * Venue map.
  *
- * The interactive map itself is not built yet: the provider (Google Maps vs
- * Mapbox vs Leaflet/OSM) is still an open decision in the spec, and each one
- * needs different keys, billing and a different component. Rather than guess,
- * this ships the parts that do not depend on that choice — the per-venue list
- * of what is where, and a directions link that hands the venue's coordinates
- * to whatever map app the visitor already has. Swapping the placeholder for a
- * real embed later touches only this file.
+ * The interactive embed needs NEXT_PUBLIC_GOOGLE_MAPS_API_KEY, which isn't
+ * guaranteed to be set (local dev, a fresh clone before setup). Without it
+ * this falls back to the venue list plus a `geo:` directions link — no crash,
+ * no broken embed, just a plainer page until the key exists.
  */
 export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps) {
+  const apiKey = googleMapsApiKey();
   const [venueSlug, setVenueSlug] = useState(
     initialVenue && venues.some((v) => v.slug === initialVenue)
       ? initialVenue
@@ -91,21 +91,29 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
       </div>
 
       <div className={styles.placeholder}>
-        <div className={styles.canvas}>
-          <MapIcon size={28} />
-          <p className={styles.canvasTitle}>Interactive map coming soon</p>
-          <p className={styles.canvasHint}>
-            The mapping provider is still being chosen. In the meantime, open the venue in your
-            own maps app and use the list below for what is where inside.
-          </p>
+        {apiKey ? (
+          <div className={styles.mapCanvas}>
+            <GoogleVenueMap apiKey={apiKey} venues={venues} selectedSlug={venueSlug} />
+          </div>
+        ) : (
+          <div className={styles.canvas}>
+            <MapIcon size={28} />
+            <p className={styles.canvasTitle}>Map unavailable</p>
+            <p className={styles.canvasHint}>
+              Missing NEXT_PUBLIC_GOOGLE_MAPS_API_KEY. Use the venue list below and your own maps
+              app in the meantime.
+            </p>
+          </div>
+        )}
+        <div className={styles.placeholderFoot}>
           {directionsHref ? (
             <a className={styles.directions} href={directionsHref}>
               <PinIcon size={14} />
               Directions to {venue?.shortName}
             </a>
           ) : null}
+          {venue?.address ? <p className={styles.address}>{venue.address}</p> : null}
         </div>
-        {venue?.address ? <p className={styles.address}>{venue.address}</p> : null}
       </div>
 
       <h2 className="mg-section-title" style={{ margin: "16px var(--mg-gutter) 8px" }}>

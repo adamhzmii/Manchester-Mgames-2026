@@ -20,6 +20,7 @@ Built from `mgames26_system_design_spec.md` and the Claude Design prototype.
 |---|---|
 | Framework | Next.js 16 (App Router, React 19, TypeScript) |
 | Data + auth | Supabase (Postgres, Auth, Realtime) |
+| Maps | Google Maps JavaScript API via `@vis.gl/react-google-maps` |
 | Styling | CSS Modules over the design tokens in `src/app/globals.css` |
 | Hosting | Vercel (free tier is sufficient for this event's scale) |
 
@@ -86,6 +87,34 @@ Once the project is linked it can be replaced wholesale:
 npx supabase gen types typescript --linked > src/lib/supabase/types.ts
 ```
 
+### Setting up Google Maps
+
+`/map` embeds a real Google Map (via `@vis.gl/react-google-maps`) once
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set; without it, the page falls back to a
+plain venue list and a `geo:` directions link — no crash, no broken embed.
+
+1. In [Google Cloud Console](https://console.cloud.google.com), create a
+   project (or reuse one) and enable the **Maps JavaScript API**.
+2. **APIs & Services → Credentials → Billing** — link a billing account. A
+   card is required to activate the API at all, even to stay within the free
+   tier (10,000 map loads/month; well above what a one-day, ~1,000-attendee
+   event will use). Google does not hard-stop at the free quota — set a budget
+   alert in Cloud Console so an unexpected traffic spike doesn't run up a
+   real bill unnoticed.
+3. **Credentials → Create Credentials → API Key.**
+4. **Restrict the key** before using it anywhere real — an unrestricted key is
+   visible in the browser's page source and can be used from any site:
+   - *Application restrictions* → **Websites**, add
+     `localhost:3000/*` (dev) and your production domain (`*.vercel.app/*`
+     or your custom domain once one is set).
+   - *API restrictions* → restrict to **Maps JavaScript API** only.
+5. Add it to `.env.local` and to Vercel's Environment Variables (Production
+   *and* Preview, since preview deployments run on `*.vercel.app` too):
+
+```bash
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-key-here
+```
+
 ## Routes
 
 | Route | Realtime | Notes |
@@ -148,10 +177,6 @@ the BST/GMT boundary — the event is on the last BST weekend of 2026.
 
 Carried over from the spec, none of them blocking:
 
-- **Maps provider** — Google Maps vs Mapbox vs Leaflet/OSM. `/map` ships the
-  venue content and a `geo:` directions link; the embed itself is a marked
-  placeholder in `src/components/map-view.tsx` and is the only thing that
-  changes when the decision lands.
 - **Announcements linking to a fixture** — deferred, no schema support yet.
 - **Splitting coordinator editing into `/coordinator`** — the route structure
   supports it cleanly if the inline approach proves awkward on the day.
