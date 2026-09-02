@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/icons";
 import type { PickerTeam } from "@/components/schedule-view";
@@ -39,7 +40,7 @@ export function TeamPicker({
     );
   }, [teams, query]);
 
-  return (
+  const sheet = (
     <div
       className={styles.backdrop}
       onPointerDown={(event) => {
@@ -106,4 +107,9 @@ export function TeamPicker({
       </div>
     </div>
   );
+
+  // Same containing-block problem as the score editor: `.mg-page` keeps a
+  // transform after its entry animation, so a `position: fixed` backdrop
+  // rendered inside it is measured against the page, not the viewport.
+  return typeof document === "undefined" ? null : createPortal(sheet, document.body);
 }

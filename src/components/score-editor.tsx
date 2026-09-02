@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/icons";
 import type { PickerTeam } from "@/components/schedule-view";
@@ -59,7 +60,7 @@ export function ScoreEditor({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  return (
+  const sheet = (
     <div
       className={styles.backdrop}
       onPointerDown={(event) => {
@@ -170,6 +171,15 @@ export function ScoreEditor({
       </div>
     </div>
   );
+
+  // Portalled to <body> rather than rendered in place. `.mg-page` runs a
+  // slide-up animation with fill-mode `both`, which leaves its computed
+  // transform as an identity matrix rather than `none` — and any transform
+  // makes an element the containing block for its `position: fixed`
+  // descendants. Rendered inline, the backdrop measured itself against a
+  // 3000px-tall page container instead of the viewport, which is what pushed
+  // this sheet far down the screen.
+  return typeof document === "undefined" ? null : createPortal(sheet, document.body);
 }
 
 /**

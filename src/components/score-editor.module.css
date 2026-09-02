@@ -1,3 +1,10 @@
+/*
+ * Two shapes from one component. On a phone this is a bottom sheet — it is
+ * used one-handed, standing courtside, and the controls belong within thumb
+ * reach. On a laptop a sheet welded to the bottom edge reads as broken, so it
+ * becomes an ordinary centred dialog. The breakpoint matches the one where
+ * the bottom nav gives way to the header nav.
+ */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -11,11 +18,31 @@
 .sheet {
   width: 100%;
   max-width: 460px;
+  /* The sheet grew a team-assignment block; without a cap it can outgrow a
+     short viewport and put the save button off-screen. */
+  max-height: 92dvh;
+  overflow-y: auto;
   background: var(--mg-surface);
   border-radius: 20px 20px 0 0;
   padding: 18px var(--mg-gutter) calc(20px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -10px 40px rgba(28, 24, 48, 0.3);
   animation: mg-slide-up 0.2s ease both;
+}
+
+@media (min-width: 768px) {
+  .backdrop {
+    place-items: center;
+    padding: var(--mg-gutter);
+  }
+
+  .sheet {
+    max-height: 86dvh;
+    border-radius: 18px;
+    padding-bottom: 20px;
+    /* Cast the shadow outward in all directions, not upward from a bottom
+       edge that no longer exists. */
+    box-shadow: 0 24px 60px rgba(28, 24, 48, 0.35);
+  }
 }
 
 .head {

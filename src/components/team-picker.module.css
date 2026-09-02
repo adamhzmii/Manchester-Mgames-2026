@@ -20,6 +20,21 @@
   animation: mg-slide-up 0.2s ease both;
 }
 
+/* Same two-shape treatment as the score editor — the two dialogs sit one tap
+   apart on the schedule, so they must not disagree about where a modal goes. */
+@media (min-width: 768px) {
+  .backdrop {
+    place-items: center;
+    padding: var(--mg-gutter);
+  }
+
+  .sheet {
+    border-radius: 18px;
+    padding-bottom: 16px;
+    box-shadow: 0 24px 60px rgba(28, 24, 48, 0.35);
+  }
+}
+
 .head {
   display: flex;
   align-items: flex-start;
