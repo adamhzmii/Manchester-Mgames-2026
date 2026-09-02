@@ -60,6 +60,10 @@
   --mg-content-width: 640px;
   --mg-content-width-wide: 1040px;
   --mg-gutter: 16px;
+  /* Measured, not guessed: the sticky header is 61px at every breakpoint.
+     The home hero pulls itself up by exactly this much so its photograph
+     runs behind the header to the very top of the page. */
+  --mg-header-height: 61px;
   --mg-bottom-nav-height: 64px;
 
   /* The batik motif behind the header and hero. Encoded once here so the two

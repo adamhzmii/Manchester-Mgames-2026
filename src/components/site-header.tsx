@@ -3,13 +3,37 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { BellIcon } from "@/components/icons";
 import { formatTime } from "@/lib/format";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
 
 import styles from "./site-header.module.css";
+
+/**
+ * Whether the page has been scrolled away from the very top.
+ *
+ * Read through `useSyncExternalStore` rather than an effect that copies scroll
+ * position into state: the server snapshot is a plain `false`, so the markup
+ * React renders on the server and the markup it hydrates with agree, and a
+ * browser that restores a mid-page scroll position on reload is read correctly
+ * on the first paint instead of one render late.
+ */
+const SCROLL_THRESHOLD = 20;
+
+function subscribeToScroll(onChange: () => void): () => void {
+  window.addEventListener("scroll", onChange, { passive: true });
+  return () => window.removeEventListener("scroll", onChange);
+}
+
+function getScrolledSnapshot(): boolean {
+  return window.scrollY > SCROLL_THRESHOLD;
+}
+
+function getScrolledServerSnapshot(): boolean {
+  return false;
+}
 
 /**
  * The clock is client-only on purpose. Rendering "now" on the server produces
@@ -40,9 +64,17 @@ function EventClock() {
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const scrolled = useSyncExternalStore(
+    subscribeToScroll,
+    getScrolledSnapshot,
+    getScrolledServerSnapshot,
+  );
+
+  // Only the home page has a photographic hero for the header to sit over.
+  const overlaysHero = pathname === "/" && !scrolled;
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${overlaysHero ? styles.transparent : ""}`}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           <Image

@@ -14,7 +14,13 @@
   background-color: var(--mg-purple);
   background-image: var(--mg-batik-large);
   color: #fff;
-  padding: 18px var(--mg-gutter) 26px;
+  /* Pulled up under the sticky header and padded back down by the same
+     amount, so the photograph starts at the very top of the page instead of
+     beginning below a separate bar. `isolation: isolate` keeps the two
+     negative-z-index layers below inside this element's stacking context, so
+     they stay behind the header rather than painting over it. */
+  margin-top: calc(-1 * var(--mg-header-height));
+  padding: calc(var(--mg-header-height) + 18px) var(--mg-gutter) 26px;
   overflow: hidden;
 }
 
@@ -281,7 +287,9 @@
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: 40px 48px;
+    /* Still has to clear the sticky header — a bare `40px` here would put the
+       kicker underneath it. */
+    padding-block: calc(var(--mg-header-height) + 40px) 48px;
   }
 
   .tiles {
