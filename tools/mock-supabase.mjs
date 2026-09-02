@@ -64,12 +64,14 @@ const TABLES = {
   groups: [{ id: "g-bb", name: "Group A", sort_order: 1, category_id: "c-basketball",
              categories: { sports: { slug: "basketball" } } }],
   teams: [
-    { id: "t-KL Tigers", name: "KL Tigers", group_id: null,
+    { id: "t-KL Tigers", name: "KL Tigers", group_id: null, category_id: "c-football",
       categories: { sports: { slug: "football" } }, category: { sport: { name: "Football", slug: "football" } } },
-    { id: "t-Penang Panthers", name: "Penang Panthers", group_id: "g-bb",
+    { id: "t-Penang Panthers", name: "Penang Panthers", group_id: "g-bb", category_id: "c-basketball",
       categories: { sports: { slug: "basketball" } }, category: { sport: { name: "Basketball", slug: "basketball" } } },
-    { id: "t-Sabah Rhinos", name: "Sabah Rhinos", group_id: "g-bb",
+    { id: "t-Sabah Rhinos", name: "Sabah Rhinos", group_id: "g-bb", category_id: "c-basketball",
       categories: { sports: { slug: "basketball" } }, category: { sport: { name: "Basketball", slug: "basketball" } } },
+    { id: "t-Melaka Mariners", name: "Melaka Mariners", group_id: null, category_id: "c-football",
+      categories: { sports: { slug: "football" } }, category: { sport: { name: "Football", slug: "football" } } },
   ],
   courts: [
     { id: "ct1", name: "Court 1", sort_order: 1, venue: { slug: "sugden" },

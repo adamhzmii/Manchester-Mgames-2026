@@ -89,3 +89,63 @@ export async function updateFixtureScore(
 
   return { status: "success", message: "Saved." };
 }
+
+export type AssignTeamState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+};
+
+/**
+ * Turns a knockout slot's placeholder ("Winner QF1") into a real team, by
+ * writing team_a_id or team_b_id directly.
+ *
+ * There is no schema link from a finished fixture to whichever future fixture
+ * it feeds into — "Winner QF1" is display text, not a foreign key — so this
+ * is a manual, coordinator-driven action rather than an automatic advance.
+ * Deliberately so: a knockout bracket only has a handful of these transitions
+ * across a whole day, a person is already looking at the result to decide who
+ * goes through, and a link table earns its keep only once that stops being
+ * true.
+ */
+export async function assignFixtureTeam(
+  _prevState: AssignTeamState,
+  formData: FormData,
+): Promise<AssignTeamState> {
+  const fixtureId = String(formData.get("fixtureId") ?? "").trim();
+  const slot = String(formData.get("slot") ?? "");
+  const teamId = String(formData.get("teamId") ?? "").trim();
+
+  if (!fixtureId) {
+    return { status: "error", message: "Missing fixture." };
+  }
+  if (slot !== "a" && slot !== "b") {
+    return { status: "error", message: "Invalid slot." };
+  }
+  if (!teamId) {
+    return { status: "error", message: "Pick a team." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("fixtures")
+    .update(slot === "a" ? { team_a_id: teamId } : { team_b_id: teamId })
+    .eq("id", fixtureId)
+    .select("id");
+
+  if (error) {
+    return { status: "error", message: `Could not save: ${error.message}` };
+  }
+
+  if (!data || data.length === 0) {
+    return {
+      status: "error",
+      message: "Not saved. Your coordinator session may have expired — sign in again.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/schedule");
+  revalidatePath("/scores");
+
+  return { status: "success", message: "Team assigned." };
+}

@@ -270,28 +270,36 @@ export async function getStandingsData(): Promise<{
   };
 }
 
-/** Every team, for the "My Games" picker. */
+/**
+ * Every team, for the "My Games" picker and the coordinator's bracket-slot
+ * assignment picker. `categoryId` is what the latter filters on — a sport can
+ * have several categories (Pickleball's Men's/Women's Doubles) with disjoint
+ * team pools, and sport alone isn't a fine-grained enough filter to stop a
+ * women's doubles team showing up as a candidate for a men's doubles slot.
+ */
 export async function getTeams(): Promise<
-  { id: string; name: string; sportName: string; sportSlug: string }[]
+  { id: string; name: string; categoryId: string; sportName: string; sportSlug: string }[]
 > {
   const supabase = await createClient();
   const rows = unwrap(
     "teams",
     await supabase
       .from("teams")
-      .select("id, name, category:categories ( sport:sports ( name, slug ) )")
+      .select("id, name, category_id, category:categories ( sport:sports ( name, slug ) )")
       .order("name"),
   );
 
   type Row = {
     id: string;
     name: string;
+    category_id: string;
     category: { sport: { name: string; slug: string } | null } | null;
   };
 
   return (rows as unknown as Row[]).map((t) => ({
     id: t.id,
     name: t.name,
+    categoryId: t.category_id,
     sportName: t.category?.sport?.name ?? "",
     sportSlug: t.category?.sport?.slug ?? "",
   }));

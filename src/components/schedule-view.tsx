@@ -24,6 +24,7 @@ import styles from "./schedule-view.module.css";
 export type PickerTeam = {
   id: string;
   name: string;
+  categoryId: string;
   sportName: string;
   sportSlug: string;
 };
@@ -176,7 +177,9 @@ export function ScheduleView({ fixtures: initial, sports, venues, teams, canEdit
         />
       ) : null}
 
-      {editing ? <ScoreEditor fixture={editing} onClose={() => setEditing(null)} /> : null}
+      {editing ? (
+        <ScoreEditor fixture={editing} teams={teams} onClose={() => setEditing(null)} />
+      ) : null}
     </div>
   );
 }
