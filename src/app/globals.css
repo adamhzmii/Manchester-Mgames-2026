@@ -190,6 +190,18 @@ button {
   gap: 7px;
   overflow-x: auto;
   scrollbar-width: none;
+  /*
+   * `overflow-x: auto` clips the rail visually, but its off-screen children
+   * still counted toward the document's content width — on the home page that
+   * reported an html scrollWidth of 916 against a 417px viewport. Nothing
+   * actually scrolled sideways; instead the browser derived a smaller minimum
+   * page scale from it, which let the whole page be pinch-zoomed out on a
+   * phone. `contain: paint` promises descendants never paint outside this box,
+   * so they stop inflating that measurement. Adds no new clipping: `overflow-x:
+   * auto` already forces overflow-y to `auto` here, so both axes were clipped
+   * regardless.
+   */
+  contain: paint;
 }
 
 .mg-rail::-webkit-scrollbar {
