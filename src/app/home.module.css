@@ -1,11 +1,67 @@
+/*
+ * The hero photograph sits under three stacked layers, in this order:
+ *   1. a purple wash (multiply) that pulls the gym's grey-green cast into the
+ *      brand palette instead of leaving a photo that clashes with it;
+ *   2. a left-to-right gradient, opaque where the text sits and clearing
+ *      toward the right so the spike and the ball stay visible;
+ *   3. the batik motif, kept from the original solid-colour hero.
+ * The purple background-color underneath is what shows if the image 404s or
+ * is still loading, so the white text is never left on bare white.
+ */
 .hero {
-  background: var(--mg-purple);
+  position: relative;
+  isolation: isolate;
+  background-color: var(--mg-purple);
   background-image: var(--mg-batik-large);
   color: #fff;
   padding: 18px var(--mg-gutter) 26px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url("/brand/banner.jpg");
+  background-size: cover;
+  background-position: center 35%;
+  /* Desaturated and dimmed so it reads as a textured ground, not a photo
+     competing with the headline. */
+  filter: saturate(0.65) brightness(0.72);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(42, 29, 82, 0.94) 0%,
+      rgba(42, 29, 82, 0.88) 38%,
+      rgba(60, 42, 110, 0.62) 70%,
+      rgba(60, 42, 110, 0.45) 100%
+    ),
+    linear-gradient(rgba(60, 42, 110, 0.35), rgba(60, 42, 110, 0.35));
+}
+
+/* On a narrow screen there is no room for the photo to breathe beside the
+   text, so the wash goes near-solid and the image reads as texture only. */
+@media (max-width: 639px) {
+  .hero::after {
+    background: linear-gradient(
+      170deg,
+      rgba(42, 29, 82, 0.92) 0%,
+      rgba(42, 29, 82, 0.86) 55%,
+      rgba(60, 42, 110, 0.78) 100%
+    );
+  }
 }
 
 .heroInner {
+  position: relative;
   max-width: var(--mg-content-width-wide);
   margin: 0 auto;
 }
