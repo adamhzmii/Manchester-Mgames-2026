@@ -12,8 +12,9 @@ import {
   ScoresIcon,
 } from "@/components/icons";
 import { LiveRail } from "@/components/live-rail";
+import { MyTeam } from "@/components/my-team";
 import { formatFeedTime } from "@/lib/format";
-import { getAnnouncements, getLiveFixtures } from "@/lib/queries";
+import { getAnnouncements, getFixtures, getLiveFixtures, getTeams } from "@/lib/queries";
 
 import styles from "./home.module.css";
 
@@ -58,6 +59,12 @@ export default function HomePage() {
 
       <Suspense fallback={<div className={styles.banner}>Loading the latest update…</div>}>
         <LatestAnnouncement />
+      </Suspense>
+
+      {/* Above "Happening now" on purpose: if you are playing today, your own
+          next game outranks the general live rail. */}
+      <Suspense fallback={null}>
+        <YourTeam />
       </Suspense>
 
       <div className={styles.sectionHead}>
@@ -135,6 +142,11 @@ async function LatestAnnouncement() {
       </span>
     </Link>
   );
+}
+
+async function YourTeam() {
+  const [fixtures, teams] = await Promise.all([getFixtures(), getTeams()]);
+  return <MyTeam fixtures={fixtures} teams={teams} />;
 }
 
 async function LiveGames() {

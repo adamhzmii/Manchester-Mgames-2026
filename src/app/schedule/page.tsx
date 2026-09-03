@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ScheduleView } from "@/components/schedule-view";
-import { getFixtures, getIsCoordinator, getSports, getTeams, getVenues } from "@/lib/queries";
+import { getCoordinator, getFixtures, getSports, getTeams, getVenues } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Schedule",
@@ -27,12 +27,12 @@ export default function SchedulePage() {
 async function Schedule() {
   // One await for all five: they are independent, and serialising them would
   // stack five round trips before anything renders.
-  const [fixtures, sports, venues, teams, canEdit] = await Promise.all([
+  const [fixtures, sports, venues, teams, coordinator] = await Promise.all([
     getFixtures(),
     getSports(),
     getVenues(),
     getTeams(),
-    getIsCoordinator(),
+    getCoordinator(),
   ]);
 
   return (
@@ -41,7 +41,7 @@ async function Schedule() {
       sports={sports}
       venues={venues}
       teams={teams}
-      canEdit={canEdit}
+      coordinator={coordinator}
     />
   );
 }

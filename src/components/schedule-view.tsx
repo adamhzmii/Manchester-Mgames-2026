@@ -15,27 +15,20 @@ import {
   type Fixture,
   type StageFilter,
 } from "@/lib/fixtures";
-import type { Sport, Venue } from "@/lib/queries";
+import { coordinatorCanEdit, type Coordinator } from "@/lib/coordinator";
+import type { PickerTeam, Sport, Venue } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 import { useLiveFixtures } from "@/lib/use-live-fixtures";
 
 import styles from "./schedule-view.module.css";
-
-export type PickerTeam = {
-  id: string;
-  name: string;
-  categoryId: string;
-  sportName: string;
-  sportSlug: string;
-};
 
 type ScheduleViewProps = {
   fixtures: Fixture[];
   sports: Sport[];
   venues: Venue[];
   teams: PickerTeam[];
-  /** Signed in with the shared coordinator credential. */
-  canEdit: boolean;
+  /** Null when nobody is signed in. Decides which fixtures show an Edit button. */
+  coordinator: Coordinator | null;
 };
 
 /**
@@ -46,7 +39,13 @@ type ScheduleViewProps = {
  * a round trip to save nothing — and it keeps every chip instant on a crowded
  * sports hall's wifi.
  */
-export function ScheduleView({ fixtures: initial, sports, venues, teams, canEdit }: ScheduleViewProps) {
+export function ScheduleView({
+  fixtures: initial,
+  sports,
+  venues,
+  teams,
+  coordinator,
+}: ScheduleViewProps) {
   const fixtures = useLiveFixtures(initial);
   const favourites = useFavouriteTeams();
 
@@ -150,7 +149,10 @@ export function ScheduleView({ fixtures: initial, sports, venues, teams, canEdit
             fixture={fixture}
             favourite={favourites.has(fixture.teamAId) || favourites.has(fixture.teamBId)}
             onToggleFavourite={(f) => favourites.toggle([f.teamAId, f.teamBId])}
-            onEdit={canEdit ? setEditing : undefined}
+            // Per fixture, not per session: a football coordinator gets the button
+            // on football games only. RLS rejects the write either way, so this
+            // is about not offering an action that would fail.
+            onEdit={coordinatorCanEdit(coordinator, fixture.sportId) ? setEditing : undefined}
           />
         ))}
       </div>

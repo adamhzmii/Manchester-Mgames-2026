@@ -281,6 +281,28 @@ export interface Database {
           },
         ];
       };
+      coordinators: {
+        Row: {
+          user_id: string;
+          name: string;
+          /** Null means a committee admin, allowed to edit every sport. */
+          sport_id: string | null;
+          created_at: Timestamptz;
+        };
+        Insert: Omit<Database["public"]["Tables"]["coordinators"]["Row"], "created_at"> & {
+          created_at?: Timestamptz;
+        };
+        Update: Partial<Database["public"]["Tables"]["coordinators"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "coordinators_sport_id_fkey";
+            columns: ["sport_id"];
+            isOneToOne: false;
+            referencedRelation: "sports";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       announcements: {
         Row: {
           id: string;

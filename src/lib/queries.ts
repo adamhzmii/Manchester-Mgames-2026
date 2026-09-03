@@ -11,6 +11,7 @@ import {
 } from "@/lib/fixtures";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import { createClient } from "@/lib/supabase/server";
+import type { Coordinator } from "@/lib/coordinator";
 import type { AnnouncementType } from "@/lib/supabase/types";
 
 /**
@@ -56,6 +57,25 @@ export type Vendor = {
   venueSlug: string;
   venueShortName: string;
   menu: { id: string; name: string; pricePence: number }[];
+};
+
+/**
+ * A team as the "find my team" flow needs it: enough sport and category
+ * metadata to drill down sport -> category -> team without another query.
+ * Team names repeat across sports (KL Tigers field a side in several), so the
+ * category is what actually disambiguates one from another.
+ */
+export type PickerTeam = {
+  id: string;
+  name: string;
+  categoryId: string;
+  categoryName: string;
+  sportId: string;
+  sportName: string;
+  sportSlug: string;
+  sportCode: string;
+  sportColor: string;
+  sportOrder: number;
 };
 
 export type Court = {
@@ -277,15 +297,16 @@ export async function getStandingsData(): Promise<{
  * team pools, and sport alone isn't a fine-grained enough filter to stop a
  * women's doubles team showing up as a candidate for a men's doubles slot.
  */
-export async function getTeams(): Promise<
-  { id: string; name: string; categoryId: string; sportName: string; sportSlug: string }[]
-> {
+export async function getTeams(): Promise<PickerTeam[]> {
   const supabase = await createClient();
   const rows = unwrap(
     "teams",
     await supabase
       .from("teams")
-      .select("id, name, category_id, category:categories ( sport:sports ( name, slug ) )")
+      .select(
+        `id, name, category_id,
+         category:categories ( name, sport:sports ( id, name, slug, code, color, sort_order ) )`,
+      )
       .order("name"),
   );
 
@@ -293,15 +314,30 @@ export async function getTeams(): Promise<
     id: string;
     name: string;
     category_id: string;
-    category: { sport: { name: string; slug: string } | null } | null;
+    category: {
+      name: string;
+      sport: {
+        id: string;
+        name: string;
+        slug: string;
+        code: string;
+        color: string;
+        sort_order: number;
+      } | null;
+    } | null;
   };
 
   return (rows as unknown as Row[]).map((t) => ({
     id: t.id,
     name: t.name,
     categoryId: t.category_id,
+    categoryName: t.category?.name ?? "",
+    sportId: t.category?.sport?.id ?? "",
     sportName: t.category?.sport?.name ?? "",
     sportSlug: t.category?.sport?.slug ?? "",
+    sportCode: t.category?.sport?.code ?? "??",
+    sportColor: t.category?.sport?.color ?? "#3C2A6E",
+    sportOrder: t.category?.sport?.sort_order ?? 0,
   }));
 }
 
@@ -392,13 +428,30 @@ export async function getCourts(): Promise<Court[]> {
 }
 
 /**
- * Whether this request carries a coordinator session. Drives whether edit
- * affordances render — it is not the security boundary. That is the RLS
- * policy on `fixtures`: a forged client can show itself the edit UI and still
- * have its write rejected by Postgres.
+ * Who, if anyone, is signed in as a coordinator on this request.
+ *
+ * Drives whether edit affordances render — it is not the security boundary.
+ * That is the RLS policy on `fixtures`: a forged client can show itself the
+ * edit UI for another sport and still have the write rejected by Postgres.
+ *
+ * `sportId: null` means a committee admin who may edit every sport.
  */
-export async function getIsCoordinator(): Promise<boolean> {
+export async function getCoordinator(): Promise<Coordinator | null> {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  return Boolean(data?.claims);
+
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) return null;
+
+  // The signed-in user may be authenticated without being a coordinator (the
+  // row is provisioned separately), so an empty result here is a normal
+  // outcome, not an error. RLS limits this to the caller's own row.
+  const { data, error } = await supabase
+    .from("coordinators")
+    .select("name, sport_id")
+    .limit(1);
+
+  if (error || !data || data.length === 0) return null;
+
+  return { name: data[0].name, sportId: data[0].sport_id };
 }
+

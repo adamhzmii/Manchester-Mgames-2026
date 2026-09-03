@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { CloseIcon } from "@/components/icons";
-import type { PickerTeam } from "@/components/schedule-view";
+import type { PickerTeam } from "@/lib/queries";
 import {
   assignFixtureTeam,
   updateFixtureScore,

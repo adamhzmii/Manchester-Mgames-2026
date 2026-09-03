@@ -8,8 +8,8 @@ Two audiences, one app:
 
 - **Attendees** browse the schedule, live scores, venue info and food with no
   account at all.
-- **Coordinators** sign in with a single shared committee credential, which
-  reveals inline edit controls on the schedule for pushing scores during the
+- **Coordinators** sign in with their own per-sport account, which reveals
+  inline edit controls on that sport's fixtures for pushing scores during the
   day. There is no separate admin dashboard.
 
 Built from `mgames26_system_design_spec.md` and the Claude Design prototype.
@@ -74,9 +74,30 @@ Verified after the push: all ten tables readable by `anon`, anonymous writes
 refused by RLS, the `fixtures` embed query resolving both team foreign keys,
 and a score change propagating over realtime to an open page without a reload.
 
-Then create the single coordinator account (Authentication → Users → *Add
-user*, with "auto-confirm" on) and share that email and password with the
-committee.
+### Creating coordinator accounts
+
+Each coordinator is a Supabase auth user plus a row in `coordinators` naming
+the sport they cover. A row with a null `sport_id` is a committee admin who can
+edit every sport.
+
+1. **Authentication → Users → Add user**, with **Auto Confirm User** on — an
+   unconfirmed account cannot sign in, and no SMTP is configured to send the
+   verification email.
+2. Add the matching row (SQL editor, which runs as the service role):
+
+```sql
+insert into coordinators (user_id, name, sport_id)
+values (
+  '<the new user id>',
+  'Aisyah — Netball',
+  (select id from sports where slug = 'netball')   -- or NULL for an admin
+);
+```
+
+The restriction is enforced by the RLS policy on `fixtures`, not by the UI: a
+netball coordinator who forges a request to change a football score has it
+rejected by Postgres. Verified with a scoped test account — its own sport
+wrote one row, another sport wrote zero.
 
 ### Regenerating database types
 
@@ -122,14 +143,18 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-key-here
 | `/` | ✅ | Hero, latest announcement, "Happening now" rail |
 | `/schedule` | ✅ | All fixtures; sport/venue/stage filters, My Games, coordinator editing |
 | `/scores` | ✅ | Group tables (computed client-side) and knockout brackets |
-| `/map` | — | Per-venue list of courts and stalls; **map embed still to build** |
+| `/map` | — | Live Google Map plus a per-venue list of courts and stalls |
 | `/food` | — | Vendors and menus |
 | `/info` | — | First aid, prayer rooms, emergency contacts, FAQ |
 | `/announcements` | ✅ | Committee feed, newest first |
-| `/login` | — | Shared coordinator sign-in |
+| `/login` | — | Per-sport coordinator sign-in |
 
-"My Games" is not a route — it is a toggle on `/schedule` backed by team ids in
-`localStorage`, so attendees never need an account.
+"Your team" is not a route. It is a sport → category → team drill-down
+(`team-picker.tsx`), surfaced on the home page and as a filter toggle on
+`/schedule`, backed by team ids in `localStorage` so attendees never need an
+account. The drill-down exists because a flat roster does not disambiguate:
+several clubs field a same-named side in more than one sport, and the category
+is the only thing that tells them apart.
 
 ## How it fits together
 
@@ -139,6 +164,7 @@ src/
   components/             presentational + client-interactive pieces
   lib/
     queries.ts            every server-side read, in one place
+    coordinator.ts        coordinator identity + per-sport edit predicate
     fixtures.ts           fixture row → view model, filtering, sorting
     standings.ts          group tables computed from finished fixtures
     use-live-fixtures.ts  realtime subscription that patches scores in place
@@ -150,9 +176,10 @@ src/
 
 **Security model.** Every page is public and read-only for anonymous visitors.
 The only write is a coordinator updating a fixture, and the boundary that
-enforces it is the RLS policy on `fixtures` — not the UI. `canEdit` in the
-React tree decides whether buttons *render*; Postgres decides whether writes
-*land*. A forged client can show itself the edit sheet and still be refused.
+enforces it is the RLS policy on `fixtures` — not the UI. The React tree
+decides whether an Edit button *renders*; Postgres decides whether the write
+*lands*, and it scopes that to the coordinator's own sport. A forged client can
+show itself the edit sheet for another sport and still be refused.
 
 **Realtime.** Fixture payloads carry the bare row, with no joined team or venue,
 so `use-live-fixtures.ts` patches the three columns coordinators actually touch

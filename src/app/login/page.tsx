@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { signOut } from "@/lib/actions/auth";
-import { getIsCoordinator } from "@/lib/queries";
+import { getCoordinator, getSports } from "@/lib/queries";
 
 import { LoginForm } from "./login-form";
 import styles from "./login.module.css";
@@ -21,17 +21,21 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
-  const signedIn = await getIsCoordinator();
+  const [coordinator, sports] = await Promise.all([getCoordinator(), getSports()]);
+  const sportName = coordinator?.sportId
+    ? (sports.find((s) => s.id === coordinator.sportId)?.name ?? "your sport")
+    : null;
 
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
-        {signedIn ? (
+        {coordinator ? (
           <div className={styles.signedIn}>
-            <h1 className={styles.signedInTitle}>You&rsquo;re signed in</h1>
+            <h1 className={styles.signedInTitle}>Signed in as {coordinator.name}</h1>
             <p className={styles.intro}>
-              Edit buttons now appear on every fixture on the Schedule. Tap one to push a score
-              or change a game&rsquo;s status.
+              {sportName
+                ? `You can edit ${sportName} fixtures. Edit buttons appear on those games on the Schedule — tap one to push a score or change a game's status.`
+                : "You're a committee admin, so you can edit every sport. Edit buttons appear on every fixture on the Schedule."}
             </p>
             <form action={signOut}>
               <button type="submit" className={styles.signOut}>
@@ -43,8 +47,8 @@ export default async function LoginPage() {
           <>
             <h1 className={styles.title}>Coordinator sign-in</h1>
             <p className={styles.intro}>
-              For committee members updating scores on the day. Attendees don&rsquo;t need an
-              account — everything else on the site is open.
+              For coordinators updating their sport&rsquo;s scores on the day. Attendees
+              don&rsquo;t need an account — everything else on the site is open.
             </p>
             <LoginForm />
           </>
@@ -52,7 +56,7 @@ export default async function LoginPage() {
       </div>
 
       <p className={styles.note}>
-        One shared login for the whole committee. Don&rsquo;t post the password anywhere public.
+        One account per sport. Don&rsquo;t post the password anywhere public.
       </p>
     </div>
   );
