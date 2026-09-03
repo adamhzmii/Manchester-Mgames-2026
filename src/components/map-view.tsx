@@ -62,11 +62,12 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
     return [...here, ...food];
   }, [courts, vendors, venueSlug]);
 
-  // geo: is understood by iOS, Android and most desktop map apps, and needs no
-  // API key or provider decision.
+  // A Google Maps URL rather than a `geo:` URI: `geo:` opens the native app on
+  // a phone but does nothing at all in a desktop browser, and a coordinator or
+  // spectator checking the venue from a laptop is a normal case.
   const directionsHref =
     venue?.latitude != null && venue?.longitude != null
-      ? `geo:${venue.latitude},${venue.longitude}?q=${encodeURIComponent(venue.name)}`
+      ? `https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}&travelmode=walking`
       : null;
 
   return (
@@ -93,7 +94,12 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
       <div className={styles.placeholder}>
         {apiKey ? (
           <div className={styles.mapCanvas}>
-            <GoogleVenueMap apiKey={apiKey} venues={venues} selectedSlug={venueSlug} />
+            <GoogleVenueMap
+              apiKey={apiKey}
+              venues={venues}
+              vendors={vendors}
+              selectedSlug={venueSlug}
+            />
           </div>
         ) : (
           <div className={styles.canvas}>
@@ -107,7 +113,12 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
         )}
         <div className={styles.placeholderFoot}>
           {directionsHref ? (
-            <a className={styles.directions} href={directionsHref}>
+            <a
+              className={styles.directions}
+              href={directionsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <PinIcon size={14} />
               Directions to {venue?.shortName}
             </a>

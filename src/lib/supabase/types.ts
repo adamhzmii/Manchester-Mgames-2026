@@ -239,6 +239,8 @@ export interface Database {
           cuisine: string;
           location: string | null;
           photo_url: string | null;
+          latitude: number | null;
+          longitude: number | null;
           sort_order: number;
           created_at: Timestamptz;
         };

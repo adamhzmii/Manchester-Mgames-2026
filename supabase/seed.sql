@@ -46,9 +46,9 @@ join sports s on s.slug = v.sport_slug;
 
 insert into venues (slug, name, short_name, address, latitude, longitude, sort_order) values
   ('trinity', 'Trinity Sports Centre', 'Trinity',
-   'Cambridge St, Manchester M15 6HE', 53.470200, -2.243900, 1),
+   'Cambridge St, Hulme, Manchester M15 6HP', 53.464754, -2.239163, 1),
   ('sugden',  'Sugden Sports Centre',  'Sugden',
-   'Grosvenor St, Manchester M1 7HL',  53.472700, -2.234300, 2);
+   '114 Grosvenor St, Manchester M1 7HL',     53.471186, -2.235999, 2);
 
 insert into courts (venue_id, sport_id, name, sort_order)
 select v.id, s.id, c.name, c.sort_order

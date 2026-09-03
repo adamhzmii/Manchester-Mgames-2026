@@ -3,25 +3,36 @@
 import { APIProvider, InfoWindow, Map, Marker, useApiIsLoaded } from "@vis.gl/react-google-maps";
 import { useState } from "react";
 
-import type { Venue } from "@/lib/queries";
+import type { Vendor, Venue } from "@/lib/queries";
 
 import styles from "./google-venue-map.module.css";
 
 /**
  * A muted, decluttered style so the embed reads as part of this app rather
- * than a raw Google Maps iframe: default POI icons and transit clutter add
- * nothing for "where is the sports centre", and the saturated default palette
- * fights the app's own purple/gold system.
+ * than a raw Google Maps iframe. Roads and their labels stay — people orient
+ * by street names — but the saturated default palette and the generic POI
+ * pins go, since neither helps anyone find a sports hall.
  */
 const MAP_STYLE: google.maps.MapTypeStyle[] = [
-  { elementType: "geometry", stylers: [{ saturation: -75 }, { lightness: 8 }] },
+  { elementType: "geometry", stylers: [{ saturation: -60 }, { lightness: 6 }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "labels", stylers: [{ visibility: "simplified" }] },
 ];
 
-/** A teardrop pin as a data URI — Google's default red pin clashes with the brand. */
+const GOLD = "#D4A93C";
+const PURPLE = "#3C2A6E";
+
+/**
+ * A Google Maps link rather than a `geo:` URI. `geo:` is understood by native
+ * apps but does nothing in a desktop browser, and this link has to work from
+ * a laptop as well as a phone — where it opens the Maps app directly.
+ */
+function directionsHref(lat: number, lng: number, label: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=&travelmode=walking#${encodeURIComponent(label)}`;
+}
+
+/** Teardrop pin. Google's default red clashes with the brand palette. */
 function pinIcon(color: string, scale: number): google.maps.Symbol {
   return {
     path: "M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z",
@@ -34,89 +45,147 @@ function pinIcon(color: string, scale: number): google.maps.Symbol {
   };
 }
 
+type Selected =
+  | { kind: "venue"; slug: string }
+  | { kind: "vendor"; id: string }
+  | null;
+
 export function GoogleVenueMap({
   apiKey,
   venues,
+  vendors,
   selectedSlug,
 }: {
   apiKey: string;
   venues: Venue[];
+  vendors: Vendor[];
   selectedSlug: string;
 }) {
   return (
     <APIProvider apiKey={apiKey}>
-      <VenueMapInner venues={venues} selectedSlug={selectedSlug} />
+      <VenueMapInner venues={venues} vendors={vendors} selectedSlug={selectedSlug} />
     </APIProvider>
   );
 }
 
 /**
- * Split from GoogleVenueMap because `pinIcon()` touches `google.maps.*`
- * directly, which does not exist until the Maps script `<APIProvider>` loads
- * has finished loading. `useApiIsLoaded` only works below `<APIProvider>` in
- * the tree, so the gate has to live in a child, not the wrapper itself — the
- * pins are just skipped for the one render or two before it flips to true,
- * which is fast enough that there is no visible empty-map flash worth a
- * loading spinner over.
+ * Split from the wrapper because `pinIcon()` touches `google.maps.*`, which
+ * does not exist until `<APIProvider>` has loaded the script — and
+ * `useApiIsLoaded` only reports that from inside the provider.
  */
 function VenueMapInner({
   venues,
+  vendors,
   selectedSlug,
 }: {
   venues: Venue[];
+  vendors: Vendor[];
   selectedSlug: string;
 }) {
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [open, setOpen] = useState<Selected>(null);
   const apiIsLoaded = useApiIsLoaded();
 
   const selected = venues.find((v) => v.slug === selectedSlug);
-  const withCoords = venues.filter((v) => v.latitude != null && v.longitude != null);
+  const venuePins = venues.filter((v) => v.latitude != null && v.longitude != null);
 
-  if (!selected || selected.latitude == null || selected.longitude == null) {
-    return null;
-  }
+  // Only stalls at the venue being shown, and only those someone has actually
+  // placed — the column is nullable precisely so an unplaced stall is listed
+  // without being pinned to a guess.
+  const vendorPins = vendors.filter(
+    (v) => v.venueSlug === selectedSlug && v.latitude != null && v.longitude != null,
+  );
+
+  if (!selected || selected.latitude == null || selected.longitude == null) return null;
+
+  const openVenue = open?.kind === "venue" ? venues.find((v) => v.slug === open.slug) : null;
+  const openVendor = open?.kind === "vendor" ? vendors.find((v) => v.id === open.id) : null;
 
   return (
     <Map
       className={styles.map}
+      // `center`/`zoom` (not `defaultCenter`) so switching venue tab re-centres
+      // the map; the reset is the point of the tab.
       center={{ lat: selected.latitude, lng: selected.longitude }}
-      zoom={16}
+      zoom={17}
       styles={MAP_STYLE}
       disableDefaultUI
       zoomControl
-      gestureHandling="cooperative"
+      fullscreenControl
+      // `greedy`, not `cooperative`: the map sits in a fixed-height box that
+      // cannot swallow the page scroll, and requiring ctrl-scroll or two
+      // fingers made it feel frozen.
+      gestureHandling="greedy"
       clickableIcons={false}
     >
       {apiIsLoaded &&
-        withCoords.map((v) => {
+        venuePins.map((v) => {
           const isSelected = v.slug === selectedSlug;
           return (
             <Marker
               key={v.slug}
               position={{ lat: v.latitude!, lng: v.longitude! }}
-              icon={pinIcon(isSelected ? "#D4A93C" : "#3C2A6E", isSelected ? 2.1 : 1.5)}
-              zIndex={isSelected ? 2 : 1}
-              onClick={() => setOpenSlug(v.slug)}
+              icon={pinIcon(isSelected ? PURPLE : "#9b93b5", isSelected ? 2.2 : 1.5)}
+              zIndex={isSelected ? 3 : 1}
+              onClick={() => setOpen({ kind: "venue", slug: v.slug })}
               title={v.name}
             />
           );
         })}
 
       {apiIsLoaded &&
-        openSlug &&
-        (() => {
-          const v = venues.find((x) => x.slug === openSlug);
-          if (!v || v.latitude == null || v.longitude == null) return null;
-          return (
-            <InfoWindow
-              position={{ lat: v.latitude, lng: v.longitude }}
-              onCloseClick={() => setOpenSlug(null)}
-              headerContent={<strong>{v.name}</strong>}
+        vendorPins.map((v) => (
+          <Marker
+            key={v.id}
+            position={{ lat: v.latitude!, lng: v.longitude! }}
+            icon={pinIcon(GOLD, 1.7)}
+            zIndex={2}
+            onClick={() => setOpen({ kind: "vendor", id: v.id })}
+            title={v.name}
+          />
+        ))}
+
+      {apiIsLoaded && openVenue && openVenue.latitude != null && openVenue.longitude != null ? (
+        <InfoWindow
+          position={{ lat: openVenue.latitude, lng: openVenue.longitude }}
+          onCloseClick={() => setOpen(null)}
+          headerContent={<strong>{openVenue.name}</strong>}
+        >
+          <div className={styles.info}>
+            {openVenue.address ? <p className={styles.infoLine}>{openVenue.address}</p> : null}
+            <a
+              className={styles.infoLink}
+              href={directionsHref(openVenue.latitude, openVenue.longitude, openVenue.name)}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {v.address ? <span>{v.address}</span> : null}
-            </InfoWindow>
-          );
-        })()}
+              Directions in Google Maps ↗
+            </a>
+          </div>
+        </InfoWindow>
+      ) : null}
+
+      {apiIsLoaded && openVendor && openVendor.latitude != null && openVendor.longitude != null ? (
+        <InfoWindow
+          position={{ lat: openVendor.latitude, lng: openVendor.longitude }}
+          onCloseClick={() => setOpen(null)}
+          headerContent={<strong>{openVendor.name}</strong>}
+        >
+          <div className={styles.info}>
+            <p className={styles.infoLine}>
+              {openVendor.cuisine}
+              {openVendor.location ? ` · ${openVendor.location}` : ""}
+            </p>
+            <a
+              className={styles.infoLink}
+              href={directionsHref(openVendor.latitude, openVendor.longitude, openVendor.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Directions in Google Maps ↗
+            </a>
+          </div>
+        </InfoWindow>
+      ) : null}
     </Map>
   );
 }

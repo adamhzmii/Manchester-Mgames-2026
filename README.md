@@ -136,6 +136,21 @@ plain venue list and a `geo:` directions link — no crash, no broken embed.
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-key-here
 ```
 
+### Pinning food stalls on the map
+
+`vendors` carries nullable `latitude` / `longitude`. A stall with coordinates
+gets a gold pin on its venue's map; one without is still listed, just not
+pinned — so nothing has to be guessed before the day. To place one:
+
+```sql
+update vendors
+set latitude = 53.4712, longitude = -2.2360
+where name = 'Nasi Lemak Corner';
+```
+
+The easiest way to read a coordinate off Google Maps is to right-click the
+spot and copy the pair it shows.
+
 ## Routes
 
 | Route | Realtime | Notes |
@@ -143,7 +158,7 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-key-here
 | `/` | ✅ | Hero, latest announcement, "Happening now" rail |
 | `/schedule` | ✅ | All fixtures; sport/venue/stage filters, My Games, coordinator editing |
 | `/scores` | ✅ | Group tables (computed client-side) and knockout brackets |
-| `/map` | — | Live Google Map plus a per-venue list of courts and stalls |
+| `/map` | — | Pannable Google Map with venue and food-stall pins, plus a per-venue list |
 | `/food` | — | Vendors and menus |
 | `/info` | — | First aid, prayer rooms, emergency contacts, FAQ |
 | `/announcements` | ✅ | Committee feed, newest first |

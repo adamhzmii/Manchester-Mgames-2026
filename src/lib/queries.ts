@@ -56,6 +56,9 @@ export type Vendor = {
   photoUrl: string | null;
   venueSlug: string;
   venueShortName: string;
+  /** Null until someone places the stall on the venue map; unplaced stalls are listed, not pinned. */
+  latitude: number | null;
+  longitude: number | null;
   menu: { id: string; name: string; pricePence: number }[];
 };
 
@@ -367,7 +370,7 @@ export async function getVendors(): Promise<Vendor[]> {
     await supabase
       .from("vendors")
       .select(
-        `id, name, cuisine, location, photo_url, sort_order,
+        `id, name, cuisine, location, photo_url, sort_order, latitude, longitude,
          venue:venues ( slug, short_name ),
          menu_items ( id, name, price_pence, sort_order )`,
       )
@@ -380,6 +383,8 @@ export async function getVendors(): Promise<Vendor[]> {
     cuisine: string;
     location: string | null;
     photo_url: string | null;
+    latitude: number | null;
+    longitude: number | null;
     venue: { slug: string; short_name: string } | null;
     menu_items: { id: string; name: string; price_pence: number; sort_order: number }[];
   };
@@ -392,6 +397,8 @@ export async function getVendors(): Promise<Vendor[]> {
     photoUrl: v.photo_url,
     venueSlug: v.venue?.slug ?? "",
     venueShortName: v.venue?.short_name ?? "",
+    latitude: v.latitude,
+    longitude: v.longitude,
     // Nested rows come back in insertion order, not the order requested on the
     // parent — sort the menu here so prices read top to bottom as intended.
     menu: [...v.menu_items]
