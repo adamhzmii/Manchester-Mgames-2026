@@ -1,7 +1,7 @@
 "use client";
 
-import { APIProvider, InfoWindow, Map, Marker, useApiIsLoaded } from "@vis.gl/react-google-maps";
-import { useState } from "react";
+import { APIProvider, InfoWindow, Map, Marker, useApiIsLoaded, useMap } from "@vis.gl/react-google-maps";
+import { useEffect, useState } from "react";
 
 import type { Vendor, Venue } from "@/lib/queries";
 
@@ -103,10 +103,13 @@ function VenueMapInner({
   return (
     <Map
       className={styles.map}
-      // `center`/`zoom` (not `defaultCenter`) so switching venue tab re-centres
-      // the map; the reset is the point of the tab.
-      center={{ lat: selected.latitude, lng: selected.longitude }}
-      zoom={17}
+      // `defaultCenter`/`defaultZoom`, deliberately NOT `center`/`zoom`.
+      // The latter make the map a controlled component: every pan re-renders
+      // and snaps the camera straight back to the prop, which reads as a map
+      // that simply will not move. Re-centring on a venue change is handled
+      // imperatively by <RecenterOnVenue> below instead.
+      defaultCenter={{ lat: selected.latitude, lng: selected.longitude }}
+      defaultZoom={17}
       styles={MAP_STYLE}
       disableDefaultUI
       zoomControl
@@ -117,6 +120,12 @@ function VenueMapInner({
       gestureHandling="greedy"
       clickableIcons={false}
     >
+      <RecenterOnVenue
+        lat={selected.latitude}
+        lng={selected.longitude}
+        venueSlug={selectedSlug}
+      />
+
       {apiIsLoaded &&
         venuePins.map((v) => {
           const isSelected = v.slug === selectedSlug;
@@ -188,4 +197,36 @@ function VenueMapInner({
       ) : null}
     </Map>
   );
+}
+
+/**
+ * Pans the map when the visitor switches venue tab.
+ *
+ * Done imperatively rather than by binding `center`, so the map stays
+ * uncontrolled and free to drag between switches. Keyed on the slug, not the
+ * coordinates, so it only fires on a real tab change — not on every render
+ * that happens to rebuild the latitude/longitude object.
+ */
+function RecenterOnVenue({
+  lat,
+  lng,
+  venueSlug,
+}: {
+  lat: number;
+  lng: number;
+  venueSlug: string;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    map.panTo({ lat, lng });
+    map.setZoom(17);
+    // `lat`/`lng` are intentionally not dependencies: they are derived from
+    // venueSlug, and including them would re-centre mid-drag if a parent
+    // re-rendered.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, venueSlug]);
+
+  return null;
 }
