@@ -100,10 +100,19 @@
   text-align: center;
 }
 
+.footRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .allLink {
   font-size: 12px;
   font-weight: 700;
   color: var(--mg-purple);
+  padding-top: 8px;
 }
 
 @media (min-width: 768px) {

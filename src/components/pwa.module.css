@@ -1,0 +1,74 @@
+/*
+ * Sits above the bottom nav rather than over the page content: on mobile the
+ * nav is the one thing always on screen, and a banner covering it would block
+ * navigation to dismiss itself.
+ */
+.bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--mg-bottom-nav-height) + 12px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: calc(100% - var(--mg-gutter) * 2);
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--mg-purple);
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(28, 24, 48, 0.35);
+  animation: mg-slide-up 0.24s ease both;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.body {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.install {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 15px;
+  background: var(--mg-gold);
+  color: var(--mg-purple-deep);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dismiss {
+  flex: 0 0 auto;
+  border: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 9px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Past the bottom-nav breakpoint the nav is gone, so the banner can sit lower. */
+@media (min-width: 768px) {
+  .bar {
+    bottom: 16px;
+  }
+}

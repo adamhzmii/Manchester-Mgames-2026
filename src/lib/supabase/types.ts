@@ -283,6 +283,22 @@ export interface Database {
           },
         ];
       };
+      push_subscriptions: {
+        Row: {
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          team_ids: string[];
+          created_at: Timestamptz;
+          updated_at: Timestamptz;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["push_subscriptions"]["Row"],
+          "created_at" | "updated_at" | "team_ids"
+        > & { team_ids?: string[]; created_at?: Timestamptz; updated_at?: Timestamptz };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Insert"]>;
+        Relationships: [];
+      };
       coordinators: {
         Row: {
           user_id: string;
@@ -323,7 +339,21 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      register_push_subscription: {
+        Args: {
+          p_endpoint: string;
+          p_p256dh: string;
+          p_auth: string;
+          p_team_ids: string[];
+        };
+        Returns: undefined;
+      };
+      unregister_push_subscription: {
+        Args: { p_endpoint: string };
+        Returns: undefined;
+      };
+    };
     Enums: {
       fixture_stage: FixtureStage;
       fixture_status: FixtureStatus;

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { sendPush } from "@/lib/push/server";
 import { createClient } from "@/lib/supabase/server";
 import type { FixtureStatus } from "@/lib/supabase/types";
 
@@ -63,6 +64,19 @@ export async function updateFixtureScore(
   }
 
   const supabase = await createClient();
+
+  // Read the fixture before writing: the push needs team names and the
+  // previous status, and after the update the old status is gone.
+  const { data: before } = await supabase
+    .from("fixtures")
+    .select(
+      `status, team_a_id, team_b_id,
+       team_a:teams!fixtures_team_a_id_fkey ( name ),
+       team_b:teams!fixtures_team_b_id_fkey ( name )`,
+    )
+    .eq("id", fixtureId)
+    .limit(1);
+
   const { data, error } = await supabase
     .from("fixtures")
     .update({ score_a: scoreA, score_b: scoreB, status })
@@ -87,7 +101,73 @@ export async function updateFixtureScore(
   revalidatePath("/schedule");
   revalidatePath("/scores");
 
+  await notifyFixtureChange({
+    fixtureId,
+    previousStatus: before?.[0]?.status ?? null,
+    status,
+    scoreA,
+    scoreB,
+    teamAId: before?.[0]?.team_a_id ?? null,
+    teamBId: before?.[0]?.team_b_id ?? null,
+    teamAName:
+      (before?.[0] as { team_a?: { name: string } | null } | undefined)?.team_a?.name ?? "TBC",
+    teamBName:
+      (before?.[0] as { team_b?: { name: string } | null } | undefined)?.team_b?.name ?? "TBC",
+  });
+
   return { status: "success", message: "Saved." };
+}
+
+/**
+ * Pushes only the two moments that are worth interrupting someone for: a
+ * followed team kicking off, and a followed team's final result.
+ *
+ * Every individual score bump would be intolerable — a basketball game alone
+ * would fire dozens — so mid-game updates deliberately stay silent and are
+ * carried by realtime instead. Targeted at the two teams involved, so nobody
+ * gets notified about a match they are not following.
+ *
+ * Never allowed to fail the write: the score is already saved by this point,
+ * and a push service being unreachable must not be reported to the
+ * coordinator as a failed save.
+ */
+async function notifyFixtureChange(f: {
+  fixtureId: string;
+  previousStatus: FixtureStatus | null;
+  status: FixtureStatus;
+  scoreA: number | null;
+  scoreB: number | null;
+  teamAId: string | null;
+  teamBId: string | null;
+  teamAName: string;
+  teamBName: string;
+}): Promise<void> {
+  if (f.previousStatus === f.status) return;
+
+  const teamIds = [f.teamAId, f.teamBId].filter((id): id is string => Boolean(id));
+  if (teamIds.length === 0) return;
+
+  let title: string | null = null;
+  let body: string | null = null;
+
+  if (f.status === "live") {
+    title = "Your team is playing now";
+    body = `${f.teamAName} v ${f.teamBName} has started.`;
+  } else if (f.status === "finished") {
+    title = "Full time";
+    body = `${f.teamAName} ${f.scoreA ?? "-"} – ${f.scoreB ?? "-"} ${f.teamBName}`;
+  }
+
+  if (!title || !body) return;
+
+  try {
+    await sendPush(
+      { title, body, url: "/schedule", tag: `fixture-${f.fixtureId}` },
+      { teamIds },
+    );
+  } catch {
+    // Best effort by design — see the docblock.
+  }
 }
 
 export type AssignTeamState = {

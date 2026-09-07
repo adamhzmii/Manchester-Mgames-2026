@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { FixtureCard } from "@/components/fixture-card";
+import { NotifyToggle } from "@/components/notify-toggle";
 import { StarIcon } from "@/components/icons";
 import { TeamPicker } from "@/components/team-picker";
 import { byRelevance, type Fixture } from "@/lib/fixtures";
@@ -95,9 +96,12 @@ export function MyTeam({ fixtures, teams }: { fixtures: Fixture[]; teams: Picker
             </p>
           )}
 
-          <Link href="/schedule" className={styles.allLink}>
-            See all your games ›
-          </Link>
+          <div className={styles.footRow}>
+            <Link href="/schedule" className={styles.allLink}>
+              See all your games ›
+            </Link>
+            <NotifyToggle />
+          </div>
         </div>
       )}
 
