@@ -108,6 +108,12 @@
   flex-wrap: wrap;
 }
 
+.notifyRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
 .allLink {
   font-size: 12px;
   font-weight: 700;

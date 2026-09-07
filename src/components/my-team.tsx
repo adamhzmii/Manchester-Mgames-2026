@@ -100,10 +100,13 @@ export function MyTeam({ fixtures, teams }: { fixtures: Fixture[]; teams: Picker
             <Link href="/schedule" className={styles.allLink}>
               See all your games ›
             </Link>
-            <NotifyToggle />
           </div>
         </div>
       )}
+
+      <div className={styles.notifyRow}>
+        <NotifyToggle />
+      </div>
 
       {pickerOpen ? (
         <TeamPicker
