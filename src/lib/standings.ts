@@ -66,6 +66,26 @@ const QUALIFYING_PLACES = 2;
  * folded in early: a half-played score would reorder the table and then
  * reorder it back, which reads as a bug to anyone watching.
  */
+/**
+ * Strictly better on the tiebreaker chain — the same comparison the table sorts
+ * by, minus the alphabetical fallback, which orders tied teams for display
+ * without settling anything between them.
+ *
+ * `below` is undefined when a group holds no more teams than there are
+ * qualifying places: nobody to be separated from, so the place is safe.
+ */
+function isAheadOf(
+  row: { points: number; scoreDifference: number; scoreFor: number },
+  below: { points: number; scoreDifference: number; scoreFor: number } | undefined,
+): boolean {
+  if (!below) return true;
+  return (
+    row.points !== below.points ||
+    row.scoreDifference !== below.scoreDifference ||
+    row.scoreFor !== below.scoreFor
+  );
+}
+
 export function computeStandings(
   fixtures: readonly Fixture[],
   groups: readonly GroupMeta[],
@@ -153,10 +173,16 @@ export function computeStandings(
             b.scoreFor - a.scoreFor ||
             a.teamName.localeCompare(b.teamName),
         )
-        .map((row, index) => ({
+        .map((row, index, sorted) => ({
           ...row,
           position: index + 1,
-          qualifying: index < QUALIFYING_PLACES,
+          // A place inside the cut is not the same as having earned it. Before
+          // a group has been played every team is level, and the order above is
+          // just alphabetical — marking the top two "Q" there would tell a team
+          // it had qualified on the strength of its name. So a row only counts
+          // as qualifying if it is strictly ahead of the first team below the
+          // line; while that tie stands, qualification is genuinely undecided.
+          qualifying: index < QUALIFYING_PLACES && isAheadOf(row, sorted[QUALIFYING_PLACES]),
         }));
 
       return { groupId: group.id, groupName: group.name, rows };

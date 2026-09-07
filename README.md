@@ -68,6 +68,27 @@ psql "$DATABASE_URL" -f supabase/seed.sql   # optional: prototype data
   local development. Truncates first, so it is safe to re-run and **must not**
   be run against production once real data exists.
 
+### Dry runs
+
+`seed.sql` loads a deliberately mid-tournament snapshot (37 played, 2 live) so
+every screen has something to render. For a rehearsal with the committee that
+is the wrong starting point — the day should be walked forward from nothing:
+
+```bash
+npm run reset:pre-event
+```
+
+Every fixture goes back to `upcoming` with no score, knockout slots fed by an
+earlier match go back to showing "Winner QF1" rather than a hardcoded winner,
+and the announcement feed is trimmed to a single pre-doors notice. It edits in
+place rather than reseeding, so `seed.sql` stays the only description of the
+data, and it is safe to re-run between practice rounds.
+
+The work is done by `reset_demo_day_to_pre_event()`, which is granted to
+`service_role` only — wiping every score is exactly what a stranger would want
+to do during the event, so it is not reachable with the anon key. Coordinator
+logins and notification sign-ups survive a reset.
+
 Both migrations have been applied to the **Manchester-Mgames-2026** project
 (`wtpujwtubqasofesvwki`, eu-west-2), and `seed.sql` has been loaded there.
 Verified after the push: all ten tables readable by `anon`, anonymous writes

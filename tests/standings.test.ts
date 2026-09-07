@@ -95,6 +95,39 @@ test("the top two of a group are flagged as qualifying", () => {
   );
 });
 
+test("nobody is flagged as qualifying before a group has been played", () => {
+  // Every team level on zero, so the sort order is alphabetical. Marking the
+  // first two "Q" would tell a team it had qualified on the strength of its
+  // name — which is exactly what the table looked like on a pre-event reset.
+  const [group] = computeStandings([], [GROUP], TEAMS, "football");
+  assert.deepEqual(
+    group.rows.map((r) => r.qualifying),
+    [false, false, false, false],
+  );
+});
+
+test("a team level with the one below the cut is not yet qualifying", () => {
+  const teams: TeamMeta[] = [
+    { id: "a", name: "Alpha", groupId: "g1" },
+    { id: "b", name: "Bravo", groupId: "g1" },
+    { id: "c", name: "Charlie", groupId: "g1" },
+    { id: "d", name: "Delta", groupId: "g1" },
+  ];
+  // Alpha wins clearly; Bravo and Charlie are dead level on every tiebreaker,
+  // so second place is still open between them.
+  const fixtures = [
+    match("a", "d", 3, 0),
+    match("b", "d", 1, 0),
+    match("c", "d", 1, 0),
+  ];
+
+  const [group] = computeStandings(fixtures, [GROUP], teams, "football");
+  const byName = Object.fromEntries(group.rows.map((r) => [r.teamName, r.qualifying]));
+  assert.equal(byName["Alpha"], true, "a clear leader has earned its place");
+  assert.equal(byName["Bravo"], false, "tied with Charlie, so undecided");
+  assert.equal(byName["Charlie"], false);
+});
+
 test("a live match is not counted until it finishes", () => {
   const fixtures = footballGroupA();
   // Perak are thrashing KL, but it is still in progress.
