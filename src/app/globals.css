@@ -25,6 +25,9 @@
   --mg-surface-alt: #ede9f5;
   --mg-surface-cream: #fbf3dc;
   --mg-border: #eceaf2;
+  /* Bracket connectors need to read as lines across open background, which
+     --mg-border (tuned for card edges against a surface) is too pale to do. */
+  --mg-bracket-line: #cfc9de;
   --mg-border-strong: #e4dfee;
 
   /* Text */

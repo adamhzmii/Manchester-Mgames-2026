@@ -152,33 +152,134 @@
 
 /* ------------------------------------------------------------ bracket ---- */
 
+/* ------------------------------------------------------------ bracket ---- */
+
+/* Full-bleed rather than inside .panel's gutter: a bracket is wider than the
+   phone it is read on, and the horizontal scroll should start at the screen
+   edge instead of inside a margin. */
+.bracketPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bracket {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  padding: 4px var(--mg-gutter) 22px;
+  -webkit-overflow-scrolling: touch;
+}
+
 .round {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 8px;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-width: 208px;
 }
 
 .roundName {
   font-family: var(--font-barlow-condensed), sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--mg-purple);
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: center;
+  padding: 0 16px 10px;
 }
 
-.roundRule {
-  flex: 1;
-  height: 1px;
-  background: var(--mg-border);
-}
-
-.matches {
+/* Equal-height slots are what make the connectors line up: each match sits at
+   the vertical centre of its own slot, so a round with half as many matches
+   has slots twice as tall and its cards land between their two feeders. */
+.slots {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  flex: 1;
 }
+
+.slot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 8px 16px;
+  min-height: 92px;
+}
+
+.slotInner {
+  position: relative;
+  width: 100%;
+}
+
+/* Stub out of the right of a card, towards the next round. */
+.round:not(:last-child) .slot::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background: var(--mg-bracket-line);
+}
+
+/* The vertical half that joins a pair of feeders into one elbow: the upper of
+   the pair reaches down, the lower reaches up, and they meet on the line the
+   next round's card stub arrives at. */
+.round:not(:last-child) .slot::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 2px;
+  background: var(--mg-bracket-line);
+}
+
+.round:not(:last-child) .slot:nth-child(odd)::after {
+  top: 50%;
+  bottom: 0;
+}
+
+.round:not(:last-child) .slot:nth-child(even)::after {
+  top: 0;
+  height: 50%;
+}
+
+/* An odd match with nothing below it has no pair to join, so the elbow would
+   point into empty space. Brackets in this data are not always full. */
+.round:not(:last-child) .slot:last-child:nth-child(odd)::after {
+  display: none;
+}
+
+/* Stub into the left of a card, from the previous round. */
+.round:not(:first-child) .slotInner::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background: var(--mg-bracket-line);
+}
+
+.champion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--mg-purple);
+  background: var(--mg-surface);
+  border: 1px solid var(--mg-gold);
+  border-radius: 12px;
+  padding: 14px 12px;
+  box-shadow: var(--mg-shadow-sm);
+}
+
+
+
 
 .match {
   background: var(--mg-surface);

@@ -86,6 +86,7 @@ export type Court = {
   name: string;
   venueSlug: string;
   sportName: string | null;
+  sportSlug: string | null;
   sportColor: string | null;
   sportCode: string | null;
 };
@@ -413,7 +414,7 @@ export async function getCourts(): Promise<Court[]> {
     "courts",
     await supabase
       .from("courts")
-      .select("id, name, sort_order, venue:venues ( slug ), sport:sports ( name, code, color )")
+      .select("id, name, sort_order, venue:venues ( slug ), sport:sports ( name, slug, code, color )")
       .order("sort_order"),
   );
 
@@ -421,7 +422,7 @@ export async function getCourts(): Promise<Court[]> {
     id: string;
     name: string;
     venue: { slug: string } | null;
-    sport: { name: string; code: string; color: string } | null;
+    sport: { name: string; slug: string; code: string; color: string } | null;
   };
 
   return (rows as unknown as Row[]).map((c) => ({
@@ -429,6 +430,7 @@ export async function getCourts(): Promise<Court[]> {
     name: c.name,
     venueSlug: c.venue?.slug ?? "",
     sportName: c.sport?.name ?? null,
+    sportSlug: c.sport?.slug ?? null,
     sportColor: c.sport?.color ?? null,
     sportCode: c.sport?.code ?? null,
   }));

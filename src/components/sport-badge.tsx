@@ -1,15 +1,25 @@
+import { SPORT_ICONS } from "@/components/sport-icons";
+
 type SportBadgeProps = {
   code: string;
   color: string;
+  slug?: string;
   name?: string;
   size?: number;
 };
 
 /**
- * The two-letter sport chip. Its colour comes from the `sports` row, not from
- * CSS, so the committee can add a sport without a code change.
+ * The sport chip. Its colour comes from the `sports` row, not from CSS, so the
+ * committee can add a sport without a code change.
+ *
+ * Shows a glyph where one exists and the two-letter code otherwise. That
+ * fallback is the point rather than an edge case: sports are rows in a table,
+ * and a sport added the week before the event still has to render something a
+ * player can tell apart.
  */
-export function SportBadge({ code, color, name, size = 22 }: SportBadgeProps) {
+export function SportBadge({ code, color, slug, name, size = 22 }: SportBadgeProps) {
+  const Icon = slug ? SPORT_ICONS[slug] : undefined;
+
   return (
     <span
       style={{
@@ -26,7 +36,7 @@ export function SportBadge({ code, color, name, size = 22 }: SportBadgeProps) {
         flex: "0 0 auto",
       }}
     >
-      {code}
+      {Icon ? <Icon size={Math.round(size * 0.72)} /> : code}
       {name ? <span className="mg-sr-only">{name}</span> : null}
     </span>
   );

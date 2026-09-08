@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { FilterChips, type ChipOption } from "@/components/filter-chips";
+import { TrophyIcon } from "@/components/icons";
 import { stageLabel, type Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import type { Sport } from "@/lib/queries";
@@ -62,6 +63,16 @@ export function ScoresView({ fixtures: initial, sports, groups, teams }: ScoresV
         .filter((f) => f.stage === stage)
         .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime)),
     })).filter((round) => round.matches.length > 0);
+  }, [sportFixtures]);
+
+  // Only once the final is actually finished — a bracket that names a champion
+  // while the match is still being played would be worse than showing nothing.
+  const champion = useMemo(() => {
+    const final = sportFixtures.find((f) => f.stage === "final");
+    if (!final || final.status !== "finished") return null;
+    if (final.scoreA === null || final.scoreB === null) return null;
+    if (final.scoreA === final.scoreB) return null;
+    return final.scoreA > final.scoreB ? final.teamA : final.teamB;
   }, [sportFixtures]);
 
   const sportName = sports.find((s) => s.slug === sportSlug)?.name ?? "This sport";
@@ -170,20 +181,41 @@ export function ScoresView({ fixtures: initial, sports, groups, teams }: ScoresV
           )}
         </div>
       ) : (
-        <div className={styles.panel}>
-          {rounds.map((round) => (
-            <section key={round.stage}>
-              <div className={styles.round}>
-                <h2 className={styles.roundName}>{round.name}</h2>
-                <span className={styles.roundRule} />
-              </div>
-              <div className={styles.matches}>
-                {round.matches.map((match) => (
-                  <BracketMatch key={match.id} fixture={match} />
-                ))}
-              </div>
-            </section>
-          ))}
+        <div className={styles.bracketPanel}>
+          {rounds.length > 0 ? (
+            <div className={styles.bracket}>
+              {rounds.map((round) => (
+                <section key={round.stage} className={styles.round}>
+                  <h2 className={styles.roundName}>{round.name}</h2>
+                  <div className={styles.slots}>
+                    {round.matches.map((match) => (
+                      <div key={match.id} className={styles.slot}>
+                        <div className={styles.slotInner}>
+                          <BracketMatch fixture={match} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              {champion !== null ? (
+                <section className={styles.round}>
+                  <h2 className={styles.roundName}>Champion</h2>
+                  <div className={styles.slots}>
+                    <div className={styles.slot}>
+                      <div className={styles.slotInner}>
+                        <p className={styles.champion}>
+                          <TrophyIcon size={20} />
+                          {champion}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          ) : null}
 
           {rounds.length === 0 ? (
             <div className={styles.notice}>

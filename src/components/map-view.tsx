@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { BusIcon, MapIcon, PinIcon } from "@/components/icons";
 import { GoogleVenueMap } from "@/components/google-venue-map";
+import { SPORT_ICONS } from "@/components/sport-icons";
 import type { Court, Vendor, Venue } from "@/lib/queries";
 import { googleMapsApiKey } from "@/lib/maps-env";
 
@@ -28,6 +29,24 @@ type MapViewProps = {
  * this falls back to the venue list plus a `geo:` directions link — no crash,
  * no broken embed, just a plainer page until the key exists.
  */
+/** Mirrors SportBadge: a glyph where there is one, the code otherwise. */
+function ZoneBadge({
+  badge,
+  slug,
+  color,
+}: {
+  badge: string;
+  slug: string | null;
+  color: string;
+}) {
+  const Icon = slug ? SPORT_ICONS[slug] : undefined;
+  return (
+    <span className={styles.zoneBadge} style={{ background: color }}>
+      {Icon ? <Icon size={17} /> : badge}
+    </span>
+  );
+}
+
 export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps) {
   const apiKey = googleMapsApiKey();
   const [venueSlug, setVenueSlug] = useState(
@@ -44,6 +63,7 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
       .map((court) => ({
         key: `court-${court.id}`,
         badge: court.sportCode ?? "··",
+        slug: court.sportSlug,
         color: court.sportColor ?? "#3C2A6E",
         name: court.sportName ?? court.name,
         where: court.sportName ? court.name : "Shared space",
@@ -54,6 +74,7 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
       .map((vendor) => ({
         key: `vendor-${vendor.id}`,
         badge: "F",
+        slug: null as string | null,
         color: FOOD_COLOR,
         name: vendor.name,
         where: vendor.location ?? "Food stall",
@@ -134,9 +155,7 @@ export function MapView({ venues, courts, vendors, initialVenue }: MapViewProps)
       <div className={styles.zones}>
         {zones.map((zone) => (
           <div key={zone.key} className={styles.zone}>
-            <span className={styles.zoneBadge} style={{ background: zone.color }}>
-              {zone.badge}
-            </span>
+            <ZoneBadge badge={zone.badge} slug={zone.slug} color={zone.color} />
             <div>
               <p className={styles.zoneName}>{zone.name}</p>
               <p className={styles.zoneWhere}>{zone.where}</p>

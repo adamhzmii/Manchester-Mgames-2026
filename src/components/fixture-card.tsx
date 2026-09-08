@@ -56,7 +56,12 @@ export function FixtureCard({
     <article className={`${styles.card} ${styles[fixture.status]}`}>
       <div className={styles.head}>
         <span className={styles.sport}>
-          <SportBadge code={fixture.sportCode} color={fixture.sportColor} name={fixture.sportName} />
+          <SportBadge
+            code={fixture.sportCode}
+            color={fixture.sportColor}
+            slug={fixture.sportSlug}
+            name={fixture.sportName}
+          />
           <span className={styles.sportText}>
             {fixture.sportName} · {fixture.stageLabel}
           </span>
@@ -133,6 +138,7 @@ export function LiveFixtureCard({ fixture }: { fixture: Fixture }) {
           <SportBadge
             code={fixture.sportCode}
             color={fixture.sportColor}
+            slug={fixture.sportSlug}
             name={fixture.sportName}
             size={20}
           />

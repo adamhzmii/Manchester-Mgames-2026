@@ -43,20 +43,6 @@ export const FAQ = [
       "Yes. Your wristband gives you entry to both Trinity and Sugden all day. It's a 12-minute walk or a 6-minute ride on bus 142.",
   },
   {
-    question: "Where do I collect my team kit?",
-    answer:
-      "Team captains can collect kit from Sugden reception from 08:30. Bring your registration confirmation.",
-  },
-  {
-    question: "Is there a bag drop?",
-    answer:
-      "Yes, a staffed bag drop is at each venue reception for £1 per bag. Please don't leave bags courtside.",
-  },
-  {
-    question: "How much is spectator entry?",
-    answer: "Entry is free for all spectators, all day, at both venues. Just come along and cheer!",
-  },
-  {
     question: "What happens if my game is delayed?",
     answer:
       "All timing changes are posted to the Announcements feed in real time. Check there first, then ask a steward in gold hi-vis.",

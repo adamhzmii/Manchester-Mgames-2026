@@ -166,7 +166,7 @@ export function TeamPicker({
                   className={styles.sportTile}
                   onClick={() => chooseSport(s.sportId)}
                 >
-                  <SportBadge code={s.sportCode} color={s.sportColor} size={26} />
+                  <SportBadge code={s.sportCode} color={s.sportColor} slug={s.sportSlug} size={26} />
                   <span className={styles.sportName}>{s.sportName}</span>
                 </button>
               ))}
