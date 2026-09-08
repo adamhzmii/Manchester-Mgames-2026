@@ -36,6 +36,23 @@
   display: block;
 }
 
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px 0;
+}
+
+/* In the compact row the tags are laid out, not overlaid on a photo. */
+.labelRow .photoTag,
+.labelRow .cuisineTag {
+  position: static;
+  top: auto;
+  left: auto;
+  right: auto;
+}
+
 .photoTag {
   position: absolute;
   top: 10px;

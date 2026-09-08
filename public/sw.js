@@ -14,7 +14,7 @@ const DATA_CACHE = `mgames-data-${VERSION}`;
 // Only the things that are useless to fetch twice. Pages themselves are
 // deliberately not precached: they are server-rendered per request and a
 // precached copy would go stale within minutes on event day.
-const SHELL_ASSETS = ["/icons/icon-192.png", "/icons/icon-512.png"];
+const SHELL_ASSETS = ["/icons/icon-192.png", "/icons/icon-512.png", "/brand/logo-mark.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -80,8 +80,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Immutable build output: safe to serve from cache first.
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  // Immutable build output: safe to serve from cache first. /brand/ is in the
+  // list because the header crest lives there — without it the one element on
+  // every screen renders as a broken image the moment the venue wifi drops.
+  if (
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.startsWith("/brand/")
+  ) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>

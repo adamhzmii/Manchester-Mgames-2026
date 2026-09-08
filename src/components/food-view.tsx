@@ -37,23 +37,35 @@ export function FoodView({ vendors, venues }: { vendors: Vendor[]; venues: Venue
       <div className={styles.list}>
         {visible.map((vendor) => (
           <article key={vendor.id} className={styles.vendor}>
-            <div className={styles.photo}>
-              {vendor.photoUrl ? (
-                /* Vendor photos are arbitrary external URLs supplied by the
-                   committee, and next/image needs every host allow-listed in
-                   next.config up front. A plain <img> accepts whatever they
-                   paste. */
-                // eslint-disable-next-line @next/next/no-img-element
+            {/* No photo is the normal case, not a failure: vendors are booked
+                long before anyone takes pictures of the stalls. Reserving the
+                full photo band for them left 130px of empty grey per vendor
+                with the cuisine name ghosted into the middle of it, directly
+                beside the tag that already said the same word. Without a photo
+                the labels collapse to a single compact row. */}
+            {vendor.photoUrl ? (
+              <div className={styles.photo}>
+                {/* Vendor photos are arbitrary external URLs supplied by the
+                    committee, and next/image needs every host allow-listed in
+                    next.config up front. A plain <img> accepts whatever they
+                    paste. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={vendor.photoUrl} alt="" />
-              ) : (
-                <span>{vendor.cuisine}</span>
-              )}
-              <span className={styles.photoTag}>
-                <PinIcon size={11} />
-                {vendor.venueShortName}
-              </span>
-              <span className={styles.cuisineTag}>{vendor.cuisine}</span>
-            </div>
+                <span className={styles.photoTag}>
+                  <PinIcon size={11} />
+                  {vendor.venueShortName}
+                </span>
+                <span className={styles.cuisineTag}>{vendor.cuisine}</span>
+              </div>
+            ) : (
+              <div className={styles.labelRow}>
+                <span className={styles.photoTag}>
+                  <PinIcon size={11} />
+                  {vendor.venueShortName}
+                </span>
+                <span className={styles.cuisineTag}>{vendor.cuisine}</span>
+              </div>
+            )}
 
             <div className={styles.body}>
               <div className={styles.vendorHead}>
