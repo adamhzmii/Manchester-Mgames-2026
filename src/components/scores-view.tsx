@@ -13,12 +13,19 @@ import type { FixtureStage } from "@/lib/supabase/types";
 
 import styles from "./scores-view.module.css";
 
-/** Knockout rounds in the order a bracket reads. */
+/**
+ * Knockout rounds in the order a bracket reads.
+ *
+ * `third_place` is deliberately absent. It is a knockout fixture, but it is not
+ * a round on the way to the final — putting it in this list drew a connector
+ * from the semifinals through it and on into the final, which reads as "the
+ * winner of the third-place match plays the final". It gets its own block
+ * below the bracket instead.
+ */
 const BRACKET_ORDER: readonly FixtureStage[] = [
   "playoff",
   "quarterfinal",
   "semifinal",
-  "third_place",
   "final",
 ];
 
@@ -35,7 +42,7 @@ export function ScoresView({ fixtures: initial, sports, groups, teams }: ScoresV
   const [sportSlug, setSportSlug] = useState(sports[0]?.slug ?? "");
 
   const sportOptions: ChipOption[] = useMemo(
-    () => sports.map((s) => ({ value: s.slug, label: s.name })),
+    () => sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
     [sports],
   );
 
@@ -74,6 +81,11 @@ export function ScoresView({ fixtures: initial, sports, groups, teams }: ScoresV
     if (final.scoreA === final.scoreB) return null;
     return final.scoreA > final.scoreB ? final.teamA : final.teamB;
   }, [sportFixtures]);
+
+  const thirdPlace = useMemo(
+    () => sportFixtures.filter((f) => f.stage === "third_place"),
+    [sportFixtures],
+  );
 
   const sportName = sports.find((s) => s.slug === sportSlug)?.name ?? "This sport";
 
@@ -215,6 +227,17 @@ export function ScoresView({ fixtures: initial, sports, groups, teams }: ScoresV
                 </section>
               ) : null}
             </div>
+          ) : null}
+
+          {thirdPlace.length > 0 ? (
+            <section className={styles.thirdPlace}>
+              <h2 className={styles.roundName}>Third place</h2>
+              <div className={styles.thirdPlaceGames}>
+                {thirdPlace.map((match) => (
+                  <BracketMatch key={match.id} fixture={match} />
+                ))}
+              </div>
+            </section>
           ) : null}
 
           {rounds.length === 0 ? (

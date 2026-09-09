@@ -51,7 +51,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
   padding: 6px var(--mg-gutter) 0;
 }
 
@@ -76,4 +76,56 @@
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     align-items: start;
   }
+}
+
+/* ------------------------------------------------------- hour blocks ---- */
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Offsets the sticky heading so scrollIntoView does not tuck the first card
+     of a block under the site header. */
+  scroll-margin-top: calc(var(--mg-header-height) + 8px);
+}
+
+.blockGames {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Sticky so the hour a player is looking at stays named while they scroll
+   through it. */
+.hour {
+  position: sticky;
+  top: var(--mg-header-height);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 0 6px;
+  background: var(--mg-bg);
+}
+
+.hourTime {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--mg-purple);
+  font-variant-numeric: tabular-nums;
+}
+
+.hourRule {
+  flex: 1;
+  height: 1px;
+  background: var(--mg-border);
+}
+
+.hourCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mg-text-faint);
 }

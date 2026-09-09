@@ -24,3 +24,11 @@
   background: var(--mg-purple);
   color: #fff;
 }
+
+/* Icon and label share a baseline-ish row. The icon inherits the chip's text
+   colour, so it flips with the selected state without a second rule. */
+.chipIcon {
+  flex: 0 0 auto;
+  margin-right: 6px;
+  vertical-align: -3px;
+}

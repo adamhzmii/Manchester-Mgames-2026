@@ -181,19 +181,25 @@ with f(sport_slug, cat_slug, stage, a_name, b_name, ph_a, ph_b,
   ('badminton','open','group','Johor Warriors','Perak Bison',null,null,'sugden','Court B','2026-10-24 10:00+01','finished',2,0),
   ('table-tennis','open','group','KL Tigers','Johor Warriors',null,null,'sugden','TT Room','2026-10-24 11:15+01','finished',3,2),
   ('pickleball','mens-doubles','group','KL Tigers (MD)','Selangor Smashers (MD)',null,null,'sugden','Court C','2026-10-24 11:45+01','finished',11,7),
+  -- Knockouts. Football and Basketball send four qualifiers into the last
+  -- four, so their first knockout round is a semifinal — there is no round of
+  -- eight to play. The round that used to sit between them and the final is
+  -- the third-place playoff.
   -- Knockouts already played
-  ('football','open','quarterfinal','Sabah Rhinos','Melaka Mariners',null,null,'sugden','Court 1','2026-10-24 12:30+01','finished',2,1),
-  ('basketball','open','quarterfinal','Penang Panthers','Sarawak Hornbills',null,null,'trinity','Court 2','2026-10-24 12:15+01','finished',55,40),
+  ('football','open','semifinal','Sabah Rhinos','Melaka Mariners',null,null,'sugden','Court 1','2026-10-24 12:30+01','finished',2,1),
+  ('basketball','open','semifinal','Penang Panthers','Sarawak Hornbills',null,null,'trinity','Court 2','2026-10-24 12:15+01','finished',55,40),
   -- Live right now
-  ('football','open','quarterfinal','KL Tigers','Penang Panthers',null,null,'sugden','Court 1','2026-10-24 13:15+01','live',1,0),
-  ('basketball','open','quarterfinal','Sabah Rhinos','Selangor Smashers',null,null,'trinity','Court 2','2026-10-24 13:00+01','live',28,26),
+  ('football','open','semifinal','KL Tigers','Penang Panthers',null,null,'sugden','Court 1','2026-10-24 13:15+01','live',1,0),
+  ('basketball','open','semifinal','Sabah Rhinos','Selangor Smashers',null,null,'trinity','Court 2','2026-10-24 13:00+01','live',28,26),
   ('netball','open','semifinal','Selangor Smashers','Sarawak Hornbills',null,null,'trinity','Court 3','2026-10-24 13:10+01','live',15,15),
+  ('netball','open','semifinal','Kedah Eagles','Melaka Mariners',null,null,'trinity','Court 3','2026-10-24 13:40+01','upcoming',null,null),
   ('badminton','open','semifinal','Johor Warriors','KL Tigers',null,null,'sugden','Court B','2026-10-24 13:20+01','live',1,1),
   ('volleyball','open','semifinal','Sarawak Hornbills','Melaka Mariners',null,null,'trinity','Main Hall','2026-10-24 13:05+01','live',1,0),
+  ('volleyball','open','semifinal','Terengganu Turtles','Kedah Eagles',null,null,'trinity','Main Hall','2026-10-24 13:35+01','upcoming',null,null),
   -- Still to come
   ('frisbee','open','playoff','Sabah Rhinos','Perak Bison',null,null,'trinity','Main Hall','2026-10-24 14:00+01','upcoming',null,null),
-  ('football','open','semifinal',null,null,'Winner QF1','Winner QF2','sugden','Court 1','2026-10-24 14:15+01','upcoming',null,null),
-  ('basketball','open','semifinal',null,null,'Winner QF1','Winner QF2','trinity','Court 2','2026-10-24 14:30+01','upcoming',null,null),
+  ('football','open','third_place',null,null,'Loser SF1','Loser SF2','sugden','Court 1','2026-10-24 14:15+01','upcoming',null,null),
+  ('basketball','open','third_place',null,null,'Loser SF1','Loser SF2','trinity','Court 2','2026-10-24 14:30+01','upcoming',null,null),
   ('table-tennis','open','final','KL Tigers','Sarawak Hornbills',null,null,'sugden','TT Room','2026-10-24 15:00+01','upcoming',null,null),
   ('pickleball','womens-doubles','final','Penang Panthers (WD)','Johor Warriors (WD)',null,null,'sugden','Court C','2026-10-24 15:15+01','upcoming',null,null),
   ('netball','open','final',null,null,'Winner SF1','Winner SF2','trinity','Court 3','2026-10-24 15:30+01','upcoming',null,null),

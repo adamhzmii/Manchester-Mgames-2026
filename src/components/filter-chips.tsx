@@ -1,10 +1,18 @@
 "use client";
 
+import { SPORT_ICONS } from "@/components/sport-icons";
+
 import styles from "./filter-chips.module.css";
 
 export type ChipOption = {
   value: string;
   label: string;
+  /**
+   * Sport slug, where the chip stands for a sport. Optional because these rows
+   * also filter by venue and stage, and because "All sports" is a chip with no
+   * sport behind it.
+   */
+  slug?: string;
 };
 
 type FilterChipsProps = {
@@ -26,6 +34,7 @@ export function FilterChips({ label, options, value, onChange }: FilterChipsProp
     <div className={`mg-rail ${styles.rail}`} role="radiogroup" aria-label={label}>
       {options.map((option) => {
         const selected = option.value === value;
+        const Icon = option.slug ? SPORT_ICONS[option.slug] : undefined;
         return (
           <button
             key={option.value}
@@ -35,6 +44,7 @@ export function FilterChips({ label, options, value, onChange }: FilterChipsProp
             className={`${styles.chip} ${selected ? styles.chipOn : ""}`}
             onClick={() => onChange(option.value)}
           >
+            {Icon ? <Icon size={15} className={styles.chipIcon} /> : null}
             {option.label}
           </button>
         );

@@ -31,6 +31,29 @@ export function formatDay(iso: string): string {
   return dayFormatter.format(new Date(iso));
 }
 
+const hourKeyFormatter = new Intl.DateTimeFormat("en-GB", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  hour12: false,
+  timeZone: EVENT_TIME_ZONE,
+});
+
+/**
+ * A sortable key for the hour a fixture kicks off in, in Manchester time —
+ * "24/10/2026, 13". Includes the date so a two-day event would not fold both
+ * afternoons into one heading.
+ */
+export function hourKey(iso: string): string {
+  return hourKeyFormatter.format(new Date(iso));
+}
+
+/** "13:00" — the heading for an hour block, not the fixture's own time. */
+export function formatHour(iso: string): string {
+  return `${formatTime(iso).slice(0, 2)}:00`;
+}
+
 /** 650 → "£6.50" */
 export function formatPrice(pence: number): string {
   return `£${(pence / 100).toFixed(2)}`;

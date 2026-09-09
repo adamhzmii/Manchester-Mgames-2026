@@ -63,6 +63,10 @@
   font-weight: 600;
   color: var(--mg-text-muted);
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
 }
 
 .close {

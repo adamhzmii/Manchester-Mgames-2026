@@ -12,6 +12,7 @@ import {
   type UpdateFixtureState,
 } from "@/lib/actions/fixtures";
 import type { Fixture } from "@/lib/fixtures";
+import { SportBadge } from "@/components/sport-badge";
 import { formatTime } from "@/lib/format";
 
 import styles from "./score-editor.module.css";
@@ -82,6 +83,12 @@ export function ScoreEditor({
               Update score
             </h2>
             <p className={styles.subtitle}>
+              <SportBadge
+                code={fixture.sportCode}
+                color={fixture.sportColor}
+                slug={fixture.sportSlug}
+                size={18}
+              />
               {fixture.sportName} · {fixture.stageLabel} · {formatTime(fixture.scheduledTime)}{" "}
               {fixture.venueShortName} {fixture.courtName}
             </p>

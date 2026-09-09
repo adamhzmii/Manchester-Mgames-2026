@@ -372,3 +372,22 @@
     align-items: start;
   }
 }
+
+/* The third-place match sits outside the bracket, so it is laid out as a plain
+   block rather than a column with connectors running into it. */
+.thirdPlace {
+  padding: 0 var(--mg-gutter) 4px;
+  /* Left-aligned: .roundName centres itself over a bracket column, which
+     looks accidental over a single card. */
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.thirdPlaceGames {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

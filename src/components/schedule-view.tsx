@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FilterChips, type ChipOption } from "@/components/filter-chips";
 import { FixtureCard } from "@/components/fixture-card";
@@ -16,6 +16,7 @@ import {
   type StageFilter,
 } from "@/lib/fixtures";
 import { coordinatorCanEdit, type Coordinator } from "@/lib/coordinator";
+import { formatHour, hourKey } from "@/lib/format";
 import type { PickerTeam, Sport, Venue } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 import { useLiveFixtures } from "@/lib/use-live-fixtures";
@@ -59,7 +60,7 @@ export function ScheduleView({
   const sportOptions: ChipOption[] = useMemo(
     () => [
       { value: "all", label: "All sports" },
-      ...sports.map((s) => ({ value: s.slug, label: s.name })),
+      ...sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
     ],
     [sports],
   );
@@ -89,6 +90,73 @@ export function ScheduleView({
   );
 
   const filtersActive = sport !== "all" || venue !== "all" || stage !== "all" || myGamesOnly;
+
+  /**
+   * Kick-off times, grouped by the hour. A flat list of 49 games means a
+   * player looking for their next match at 14:00 scrolls past everything that
+   * has already been played; an hour heading gives them something to skim.
+   *
+   * `visible` is already in kick-off order, so one pass builds the blocks.
+   */
+  const hourBlocks = useMemo(() => {
+    // Strictly by kick-off, not by the live-first relevance order the flat
+    // list used: an hour heading is a claim about when a game starts, so a
+    // finished match sorted to the bottom would open a second 09:00 block
+    // below the 16:00 one. The card still says whether it is live or played.
+    const chronological = [...visible].sort((a, b) =>
+      a.scheduledTime.localeCompare(b.scheduledTime),
+    );
+
+    const blocks: { key: string; label: string; fixtures: Fixture[] }[] = [];
+    for (const fixture of chronological) {
+      const key = hourKey(fixture.scheduledTime);
+      const last = blocks[blocks.length - 1];
+      if (last?.key === key) last.fixtures.push(fixture);
+      else blocks.push({ key, label: formatHour(fixture.scheduledTime), fixtures: [fixture] });
+    }
+    return blocks;
+  }, [visible]);
+
+  const listRef = useRef<HTMLDivElement | null>(null);
+  // Once per visit, not on every filter change: re-scrolling the page under
+  // someone who just tapped a chip reads as the page fighting them.
+  const hasScrolled = useRef(false);
+
+  /**
+   * Open the page at the first hour that has not finished yet.
+   *
+   * All of this lives in the effect rather than in render because it depends
+   * on the current time: reading the clock while rendering would give the
+   * server and the client different answers and break hydration.
+   *
+   * Does nothing before the tournament starts, which is the common case for
+   * anyone opening the site in the weeks beforehand — jumping them past the
+   * filters to the 09:00 block they were already looking at would only hide
+   * the heading. Also does nothing once everything has been played, so the
+   * page does not fight a visitor scrolling back through results.
+   */
+  useEffect(() => {
+    if (hasScrolled.current || hourBlocks.length === 0) return;
+
+    const now = Date.now();
+    const started = hourBlocks.some((b) =>
+      b.fixtures.some((f) => new Date(f.scheduledTime).getTime() <= now),
+    );
+    if (!started) return;
+
+    const target = hourBlocks.find((b) =>
+      b.fixtures.some((f) => new Date(f.scheduledTime).getTime() > now),
+    );
+    if (!target) return;
+
+    const el = listRef.current?.querySelector<HTMLElement>(
+      `[data-hour="${CSS.escape(target.key)}"]`,
+    );
+    if (!el) return;
+
+    hasScrolled.current = true;
+    el.scrollIntoView({ block: "start", behavior: "auto" });
+  }, [hourBlocks]);
 
   const resetFilters = () => {
     setSport("all");
@@ -142,18 +210,34 @@ export function ScheduleView({
         </span>
       </div>
 
-      <div className={styles.list}>
-        {visible.map((fixture) => (
-          <FixtureCard
-            key={fixture.id}
-            fixture={fixture}
-            favourite={favourites.has(fixture.teamAId) || favourites.has(fixture.teamBId)}
-            onToggleFavourite={(f) => favourites.toggle([f.teamAId, f.teamBId])}
-            // Per fixture, not per session: a football coordinator gets the button
-            // on football games only. RLS rejects the write either way, so this
-            // is about not offering an action that would fail.
-            onEdit={coordinatorCanEdit(coordinator, fixture.sportId) ? setEditing : undefined}
-          />
+      <div className={styles.list} ref={listRef}>
+        {hourBlocks.map((block) => (
+          <section key={block.key} className={styles.block} data-hour={block.key}>
+            <h2 className={styles.hour}>
+              <span className={styles.hourTime}>{block.label}</span>
+              <span className={styles.hourRule} />
+              <span className={styles.hourCount}>
+                {block.fixtures.length} {block.fixtures.length === 1 ? "game" : "games"}
+              </span>
+            </h2>
+
+            <div className={styles.blockGames}>
+              {block.fixtures.map((fixture) => (
+                <FixtureCard
+                  key={fixture.id}
+                  fixture={fixture}
+                  favourite={favourites.has(fixture.teamAId) || favourites.has(fixture.teamBId)}
+                  onToggleFavourite={(f) => favourites.toggle([f.teamAId, f.teamBId])}
+                  // Per fixture, not per session: a football coordinator gets the button
+                  // on football games only. RLS rejects the write either way, so this
+                  // is about not offering an action that would fail.
+                  onEdit={
+                    coordinatorCanEdit(coordinator, fixture.sportId) ? setEditing : undefined
+                  }
+                />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
 
