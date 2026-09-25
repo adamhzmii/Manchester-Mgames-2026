@@ -19,6 +19,7 @@ function row(overrides: Partial<FixtureRow> = {}): FixtureRow {
     score_a: 3,
     score_b: 1,
     scheduled_time: "2026-10-24T08:30:00Z",
+    updated_at: "2026-10-24T08:00:00Z",
     placeholder_a: null,
     placeholder_b: null,
     group_id: "g1",

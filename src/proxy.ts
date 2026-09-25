@@ -58,8 +58,11 @@ export const config = {
   matcher: [
     /*
      * Everything except Next's own assets and static files — those never carry
-     * a session and refreshing on each of them wastes a round trip.
+     * a session and refreshing on each of them wastes a round trip — and the
+     * live-scores poll. That route is anonymous and CDN-cached; running the
+     * proxy in front of it would make every poll from every phone a function
+     * invocation, before the cache could answer it.
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
+    "/((?!_next/static|_next/image|api/live|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
   ],
 };

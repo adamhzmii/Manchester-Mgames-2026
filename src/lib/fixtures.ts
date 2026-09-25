@@ -12,6 +12,7 @@ export const FIXTURE_SELECT = `
   score_a,
   score_b,
   scheduled_time,
+  updated_at,
   placeholder_a,
   placeholder_b,
   group_id,
@@ -29,6 +30,7 @@ export type FixtureRow = {
   score_a: number | null;
   score_b: number | null;
   scheduled_time: string;
+  updated_at: string;
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
@@ -61,6 +63,12 @@ export type Fixture = {
   stageLabel: string;
   status: FixtureStatus;
   scheduledTime: string;
+  /**
+   * When the row last changed. Two copies of the same fixture can reach a
+   * client — one from a server render, one from the cached poll — and this is
+   * how it decides which is newer. See useLiveFixtures.
+   */
+  updatedAt: string;
   scoreA: number | null;
   scoreB: number | null;
   /** null for a knockout slot whose feeder match has not finished. */
@@ -124,6 +132,7 @@ export function toFixture(row: FixtureRow): Fixture {
     stageLabel: stageLabel(row.stage),
     status: row.status,
     scheduledTime: row.scheduled_time,
+    updatedAt: row.updated_at,
     scoreA: row.score_a,
     scoreB: row.score_b,
     teamAId: row.team_a?.id ?? null,

@@ -1,95 +1,111 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { Fixture } from "@/lib/fixtures";
-import { createClient } from "@/lib/supabase/client";
-import type { FixtureStatus } from "@/lib/supabase/types";
+
+/** How often an open page asks for new scores. */
+const POLL_MS = 15_000;
 
 /**
- * Keeps a server-rendered fixture list current.
+ * Keeps a server-rendered fixture list current by polling /api/live.
  *
- * A realtime payload carries the raw `fixtures` row — no joined team, sport or
- * court. Rather than re-query for each change, the three columns coordinators
- * actually touch (score_a, score_b, status) are patched straight onto the
- * fixture we already hold. Anything that cannot be patched from a bare row —
- * a new fixture, a deletion, an id we have never seen, a rescheduled kick-off
- * — falls back to `router.refresh()`, which re-runs the server query and hands
- * back a fully joined list.
+ * This replaced a Supabase Realtime subscription. Realtime holds one open
+ * connection per phone, and the plan caps those — past the cap, the next
+ * person to open the site simply never received updates, and nothing on the
+ * page said so. Polling a CDN-cached route has no such ceiling: every phone
+ * gets the same response from Vercel's edge, so a thousand phones cost
+ * Supabase what ten do. The price is latency — a score reaches phones within
+ * about 20 seconds (the poll interval plus the CDN's 5s freshness window)
+ * rather than instantly.
  *
- * `initial` wins whenever the server re-renders, so a refresh does not get
- * overwritten by older patched state. That resync happens during render rather
- * than in an effect — an effect would paint the stale list first and then
- * immediately re-render over it.
+ * A dropped signal also stops being silent. A Realtime socket that died
+ * stayed dead; a poll that fails just tries again next tick.
+ *
+ * `initial` still wins whenever the server re-renders — after a coordinator
+ * saves a score, their Server Action revalidates the page and hands down a
+ * fresh list. That resync happens during render, not in an effect, so the
+ * stale list is never painted first.
  */
 export function useLiveFixtures(initial: Fixture[]): Fixture[] {
   const [fixtures, setFixtures] = useState(initial);
   const [seenInitial, setSeenInitial] = useState(initial);
-  const router = useRouter();
 
   if (seenInitial !== initial) {
     setSeenInitial(initial);
-    setFixtures(initial);
+    setFixtures((current) => newest(current, initial));
   }
 
   useEffect(() => {
-    const supabase = createClient();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let inFlight: AbortController | undefined;
+    let stopped = false;
 
-    const channel = supabase
-      .channel("fixtures-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "fixtures" },
-        (payload) => {
-          if (payload.eventType !== "UPDATE") {
-            router.refresh();
-            return;
-          }
+    const poll = async () => {
+      clearTimeout(timer);
+      inFlight?.abort();
+      const controller = new AbortController();
+      inFlight = controller;
 
-          const row = payload.new as {
-            id: string;
-            score_a: number | null;
-            score_b: number | null;
-            status: FixtureStatus;
-            scheduled_time: string;
-            court_id: string | null;
-          };
+      try {
+        const response = await fetch("/api/live", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (response.ok) {
+          const body = (await response.json()) as { fixtures: Fixture[] };
+          setFixtures((current) => newest(current, body.fixtures));
+        }
+      } catch {
+        // Offline, aborted, or a bad response: keep what we have and try again
+        // on the next tick. Nothing to show here — the page already has data.
+      }
 
-          setFixtures((current) => {
-            const index = current.findIndex((f) => f.id === row.id);
-            if (index === -1) {
-              // Not in this view — it may have just become relevant (a fixture
-              // going live on the home rail). Let the server decide.
-              router.refresh();
-              return current;
-            }
+      if (!stopped && !document.hidden) schedule();
+    };
 
-            const existing = current[index];
-            // A move to another court needs the joined court name, which the
-            // payload does not carry.
-            if (row.scheduled_time !== existing.scheduledTime) {
-              router.refresh();
-            }
+    // Jittered so a crowd that all opened the site at the same moment — the
+    // end of a final — does not keep polling in lockstep.
+    const schedule = () => {
+      timer = setTimeout(poll, POLL_MS * (0.8 + Math.random() * 0.4));
+    };
 
-            const next = [...current];
-            next[index] = {
-              ...existing,
-              scoreA: row.score_a,
-              scoreB: row.score_b,
-              status: row.status,
-              scheduledTime: row.scheduled_time,
-            };
-            return next;
-          });
-        },
-      )
-      .subscribe();
+    // A phone in a pocket should not poll. When it comes back, catch up at
+    // once rather than showing a score that could be minutes old.
+    const onVisibility = () => {
+      if (document.hidden) clearTimeout(timer);
+      else void poll();
+    };
+    const onOnline = () => void poll();
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("online", onOnline);
+    if (!document.hidden) schedule();
 
     return () => {
-      void supabase.removeChannel(channel);
+      stopped = true;
+      clearTimeout(timer);
+      inFlight?.abort();
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("online", onOnline);
     };
-  }, [router]);
+  }, []);
 
   return fixtures;
+}
+
+/**
+ * Takes `incoming` as the set of fixtures, but keeps our own copy of any
+ * fixture we already hold a newer version of.
+ *
+ * The poll can be up to ~20 seconds behind. Without this, a coordinator who
+ * has just saved a score — and whose page already shows it — would watch it
+ * flip back to the old value when the next poll landed, then forward again.
+ */
+function newest(current: Fixture[], incoming: Fixture[]): Fixture[] {
+  const mine = new Map(current.map((f) => [f.id, f]));
+  return incoming.map((theirs) => {
+    const ours = mine.get(theirs.id);
+    return ours && Date.parse(ours.updatedAt) > Date.parse(theirs.updatedAt) ? ours : theirs;
+  });
 }

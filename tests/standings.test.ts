@@ -29,6 +29,7 @@ function match(
     stageLabel: "Group",
     status: "finished",
     scheduledTime: "2026-10-24T09:00:00Z",
+    updatedAt: "2026-10-24T09:00:00Z",
     scoreA,
     scoreB,
     teamAId: a,
