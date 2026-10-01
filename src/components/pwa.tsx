@@ -30,7 +30,20 @@ export function Pwa() {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator && process.env.NODE_ENV !== "production") {
+      // Production only. sw.js serves /_next/static/ cache-first, which is safe
+      // when every changed file gets a new hashed name — true for a production
+      // build, not for `next dev`, where a worker left over from an earlier
+      // visit kept handing out week-old code until the page crashed on a
+      // function that did not exist yet. Clear out any such worker so a
+      // developer's browser heals itself.
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((r) => r.unregister())))
+        .then(() => caches.keys())
+        .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+        .catch(() => {});
+    } else if ("serviceWorker" in navigator) {
       // After load, not during: registration competes with the first render
       // for bandwidth otherwise, and this is the least urgent thing on the page.
       const register = () => {
