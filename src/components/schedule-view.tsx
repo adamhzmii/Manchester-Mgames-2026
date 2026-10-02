@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -170,7 +171,13 @@ export function ScheduleView({
         <div className="mg-wrap">
           <p className={styles.coordinator}>
             <EditIcon size={16} />
-            Signed in as {coordinator.name}. Tap a game to update its score.
+            <span className={styles.coordinatorText}>
+              Signed in as {coordinator.name}. Tap a game to update its score.
+            </span>
+            {/* The way out on a borrowed or shared phone. */}
+            <Link href="/login" className={styles.coordinatorLink}>
+              Sign out
+            </Link>
           </p>
         </div>
       ) : null}

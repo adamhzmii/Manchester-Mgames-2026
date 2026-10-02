@@ -42,6 +42,19 @@
   box-shadow: none;
 }
 
+.coordinatorText {
+  flex: 1;
+}
+
+.coordinatorLink {
+  flex: 0 0 auto;
+  font-family: var(--mg-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+
 .coordinator {
   display: flex;
   align-items: center;

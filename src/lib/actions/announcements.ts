@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { sendPush } from "@/lib/push/server";
+import { getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { AnnouncementType } from "@/lib/supabase/types";
 
@@ -31,6 +32,14 @@ export async function postAnnouncement(
   if (!title) return { status: "error", message: "Give the announcement a title." };
   if (!TYPES.includes(typeRaw as AnnouncementType)) {
     return { status: "error", message: "Pick a type." };
+  }
+
+  // Checked here as well as by RLS, because this action does one thing the
+  // database cannot see: it pushes a notification to every subscribed phone.
+  // The policy stops the row being written; this stops anyone who is not a
+  // coordinator getting as far as trying.
+  if (!(await getCoordinator())) {
+    return { status: "error", message: "Only signed-in coordinators can post updates." };
   }
 
   const supabase = await createClient();
