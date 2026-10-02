@@ -10,8 +10,17 @@ import type { Vendor, Venue } from "@/lib/queries";
 
 import styles from "./food-view.module.css";
 
-export function FoodView({ vendors, venues }: { vendors: Vendor[]; venues: Venue[] }) {
-  const [venue, setVenue] = useState("all");
+export function FoodView({
+  vendors,
+  venues,
+  initialVenue = "all",
+}: {
+  vendors: Vendor[];
+  venues: Venue[];
+  /** From ?venue=, so a link from a venue's page lands on that venue's stalls. */
+  initialVenue?: string;
+}) {
+  const [venue, setVenue] = useState(initialVenue);
 
   const options: ChipOption[] = useMemo(
     () => [
@@ -36,7 +45,8 @@ export function FoodView({ vendors, venues }: { vendors: Vendor[]; venues: Venue
 
       <div className={styles.list}>
         {visible.map((vendor) => (
-          <article key={vendor.id} className={styles.vendor}>
+          // The id is the anchor the venue page links to.
+          <article key={vendor.id} id={vendor.id} className={styles.vendor}>
             {/* No photo is the normal case, not a failure: vendors are booked
                 long before anyone takes pictures of the stalls. Reserving the
                 full photo band for them left 130px of empty grey per vendor

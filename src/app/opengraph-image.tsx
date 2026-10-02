@@ -9,20 +9,29 @@ import { ImageResponse } from "next/og";
  * at all.
  *
  * Generated rather than a flat file so the date and venues stay in one place;
- * Next renders it once at build time and serves it as a static PNG.
+ * Next renders it once at build time and serves it as a static PNG. Set in the
+ * site's own Barlow Condensed, bundled from src/app/fonts (SIL OFL, licence
+ * alongside), because the renderer cannot fetch web fonts and its default face
+ * made the card look like a different event's.
  */
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "MGames 2026 — Manchester, Saturday 24 October";
 
-const PURPLE = "#3C2A6E";
-const PURPLE_DEEP = "#2A1D52";
-const GOLD = "#D4A93C";
+const NIGHT = "#160F29";
+const NIGHT_3 = "#2E2550";
+const GOLD = "#F2B630";
+const MUTED = "#A59DC3";
 
 export default async function OpengraphImage() {
   // Read from disk rather than fetching our own URL: at build time the site is
   // not yet serving, and a relative fetch has no origin to resolve against.
-  const crest = await readFile(join(process.cwd(), "public/brand/logo-mark.png"));
+  const root = process.cwd();
+  const [crest, bold, semi] = await Promise.all([
+    readFile(join(root, "public/brand/logo-mark.png")),
+    readFile(join(root, "src/app/fonts/barlow-condensed-800.woff")),
+    readFile(join(root, "src/app/fonts/barlow-condensed-600.woff")),
+  ]);
   const crestSrc = `data:image/png;base64,${crest.toString("base64")}`;
 
   return new ImageResponse(
@@ -32,54 +41,73 @@ export default async function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
           justifyContent: "space-between",
           padding: "64px 72px",
-          background: `linear-gradient(135deg, ${PURPLE_DEEP} 0%, ${PURPLE} 55%, #4a357f 100%)`,
+          background: `linear-gradient(135deg, ${NIGHT} 0%, ${NIGHT} 50%, ${NIGHT_3} 100%)`,
           color: "#ffffff",
-          fontFamily: "sans-serif",
+          fontFamily: "Barlow Condensed",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <img src={crestSrc} width={96} height={94} alt="" />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <div
             style={{
               display: "flex",
               fontSize: 30,
-              fontWeight: 700,
-              letterSpacing: 6,
+              fontWeight: 600,
+              letterSpacing: 5,
               color: GOLD,
               textTransform: "uppercase",
             }}
           >
-            Malaysian Students&rsquo; Society · Manchester
+            Malaysian Students&rsquo; Society of Manchester
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", fontSize: 150, fontWeight: 800, lineHeight: 0.86 }}>
+              MGAMES&nbsp;<span style={{ color: GOLD }}>2026</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                marginTop: 18,
+                fontSize: 46,
+                fontWeight: 600,
+                letterSpacing: 16,
+                textTransform: "uppercase",
+              }}
+            >
+              Manchester
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 36, fontWeight: 600 }}>
+            <div style={{ display: "flex", textTransform: "uppercase", letterSpacing: 2 }}>
+              Sat 24 October
+            </div>
+            <div style={{ display: "flex", width: 10, height: 10, borderRadius: 5, background: GOLD }} />
+            <div style={{ display: "flex", color: MUTED }}>Trinity &amp; Sugden · 8 sports</div>
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 112, fontWeight: 800, lineHeight: 1.02 }}>
-            MANCHESTER
-          </div>
-          <div style={{ display: "flex", fontSize: 112, fontWeight: 800, lineHeight: 1.02 }}>
-            MGAMES&nbsp;<span style={{ color: GOLD }}>2026</span>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 32 }}>
-          <div style={{ display: "flex", fontWeight: 700 }}>Sat 24 October</div>
-          <div
-            style={{
-              display: "flex",
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              background: GOLD,
-            }}
-          />
-          <div style={{ display: "flex", opacity: 0.85 }}>Trinity &amp; Sugden · 8 sports</div>
+        <div style={{ display: "flex", alignItems: "center", paddingLeft: 24 }}>
+          <img src={crestSrc} width={230} height={225} alt="" />
         </div>
       </div>
     ),
-    size,
+    {
+      ...size,
+      fonts: [
+        { name: "Barlow Condensed", data: bold, weight: 800, style: "normal" },
+        { name: "Barlow Condensed", data: semi, weight: 600, style: "normal" },
+      ],
+    },
   );
 }

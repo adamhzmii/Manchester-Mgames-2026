@@ -7,7 +7,7 @@
  * cache at all.
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL_CACHE = `mgames-shell-${VERSION}`;
 const DATA_CACHE = `mgames-data-${VERSION}`;
 

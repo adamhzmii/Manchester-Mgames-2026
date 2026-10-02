@@ -15,7 +15,7 @@ export const metadata: Metadata = {
  */
 export const dynamic = "force-dynamic";
 
-export default function FoodPage() {
+export default function FoodPage({ searchParams }: PageProps<"/food">) {
   return (
     <Suspense
       fallback={
@@ -25,12 +25,14 @@ export default function FoodPage() {
         </div>
       }
     >
-      <Food />
+      <Food searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function Food() {
-  const [vendors, venues] = await Promise.all([getVendors(), getVenues()]);
-  return <FoodView vendors={vendors} venues={venues} />;
+async function Food({ searchParams }: { searchParams: PageProps<"/food">["searchParams"] }) {
+  const [params, vendors, venues] = await Promise.all([searchParams, getVendors(), getVenues()]);
+  const asked = Array.isArray(params.venue) ? params.venue[0] : params.venue;
+  const initialVenue = asked && venues.some((v) => v.slug === asked) ? asked : "all";
+  return <FoodView vendors={vendors} venues={venues} initialVenue={initialVenue} />;
 }

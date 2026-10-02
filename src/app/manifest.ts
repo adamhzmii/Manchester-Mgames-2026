@@ -15,13 +15,15 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "MGames 2026 · Manchester",
     short_name: "MGames 26",
     description:
-      "Live schedule, scores, venue maps and food for Manchester MGames 2026.",
+      "Live scores, schedule, standings and venue guide for Manchester MGames 2026.",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#F4F2F8",
-    theme_color: "#3c2a6e",
+    // Night, matching the header: the launch screen is the gold crest on the
+    // same dark band the app opens into, rather than a flash of white.
+    background_color: "#160f29",
+    theme_color: "#160f29",
     categories: ["sports", "events"],
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
