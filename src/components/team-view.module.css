@@ -1,0 +1,142 @@
+.page {
+  animation: mg-fade-in 0.2s ease both;
+}
+
+.band {
+  background:
+    var(--mg-batik),
+    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+  color: var(--mg-night-text);
+}
+
+.bandInner {
+  padding-block: 22px 24px;
+}
+
+.sport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+.name {
+  margin-top: 10px;
+  color: #fff;
+  font-size: clamp(40px, 12vw, 72px);
+  font-weight: 800;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.uni {
+  margin-top: 6px;
+  color: var(--mg-gold);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.status {
+  margin-top: 14px;
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mg-night-text);
+}
+
+.record {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  max-width: 420px;
+  margin: 16px 0 0;
+}
+
+.recordItem {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  padding: 8px 4px;
+  border-radius: var(--mg-r);
+  background: rgba(10, 6, 20, 0.4);
+  box-shadow: inset 0 0 0 1px var(--mg-night-line);
+}
+
+.recordItem dt {
+  font-family: var(--mg-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+.recordItem dd {
+  margin: 0;
+  font-family: var(--mg-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.follow {
+  margin-top: 18px;
+}
+
+.followOff {
+  background: var(--mg-night-3);
+  color: var(--mg-night-text);
+}
+
+.body {
+  display: grid;
+  gap: 22px;
+  padding-block: 20px 12px;
+  max-width: 760px;
+}
+
+.notify {
+  display: flex;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.bracketLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mg-ink);
+}

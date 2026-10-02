@@ -264,17 +264,26 @@
   margin-bottom: 18px;
 }
 
+/* Two up on a phone: six champions stacked one per row pushed everything
+   else a long way down the page. */
 .champions {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 760px) {
+  .champions {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
 }
 
 .champion {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 14px 16px;
+  padding: 12px;
   border-radius: var(--mg-r-lg);
   background: linear-gradient(160deg, rgba(242, 182, 48, 0.16), rgba(242, 182, 48, 0.02) 60%);
   box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.3);
@@ -296,10 +305,10 @@
 
 .championName {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 6px;
   font-family: var(--mg-display);
-  font-size: 24px;
+  font-size: clamp(18px, 5vw, 24px);
   font-weight: 800;
   line-height: 1.05;
   text-transform: uppercase;
@@ -308,12 +317,17 @@
 
 .championCup {
   flex: 0 0 auto;
+  margin-top: 1px;
   color: var(--mg-gold);
 }
 
 .championUni {
   font-size: 13px;
   color: var(--mg-gold);
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .championScore {

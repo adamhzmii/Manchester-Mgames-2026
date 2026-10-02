@@ -1,54 +1,39 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
-import { MapView } from "@/components/map-view";
-import { getCourts, getVendors, getVenues } from "@/lib/queries";
+import { VenuesView } from "@/components/venues-view";
+import { googleMapsApiKey } from "@/lib/maps-env";
+import { getFixtures, getVendors, getVenues } from "@/lib/queries";
 
 export const metadata: Metadata = {
-  title: "Venue Map",
+  title: "Venues",
   description:
-    "What is where at Trinity and Sugden for MGames 2026 — courts, halls, food stalls and travel between the two venues.",
+    "Trinity and Sugden for MGames 2026 — what's on each court, food stalls, first aid, prayer rooms, and getting between the two.",
 };
 
-/**
- * Live data — never prerendered or cached. Scores and announcements change
- * during the event, and a stale page is worse than a slower one.
- */
+/** Live data — never prerendered or cached. */
 export const dynamic = "force-dynamic";
 
-export default function MapPage(props: PageProps<"/venues">) {
-  return (
-    <Suspense
-      fallback={
-        <div className="mg-page mg-container">
-          <h1 className="mg-page-title">Venue Map</h1>
-          <p className="mg-muted">Loading venues…</p>
-        </div>
-      }
-    >
-      <VenueMap searchParams={props.searchParams} />
-    </Suspense>
-  );
-}
-
-async function VenueMap({
-  searchParams,
-}: {
-  searchParams: PageProps<"/venues">["searchParams"];
-}) {
-  const [{ venue }, venues, courts, vendors] = await Promise.all([
+export default async function VenuesPage({ searchParams }: PageProps<"/venues">) {
+  const [params, venues, vendors, fixtures] = await Promise.all([
     searchParams,
     getVenues(),
-    getCourts(),
     getVendors(),
+    getFixtures(),
   ]);
 
+  // ?v= from venue links; ?venue= kept for links from the first version.
+  const raw = params.v ?? params.venue;
+  const asked = Array.isArray(raw) ? raw[0] : raw;
+  const initialVenue =
+    asked && venues.some((v) => v.slug === asked) ? asked : (venues[0]?.slug ?? "");
+
   return (
-    <MapView
+    <VenuesView
       venues={venues}
-      courts={courts}
       vendors={vendors}
-      initialVenue={typeof venue === "string" ? venue : undefined}
+      fixtures={fixtures}
+      mapsKey={googleMapsApiKey()}
+      initialVenue={initialVenue}
     />
   );
 }

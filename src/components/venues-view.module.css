@@ -1,0 +1,356 @@
+.page {
+  padding-block: 20px 32px;
+  animation: mg-fade-in 0.2s ease both;
+}
+
+/* Two big halves: on a phone this is the first thing a thumb reaches for. */
+.switch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  margin-top: 14px;
+  padding: 4px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-sunk);
+  box-shadow: inset 0 0 0 1px var(--mg-line);
+  max-width: 480px;
+}
+
+.switchItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 46px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: transparent;
+  color: var(--mg-ink-3);
+  font-family: var(--mg-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.switchOn {
+  background: var(--mg-night);
+  color: #fff;
+}
+
+.switchLive {
+  color: var(--mg-live);
+  font-size: 12px;
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.body {
+  display: grid;
+  gap: 22px;
+  margin-top: 16px;
+  max-width: 760px;
+}
+
+.card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+}
+
+.venueName {
+  font-size: 26px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mg-ink-2);
+  font-size: 14px;
+}
+
+.directions {
+  justify-self: start;
+  margin-top: 4px;
+}
+
+/* The map fills whatever box it is given, so the box sets the height. Kept
+   short enough on a phone that a thumb scrolling the page can always find
+   somewhere that is not the map to drag. */
+.map {
+  height: 260px;
+  border-radius: var(--mg-r-lg);
+  overflow: hidden;
+  box-shadow: var(--mg-shadow);
+}
+
+@media (min-width: 760px) {
+  .map {
+    height: 360px;
+  }
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mg-live);
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+/* ------------------------------------------------------------ courts ---- */
+
+.courts,
+.vendors,
+.facilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--mg-card);
+  border-radius: var(--mg-r-lg);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+}
+
+.courts > li + li,
+.vendors > li + li,
+.facilities > li + li {
+  box-shadow: inset 0 1px 0 var(--mg-line);
+}
+
+.court {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.courtHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.courtName {
+  font-family: var(--mg-display);
+  font-size: 19px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.courtSports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.courtSport {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-ink-2);
+}
+
+.courtNow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--mg-r);
+  background: var(--mg-sunk);
+  color: var(--mg-ink);
+}
+
+.courtLive,
+.courtNext {
+  flex: 0 0 auto;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.courtLive {
+  color: var(--mg-live);
+}
+
+.courtNext {
+  color: var(--mg-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.courtMatch {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courtDone {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+/* ------------------------------------------------------------- food ---- */
+
+.vendor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--mg-ink);
+}
+
+.vendor:hover {
+  background: var(--mg-sunk);
+}
+
+.vendorText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.vendorName {
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.vendorMeta {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.vendorPrice {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mg-gold-ink);
+}
+
+/* -------------------------------------------------------- facilities ---- */
+
+.facility {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.facilityIcon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--mg-r);
+  background: var(--mg-plum-wash);
+  color: var(--mg-plum);
+}
+
+.facility[data-tone="red"] .facilityIcon {
+  background: var(--mg-live-wash);
+  color: var(--mg-live);
+}
+
+.facilityLabel {
+  display: block;
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+.facilityValue {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* ----------------------------------------------------------- travel ---- */
+
+.travel {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.travelItem {
+  display: grid;
+  gap: 2px;
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-plum);
+}
+
+.travelBig {
+  margin-top: 6px;
+  font-family: var(--mg-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--mg-ink);
+}
+
+.travelSmall {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}

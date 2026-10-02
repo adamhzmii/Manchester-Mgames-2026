@@ -264,3 +264,19 @@
 .stripClose:hover {
   background: rgba(22, 15, 41, 0.1);
 }
+
+/* -------------------------------------------------------------- stale ---- */
+
+.stale {
+  background: var(--mg-ink);
+  color: var(--mg-paper);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.staleInner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}

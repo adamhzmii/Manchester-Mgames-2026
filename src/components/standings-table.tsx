@@ -15,17 +15,20 @@ export function StandingsTable({
   fixtures,
   highlight = [],
   qualifying = 2,
+  captionHidden = false,
 }: {
   group: StandingsGroup;
   fixtures: readonly Fixture[];
   /** Team ids to emphasise — the two sides of an open match, or followed teams. */
   highlight?: readonly string[];
   qualifying?: number;
+  /** When the page already heads the table with the group's name. */
+  captionHidden?: boolean;
 }) {
   return (
     <div className={styles.card}>
       <table className={styles.table}>
-        <caption className={styles.caption}>{group.groupName}</caption>
+        <caption className={captionHidden ? "mg-sr-only" : styles.caption}>{group.groupName}</caption>
         <thead>
           <tr>
             <th scope="col" className={styles.pos}>

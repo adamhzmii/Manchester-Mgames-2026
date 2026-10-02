@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --experimental-strip-types tests/*.test.ts",
+    "test": "node --test --experimental-strip-types --import ./tests/register-alias.mjs tests/*.test.ts",
     "mock": "node tools/mock-supabase.mjs",
     "reset:pre-event": "node tools/reset-pre-event.mjs"
   },

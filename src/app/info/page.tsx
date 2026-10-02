@@ -1,85 +1,178 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
-import { AlertIcon, BusIcon, ChevronDownIcon, InfoIcon, PhoneIcon } from "@/components/icons";
-import { EMERGENCY_CONTACTS, FACILITIES, FAQ } from "@/lib/info-content";
+import {
+  AlertIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  FirstAidIcon,
+  PhoneIcon,
+  PrayerIcon,
+  TrainIcon,
+} from "@/components/icons";
+import { SportBadge } from "@/components/sport-badge";
+import { EVENT_CONTACTS, FAQ, GETTING_THERE, VENUE_FACILITIES } from "@/lib/info-content";
+import { getFixtures, getSports, getStandingsData, getVenues } from "@/lib/queries";
+import { describeFormat } from "@/lib/tournament-format";
 
 import styles from "./info.module.css";
 
 export const metadata: Metadata = {
-  title: "Info & Help",
+  title: "Info & help",
   description:
-    "First aid, prayer rooms, emergency contacts, travel and FAQs for MGames 2026 at Trinity and Sugden.",
+    "Emergency contacts, how each sport's tournament works, first aid, prayer rooms, travel and FAQs for MGames 2026.",
 };
 
-const ICON_CLASS = {
-  red: styles.iconRed,
-  purple: styles.iconPurple,
-  gold: styles.iconGold,
-} as const;
+/** Reads the fixture list for the format section. */
+export const dynamic = "force-dynamic";
 
-export default function InfoPage() {
+export default async function InfoPage() {
+  const [fixtures, sports, standings, venues] = await Promise.all([
+    getFixtures(),
+    getSports(),
+    getStandingsData(),
+    getVenues(),
+  ]);
+  const contacts = EVENT_CONTACTS.filter((c) => c.tel !== null);
+
   return (
-    <div className="mg-page mg-container-wide" style={{ padding: 0 }}>
-      <div style={{ padding: "16px var(--mg-gutter) 10px" }}>
-        <h1 className="mg-page-title">Info &amp; Help</h1>
-      </div>
+    <div className={`mg-wrap ${styles.page}`}>
+      <h1 className="mg-page-title">Info &amp; help</h1>
 
-      <section className={styles.emergency} aria-labelledby="emergency-heading">
-        <h2 id="emergency-heading" className={styles.emergencyHead}>
-          <AlertIcon size={16} />
-          Emergency contacts
+      {/* Emergency first, and in red: the one section on this page someone
+          may need without having time to read the rest. */}
+      <section className={styles.emergency} aria-labelledby="emergency">
+        <h2 id="emergency" className={styles.emergencyTitle}>
+          <AlertIcon size={18} />
+          In an emergency
         </h2>
-        <div className={styles.contacts}>
-          {EMERGENCY_CONTACTS.map((contact) => (
-            <a
-              key={contact.tel}
-              href={`tel:${contact.tel}`}
-              className={`${styles.contact} ${"urgent" in contact && contact.urgent ? styles.contactUrgent : ""}`}
-            >
-              <span>{contact.label}</span>
-              <span className={styles.contactAction}>
-                {"urgent" in contact && contact.urgent ? null : <PhoneIcon size={14} />}
-                {contact.display}
-              </span>
-            </a>
+        <a href="tel:999" className={styles.call999}>
+          <PhoneIcon size={20} />
+          Call 999
+        </a>
+        {contacts.length > 0 ? (
+          <ul className={styles.contacts}>
+            {contacts.map((contact) => (
+              <li key={contact.label}>
+                <a href={`tel:${contact.tel}`} className={styles.contact}>
+                  <span>
+                    <span className={styles.contactLabel}>{contact.label}</span>
+                    <span className={styles.contactNote}>{contact.note}</span>
+                  </span>
+                  <span className={styles.contactCall}>
+                    <PhoneIcon size={15} />
+                    Call
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <p className={styles.emergencyNote}>
+          For anything else, find a steward in gold hi-vis — there is one at every reception.
+        </p>
+      </section>
+
+      <section className={styles.section} aria-labelledby="format">
+        <h2 id="format" className={styles.title}>
+          How each sport works
+        </h2>
+        <div className={styles.formats}>
+          {sports.map((sport) => {
+            const format = describeFormat(sport.slug, fixtures, standings.groups, standings.teams);
+            return (
+              <details key={sport.id} className={styles.format}>
+                <summary className={styles.formatSummary}>
+                  <SportBadge code={sport.code} color={sport.color} slug={sport.slug} size={28} />
+                  <span className={styles.formatName}>{sport.name}</span>
+                  <span className={styles.formatTeams}>{format.teams} teams</span>
+                  <ChevronDownIcon size={18} className={styles.chevron} />
+                </summary>
+                <div className={styles.formatBody}>
+                  <ul className={styles.formatLines}>
+                    {format.lines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                  {format.rounds.length > 0 ? (
+                    <p className={styles.rounds}>
+                      {format.rounds.map((round, i) => (
+                        <span key={round}>
+                          {i > 0 ? <ChevronRightIcon size={13} className={styles.arrow} /> : null}
+                          {round}
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
+                  <Link href={`/standings?sport=${sport.slug}`} className={styles.formatLink}>
+                    {sport.name} standings
+                  </Link>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="facilities">
+        <h2 id="facilities" className={styles.title}>
+          At the venues
+        </h2>
+        <div className={styles.venues}>
+          {venues.map((venue) => {
+            const f = VENUE_FACILITIES[venue.slug];
+            if (!f) return null;
+            return (
+              <Link key={venue.id} href={`/venues?v=${venue.slug}`} className={styles.venue}>
+                <span className={styles.venueName}>{venue.shortName}</span>
+                <span className={styles.venueLine}>
+                  <FirstAidIcon size={15} />
+                  First aid · {f.firstAid}
+                </span>
+                <span className={styles.venueLine}>
+                  <PrayerIcon size={15} />
+                  Prayer room · {f.prayer}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="getting-there">
+        <h2 id="getting-there" className={styles.title}>
+          Getting there
+        </h2>
+        <ul className={styles.list}>
+          {GETTING_THERE.map((line) => (
+            <li key={line} className={styles.listItem}>
+              <TrainIcon size={18} />
+              {line}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={styles.section} aria-labelledby="faq">
+        <h2 id="faq" className={styles.title}>
+          Questions
+        </h2>
+        <div className={styles.faqs}>
+          {FAQ.map((item) => (
+            <details key={item.question} className={styles.faq}>
+              <summary className={styles.faqQ}>
+                {item.question}
+                <ChevronDownIcon size={18} className={styles.chevron} />
+              </summary>
+              <p className={styles.faqA}>{item.answer}</p>
+            </details>
           ))}
         </div>
       </section>
 
-      <div className={styles.cards}>
-        {FACILITIES.map((facility) => (
-          <section key={facility.title} className={styles.card}>
-            <span className={`${styles.cardIcon} ${ICON_CLASS[facility.tone]}`}>
-              {facility.title === "Getting There" ? <BusIcon size={19} /> : <InfoIcon size={19} />}
-            </span>
-            <h2 className={styles.cardTitle}>{facility.title}</h2>
-            <p className={styles.cardLines}>
-              {facility.lines.map((line, index) => (
-                <span key={line}>
-                  {index > 0 ? <br /> : null}
-                  {line}
-                </span>
-              ))}
-            </p>
-          </section>
-        ))}
-      </div>
-
-      <h2 className="mg-section-title" style={{ margin: "20px var(--mg-gutter) 10px" }}>
-        FAQ
-      </h2>
-
-      <div className={styles.faq}>
-        {FAQ.map((entry) => (
-          <details key={entry.question} className={styles.item}>
-            <summary className={styles.summary}>
-              {entry.question}
-              <ChevronDownIcon size={18} className={styles.chevron} />
-            </summary>
-            <p className={styles.answer}>{entry.answer}</p>
-          </details>
-        ))}
-      </div>
+      <p className={styles.staff}>
+        On the committee? <Link href="/login">Coordinator sign-in</Link>
+      </p>
     </div>
   );
 }

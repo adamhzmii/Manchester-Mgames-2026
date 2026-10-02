@@ -1,7 +1,7 @@
 "use client";
 
 import { APIProvider, InfoWindow, Map, Marker, useApiIsLoaded, useMap } from "@vis.gl/react-google-maps";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import type { Vendor, Venue } from "@/lib/queries";
 
@@ -20,8 +20,31 @@ const MAP_STYLE: google.maps.MapTypeStyle[] = [
   { featureType: "transit", stylers: [{ visibility: "off" }] },
 ];
 
-const GOLD = "#D4A93C";
+const GOLD = "#F2B630";
 const PURPLE = "#3C2A6E";
+
+/**
+ * Google calls a global `gm_authFailure` when it rejects the API key — most
+ * often because the page's address is not on the key's allowed list, which is
+ * exactly what happened when the site moved to manchestermgames.com. Left
+ * alone, the map becomes Google's grey "Sorry! Something went wrong" box. This
+ * store lets the component notice and show a plain fallback instead.
+ */
+let authFailed = false;
+const authListeners = new Set<() => void>();
+
+function subscribeAuth(onChange: () => void): () => void {
+  authListeners.add(onChange);
+  (window as Window & { gm_authFailure?: () => void }).gm_authFailure = () => {
+    authFailed = true;
+    for (const listener of authListeners) listener();
+  };
+  return () => authListeners.delete(onChange);
+}
+
+function useMapsAuthFailed(): boolean {
+  return useSyncExternalStore(subscribeAuth, () => authFailed, () => false);
+}
 
 /**
  * A Google Maps link rather than a `geo:` URI. `geo:` is understood by native
@@ -61,6 +84,24 @@ export function GoogleVenueMap({
   vendors: Vendor[];
   selectedSlug: string;
 }) {
+  const failed = useMapsAuthFailed();
+
+  if (failed) {
+    const venue = venues.find((v) => v.slug === selectedSlug);
+    const href =
+      venue?.latitude != null && venue?.longitude != null
+        ? `https://www.google.com/maps/search/?api=1&query=${venue.latitude},${venue.longitude}`
+        : "https://www.google.com/maps";
+    return (
+      <div className={styles.fallback}>
+        <p className={styles.fallbackText}>The map can&rsquo;t load here right now.</p>
+        <a href={href} target="_blank" rel="noreferrer" className={styles.fallbackLink}>
+          Open {venue?.shortName ?? "the venue"} in Google Maps
+        </a>
+      </div>
+    );
+  }
+
   return (
     <APIProvider apiKey={apiKey}>
       <VenueMapInner venues={venues} vendors={vendors} selectedSlug={selectedSlug} />

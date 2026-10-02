@@ -1,0 +1,258 @@
+.wrap {
+  display: grid;
+  gap: 18px;
+}
+
+/* Full-bleed sideways scroll on a phone, with a fade at the right edge that
+   says there is more — the first version gave no hint, and the final sat
+   off-screen unseen. */
+.scroller {
+  overflow-x: auto;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding: 4px var(--mg-gutter) 8px;
+  scrollbar-width: none;
+  contain: paint;
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .scroller {
+    mask-image: none;
+  }
+}
+
+.bracket {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 200px;
+}
+
+@media (min-width: 760px) {
+  .round {
+    width: 232px;
+  }
+}
+
+.roundName {
+  padding: 0 14px 10px;
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+/* Equal-height slots are what make the connectors line up: each match sits at
+   the vertical centre of its slot, so a round with half as many matches has
+   slots twice as tall and its cards land between their two feeders. */
+.slots {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.slot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 6px 14px;
+  min-height: 104px;
+}
+
+.slotInner {
+  position: relative;
+  width: 100%;
+}
+
+/* Stub out of the right of a card, towards the next round. */
+.round:not(:last-child) .slot::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  background: var(--mg-line-2);
+}
+
+/* The upper of a pair reaches down, the lower reaches up; they meet where
+   the next round's card is. */
+.round:not(:last-child) .slot::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 2px;
+  background: var(--mg-line-2);
+}
+
+.round:not(:last-child) .slot:nth-child(odd)::after {
+  top: 50%;
+  bottom: 0;
+}
+
+.round:not(:last-child) .slot:nth-child(even)::after {
+  top: 0;
+  height: 50%;
+}
+
+/* An odd match with nothing below has no pair to join. */
+.round:not(:last-child) .slot:last-child:nth-child(odd)::after {
+  display: none;
+}
+
+/* Stub into the left of a card, from the previous round. */
+.round:not(:first-child) .slotInner::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  background: var(--mg-line-2);
+}
+
+/* ------------------------------------------------------------ match ---- */
+
+.match {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink);
+}
+
+.match[data-status="live"] {
+  box-shadow:
+    var(--mg-shadow),
+    inset 3px 0 0 var(--mg-live);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.team {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.won {
+  font-weight: 800;
+}
+
+.lost {
+  color: var(--mg-ink-3);
+}
+
+.tbc .team {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--mg-ink-3);
+}
+
+.score {
+  min-width: 22px;
+  padding: 0 3px;
+  border-radius: 4px;
+  text-align: right;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.score[data-flash] {
+  animation: mg-score-flash 1.6s ease-out;
+}
+
+.meta {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--mg-line);
+  font-size: 12px;
+  color: var(--mg-ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mg-live);
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.championRound .slot {
+  padding-right: 0;
+}
+
+.champion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-night);
+  color: #fff;
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.5);
+}
+
+.champion svg {
+  color: var(--mg-gold);
+  flex: 0 0 auto;
+}
+
+.third {
+  display: grid;
+  gap: 8px;
+  max-width: 260px;
+}
+
+.third .roundName {
+  padding: 0;
+}
+
+.empty {
+  padding: 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink-2);
+}

@@ -127,9 +127,13 @@ export function HomeView({ fixtures: initial, teams, sports, venues, updates, re
         </div>
 
         <aside className={styles.aside}>
-          <div className={styles.sTeam}>
-            <YourTeam fixtures={fixtures} teams={teams} venues={venues} />
-          </div>
+          {/* Once it is all over, "follow your team to see your next game"
+              has nothing left to offer; a team already followed still shows. */}
+          {phase !== "after" || favourites.teamIds.length > 0 ? (
+            <div className={styles.sTeam}>
+              <YourTeam fixtures={fixtures} teams={teams} venues={venues} />
+            </div>
+          ) : null}
 
           {updates.length > 0 ? (
             <section className={styles.sUpdates}>
@@ -311,7 +315,10 @@ function ChampionsBand({ finals, teams }: { finals: Podium[]; teams: PickerTeam[
                 </span>
                 {university ? <span className={styles.championUni}>{university}</span> : null}
                 <span className={styles.championScore}>
-                  Beat {p.silver.name} {a}–{b}
+                  Beat {p.silver.name}{" "}
+                  <span className={styles.nowrap}>
+                    {a}–{b}
+                  </span>
                 </span>
               </Link>
             );

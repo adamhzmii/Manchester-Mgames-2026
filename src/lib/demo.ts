@@ -241,7 +241,7 @@ const SCRIPT: Record<
       minutesAgo: 95,
       type: "result",
       title: "Group stages complete",
-      body: "Every group game is in. Knockout brackets are now filled in on the Scores page.",
+      body: "Every group game is in. Knockout brackets are filled in on the Standings page.",
     },
     {
       minutesAgo: 260,

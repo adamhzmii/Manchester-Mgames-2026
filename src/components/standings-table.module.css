@@ -31,6 +31,7 @@
 }
 
 .table thead th {
+  white-space: nowrap;
   padding-block: 7px;
   font-family: var(--mg-display);
   font-size: 12px;

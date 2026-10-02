@@ -246,6 +246,7 @@ export function MatchView({
               group={table}
               fixtures={fixtures}
               highlight={[fixture.teamAId, fixture.teamBId].filter((x): x is string => x !== null)}
+              captionHidden
             />
           </section>
         ) : null}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { CloseIcon, MegaphoneIcon } from "@/components/icons";
+import { CloseIcon, MegaphoneIcon, WifiOffIcon } from "@/components/icons";
 import { UPDATE_TYPE_LABEL, UpdateTypeIcon } from "@/components/update-type-icon";
 import { useNow } from "@/lib/clock";
 import { useLiveFeed } from "@/lib/live-feed";
@@ -62,6 +62,7 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
+      <StaleStrip />
       {pathname === "/updates" ? null : <UpdateStrip />}
     </>
   );
@@ -175,6 +176,42 @@ function UpdateStrip() {
         >
           <CloseIcon size={16} />
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** How long without a successful poll before the page admits it is behind. */
+const STALE_AFTER_MS = 45_000;
+
+/**
+ * Says so when the scores on screen may be old.
+ *
+ * In a sports hall the signal comes and goes, and a score that silently stops
+ * updating is worse than one that admits it: a player can read a half-time
+ * score as final and walk off. One failed poll is not enough to show this —
+ * the next usually lands — but three-ish in a row, or the phone reporting it
+ * is offline, is.
+ */
+function StaleStrip() {
+  const { failing, lastSuccess } = useLiveFeed();
+  const now = useNow();
+  if (!failing || now === null) return null;
+
+  const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+  const stale = lastSuccess === null || now - lastSuccess > STALE_AFTER_MS;
+  if (!offline && !stale) return null;
+
+  return (
+    <div className={styles.stale} role="status">
+      <div className={`mg-wrap ${styles.staleInner}`}>
+        <WifiOffIcon size={16} />
+        <span>
+          {offline ? "You're offline" : "Can't reach the scores"}
+          {lastSuccess !== null
+            ? ` · showing scores from ${formatTime(new Date(lastSuccess).toISOString())}`
+            : ""}
+        </span>
       </div>
     </div>
   );
