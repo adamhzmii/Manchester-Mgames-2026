@@ -48,7 +48,7 @@ export async function postAnnouncement(
   }
 
   revalidatePath("/");
-  revalidatePath("/announcements");
+  revalidatePath("/updates");
 
   // Best effort: the announcement is already saved, and an unreachable push
   // service must not be reported back as a failed post.
@@ -56,7 +56,7 @@ export async function postAnnouncement(
     await sendPush({
       title: "MGames update",
       body: title,
-      url: "/announcements",
+      url: "/updates",
       tag: `announcement-${data[0].id}`,
     });
   } catch {

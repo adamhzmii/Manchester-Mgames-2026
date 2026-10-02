@@ -26,7 +26,7 @@ export function SportBadge({ code, color, slug, name, size = 22 }: SportBadgePro
         display: "inline-flex",
         width: size,
         height: size,
-        borderRadius: 6,
+        borderRadius: Math.round(size * 0.28),
         alignItems: "center",
         justifyContent: "center",
         fontSize: size <= 20 ? 9 : 10,

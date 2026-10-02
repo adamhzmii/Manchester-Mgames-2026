@@ -9,6 +9,7 @@ import {
   type Fixture,
   type FixtureRow,
 } from "@/lib/fixtures";
+import { applyDemo, demoAnnouncements, demoScenario } from "@/lib/demo";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import { createClient } from "@/lib/supabase/server";
 import type { Coordinator } from "@/lib/coordinator";
@@ -71,6 +72,8 @@ export type Vendor = {
 export type PickerTeam = {
   id: string;
   name: string;
+  /** The institution behind the team — what the medal table counts by. */
+  university: string | null;
   categoryId: string;
   categoryName: string;
   sportId: string;
@@ -153,11 +156,28 @@ export async function getFixtures(): Promise<Fixture[]> {
     "fixtures",
     await supabase.from("fixtures").select(FIXTURE_SELECT).order("scheduled_time"),
   );
-  return (rows as unknown as FixtureRow[]).map(toFixture).sort(byRelevance);
+  return (await withDemo((rows as unknown as FixtureRow[]).map(toFixture))).sort(byRelevance);
+}
+
+/**
+ * Passes fixtures through the matchday rehearsal when one is running locally
+ * (see demo.ts), and straight through otherwise. Exported for /api/live, which
+ * reads fixtures through its own cookie-free client.
+ */
+export async function withDemo(fixtures: Fixture[]): Promise<Fixture[]> {
+  if (!demoScenario()) return fixtures;
+  return applyDemo(fixtures, await getStandingsData());
 }
 
 /** The "Happening now" rail on the home page. */
 export async function getLiveFixtures(): Promise<Fixture[]> {
+  // A rehearsal decides what is live in memory, so the database's own status
+  // column would disagree with it.
+  if (demoScenario()) {
+    return (await getFixtures())
+      .filter((f) => f.status === "live")
+      .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+  }
   const supabase = await createClient();
   const rows = unwrap(
     "live fixtures",
@@ -308,7 +328,7 @@ export async function getTeams(): Promise<PickerTeam[]> {
     await supabase
       .from("teams")
       .select(
-        `id, name, category_id,
+        `id, name, university, category_id,
          category:categories ( name, sport:sports ( id, name, slug, code, color, sort_order ) )`,
       )
       .order("name"),
@@ -317,6 +337,7 @@ export async function getTeams(): Promise<PickerTeam[]> {
   type Row = {
     id: string;
     name: string;
+    university: string | null;
     category_id: string;
     category: {
       name: string;
@@ -334,6 +355,7 @@ export async function getTeams(): Promise<PickerTeam[]> {
   return (rows as unknown as Row[]).map((t) => ({
     id: t.id,
     name: t.name,
+    university: t.university,
     categoryId: t.category_id,
     categoryName: t.category?.name ?? "",
     sportId: t.category?.sport?.id ?? "",
@@ -346,6 +368,9 @@ export async function getTeams(): Promise<PickerTeam[]> {
 }
 
 export async function getAnnouncements(limit?: number): Promise<Announcement[]> {
+  const rehearsal = demoAnnouncements();
+  if (rehearsal) return limit === undefined ? rehearsal : rehearsal.slice(0, limit);
+
   const supabase = await createClient();
   let query = supabase
     .from("announcements")

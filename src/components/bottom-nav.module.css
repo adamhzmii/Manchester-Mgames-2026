@@ -1,36 +1,55 @@
+/* The bottom half of the frame. Same night as the header so the content reads
+   as a programme held between two bands, and the active tab is marked the
+   same way as the header's: gold. */
 .nav {
   position: sticky;
   bottom: 0;
-  z-index: 20;
+  z-index: 40;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  background: var(--mg-surface);
-  border-top: 1px solid var(--mg-border);
-  box-shadow: 0 -4px 18px rgba(60, 42, 110, 0.07);
-  /* Clears the iOS home indicator without leaving a gap on other devices. */
-  padding: 7px 4px calc(9px + env(safe-area-inset-bottom, 0px));
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--mg-night);
+  box-shadow: inset 0 1px 0 var(--mg-night-line);
+  /* Clears the iPhone home indicator; needs viewport-fit=cover to be non-zero. */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 0;
-  color: var(--mg-text-inactive);
-}
-
-.linkActive {
-  color: var(--mg-purple);
-}
-
-.label {
-  font-size: 10px;
-  font-weight: 700;
-}
-
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .nav {
     display: none;
   }
+}
+
+.link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: var(--mg-bottom-nav-height);
+  color: var(--mg-night-muted);
+  transition: color 0.15s ease;
+}
+
+.linkActive {
+  color: var(--mg-gold);
+}
+
+.linkActive::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 28%;
+  right: 28%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--mg-gold);
+}
+
+.label {
+  font-family: var(--mg-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }

@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Semi_Condensed } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 
 import { BottomNav } from "@/components/bottom-nav";
 import { Pwa } from "@/components/pwa";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ClockProvider } from "@/lib/clock";
+import { clockOffsetMs } from "@/lib/demo";
+import { LiveFeedProvider } from "@/lib/live-feed";
 
 import "./globals.css";
 
@@ -13,15 +17,21 @@ const barlow = Barlow({
   weight: ["400", "500", "600", "700"],
 });
 
-const barlowCondensed = Barlow_Semi_Condensed({
+/**
+ * Full Condensed rather than the first version's Semi Condensed: scores,
+ * kick-off times and team names are what this site is read for, and the
+ * narrower cut fits a two-team scoreline across a phone at a size you can
+ * read from arm's length courtside.
+ */
+const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow-condensed",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
 });
 
-const SITE_URL = "https://manchester-mgames-2026.vercel.app";
+const SITE_URL = "https://manchestermgames.com";
 const DESCRIPTION =
-  "Live schedule, scores, venue maps and food for Manchester MGames 2026 — the Malaysian Students' Society of Manchester one-day multi-sport tournament, Saturday 24 October 2026.";
+  "Live scores, schedule, standings and venue guide for Manchester MGames 2026 — the Malaysian Students' Society of Manchester's multi-sport tournament, Saturday 24 October 2026.";
 
 export const metadata: Metadata = {
   // Without metadataBase, Next emits relative OG image URLs, and every scraper
@@ -49,19 +59,26 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // The header sits on the brand purple; matching the browser chrome to it
-  // stops the status bar band showing a mismatched strip on mobile.
-  themeColor: "#3c2a6e",
+  // Matches the header band so the phone's status bar reads as part of it.
+  themeColor: "#160f29",
+  // Lets the bottom bar extend under the iPhone home indicator and pad itself
+  // clear with env(safe-area-inset-bottom).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-GB" className={`${barlow.variable} ${barlowCondensed.variable}`}>
       <body>
-        <SiteHeader />
-        <main id="main">{children}</main>
-        <BottomNav />
-        <Pwa />
+        <ClockProvider offset={clockOffsetMs()}>
+          <LiveFeedProvider>
+            <SiteHeader />
+            <main id="main">{children}</main>
+            <SiteFooter />
+            <BottomNav />
+            <Pwa />
+          </LiveFeedProvider>
+        </ClockProvider>
       </body>
     </html>
   );

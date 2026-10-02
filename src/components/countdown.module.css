@@ -1,0 +1,58 @@
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 420px;
+}
+
+/* Scoreboard tiles: the digits are the point, so they get the gold and the
+   room. A hairline across the middle nods to a flip-clock without miming one. */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px 8px;
+  border-radius: var(--mg-r);
+  background: rgba(10, 6, 20, 0.55);
+  box-shadow: inset 0 0 0 1px var(--mg-night-line);
+}
+
+.tile::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.value {
+  font-family: var(--mg-display);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--mg-gold);
+}
+
+.unit {
+  font-family: var(--mg-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+@media (min-width: 768px) {
+  .value {
+    font-size: 56px;
+  }
+
+  .unit {
+    font-size: 12px;
+  }
+}

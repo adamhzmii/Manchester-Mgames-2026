@@ -1,4 +1,12 @@
-import { byRelevance, FIXTURE_SELECT, toFixture, type FixtureRow } from "@/lib/fixtures";
+import {
+  byRelevance,
+  FIXTURE_SELECT,
+  toFixture,
+  type FixtureRow,
+} from "@/lib/fixtures";
+import { demoAnnouncements } from "@/lib/demo";
+import type { LatestUpdate } from "@/lib/live-feed";
+import { withDemo } from "@/lib/queries";
 import { createPublicClient } from "@/lib/supabase/public";
 
 /**
@@ -27,14 +35,15 @@ export const dynamic = "force-dynamic";
  * of an error: stale scores are better than no scores, and the client says how
  * old they are.
  */
-const CDN_CACHE = "public, max-age=5, stale-while-revalidate=30, stale-if-error=86400";
+const CDN_CACHE =
+  "public, max-age=5, stale-while-revalidate=30, stale-if-error=86400";
 
 export async function GET() {
   const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("fixtures")
-    .select(FIXTURE_SELECT)
-    .order("scheduled_time");
+  const [{ data, error }, latest] = await Promise.all([
+    supabase.from("fixtures").select(FIXTURE_SELECT).order("scheduled_time"),
+    latestUpdate(supabase),
+  ]);
 
   if (error) {
     // Must be a 5xx, not a 200 with an empty list: stale-if-error only kicks
@@ -47,10 +56,12 @@ export async function GET() {
     );
   }
 
-  const fixtures = (data as unknown as FixtureRow[]).map(toFixture).sort(byRelevance);
+  const fixtures = (
+    await withDemo((data as unknown as FixtureRow[]).map(toFixture))
+  ).sort(byRelevance);
 
   return Response.json(
-    { generatedAt: new Date().toISOString(), fixtures },
+    { generatedAt: new Date().toISOString(), fixtures, latestUpdate: latest },
     {
       headers: {
         // Browsers always come back to the CDN rather than trusting their own
@@ -61,4 +72,43 @@ export async function GET() {
       },
     },
   );
+}
+
+/**
+ * The newest committee update, riding along with the scores.
+ *
+ * Lets every page know about a delay or a court change within one poll, with
+ * no extra request: the header's unread badge and the strip under it both
+ * read this. A failure here is not worth failing the scores over, so it
+ * degrades to "no update" rather than an error.
+ */
+async function latestUpdate(
+  supabase: ReturnType<typeof createPublicClient>,
+): Promise<LatestUpdate | null> {
+  const rehearsal = demoAnnouncements();
+  if (rehearsal) {
+    const [first] = rehearsal;
+    return first
+      ? {
+          id: first.id,
+          type: first.type,
+          title: first.title,
+          publishedAt: first.publishedAt,
+        }
+      : null;
+  }
+
+  const { data, error } = await supabase
+    .from("announcements")
+    .select("id, type, title, published_at")
+    .order("published_at", { ascending: false })
+    .limit(1);
+  if (error || !data || data.length === 0) return null;
+  const [row] = data;
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    publishedAt: row.published_at,
+  };
 }

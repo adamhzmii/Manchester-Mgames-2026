@@ -1,0 +1,213 @@
+.list {
+  background: var(--mg-card);
+  border-radius: var(--mg-r-lg);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+}
+
+/*
+ *   when | sport | teams         | score | where
+ *  13:15 |  [⚽] | Johor Warriors |   2   | Sugden
+ *    SF  |       | Kedah Eagles   |   1   | Court 1
+ */
+.row {
+  display: grid;
+  grid-template-columns: 46px 34px minmax(0, 1fr) 30px 76px;
+  align-items: center;
+  gap: 0 6px;
+  padding: 10px 12px 10px 10px;
+  color: var(--mg-ink);
+  transition: background-color 0.12s ease;
+}
+
+.row[data-nosport] {
+  grid-template-columns: 46px minmax(0, 1fr) 30px 76px;
+}
+
+.row + .row {
+  box-shadow: inset 0 1px 0 var(--mg-line);
+}
+
+.row:hover {
+  background: var(--mg-sunk);
+}
+
+.row[data-status="live"] {
+  background: linear-gradient(90deg, var(--mg-live-wash), transparent 55%);
+}
+
+/* ------------------------------------------------------------- when ---- */
+
+.when {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  font-family: var(--mg-display);
+  line-height: 1;
+}
+
+.time {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--mg-ink);
+}
+
+.ft {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--mg-ink-3);
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mg-live);
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--mg-gold-ink);
+}
+
+/* ------------------------------------------------------------- sport --- */
+
+.sport {
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------- sides --- */
+
+.sides {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-family: var(--mg-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.won {
+  font-weight: 800;
+}
+
+.lost {
+  color: var(--mg-ink-3);
+}
+
+/* A slot still waiting on an earlier result: "Winner SF1". */
+.placeholder {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--mg-ink-3);
+}
+
+.followed {
+  color: var(--mg-plum);
+}
+
+.star {
+  flex: 0 0 auto;
+  color: var(--mg-gold);
+}
+
+/* ------------------------------------------------------------- score --- */
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.score {
+  min-width: 24px;
+  padding: 0 3px;
+  border-radius: 4px;
+  text-align: right;
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.score[data-flash] {
+  animation: mg-score-flash 1.6s ease-out;
+}
+
+/* ------------------------------------------------------------- where --- */
+
+.where {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.venue {
+  font-weight: 700;
+  color: var(--mg-ink-2);
+}
+
+.court {
+  color: var(--mg-ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (min-width: 700px) {
+  /* Names capped so the score stays beside them on a wide screen instead of
+     drifting to the far edge; the court takes the slack on the right. */
+  .row {
+    grid-template-columns: 54px 38px minmax(0, 300px) 34px minmax(120px, 1fr);
+    padding: 11px 18px 11px 14px;
+    gap: 0 10px;
+  }
+
+  .row[data-nosport] {
+    grid-template-columns: 54px minmax(0, 300px) 34px minmax(120px, 1fr);
+  }
+
+  .where {
+    font-size: 13px;
+  }
+}

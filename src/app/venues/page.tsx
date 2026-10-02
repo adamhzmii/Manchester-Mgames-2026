@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  */
 export const dynamic = "force-dynamic";
 
-export default function MapPage(props: PageProps<"/map">) {
+export default function MapPage(props: PageProps<"/venues">) {
   return (
     <Suspense
       fallback={
@@ -34,7 +34,7 @@ export default function MapPage(props: PageProps<"/map">) {
 async function VenueMap({
   searchParams,
 }: {
-  searchParams: PageProps<"/map">["searchParams"];
+  searchParams: PageProps<"/venues">["searchParams"];
 }) {
   const [{ venue }, venues, courts, vendors] = await Promise.all([
     searchParams,

@@ -9,6 +9,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // A matchday rehearsal's build output (see next.config.ts).
+    ".next-demo/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

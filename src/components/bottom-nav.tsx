@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import {
-  CalendarIcon,
-  FoodIcon,
-  HomeIcon,
-  InfoIcon,
-  MapIcon,
-  ScoresIcon,
-} from "@/components/icons";
+import { CalendarIcon, HomeIcon, InfoIcon, MapIcon, PodiumIcon } from "@/components/icons";
 import { NAV_ITEMS, isActive, type NavItem } from "@/lib/nav";
 
 import styles from "./bottom-nav.module.css";
@@ -18,13 +11,12 @@ import styles from "./bottom-nav.module.css";
 const ICONS: Record<NavItem["icon"], (props: { size?: number }) => React.ReactElement> = {
   home: HomeIcon,
   calendar: CalendarIcon,
-  scores: ScoresIcon,
+  standings: PodiumIcon,
   map: MapIcon,
-  food: FoodIcon,
   info: InfoIcon,
 };
 
-/** Mobile tab bar. Hidden at ≥768px, where the header carries the same links. */
+/** Phone tab bar. Hidden from 900px, where the header carries the same links. */
 export function BottomNav() {
   const pathname = usePathname();
 

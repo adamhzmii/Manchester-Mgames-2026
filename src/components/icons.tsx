@@ -116,6 +116,90 @@ export const PhoneIcon = icon(
 
 export const CloseIcon = icon(<path d="M18 6 6 18M6 6l12 12" />);
 
+export const ChevronLeftIcon = icon(<path d="M15 18l-6-6 6-6" />);
+
+/** Standings: a podium reads as "who is where" before it reads as a chart. */
+export const PodiumIcon = icon(
+  <>
+    <path d="M9 21V9h6v12M3 21v-7h6M15 21v-9h6v9M2 21h20" />
+    <path d="M12 3.5l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 5.6l2-.3.9-1.8Z" />
+  </>,
+);
+
+export const ShareIcon = icon(
+  <>
+    <path d="M12 3v12M8 7l4-4 4 4" />
+    <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+  </>,
+);
+
+export const CalendarPlusIcon = icon(
+  <>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18M12 13v6M9 16h6" />
+  </>,
+);
+
+export const EditIcon = icon(
+  <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4ZM13.5 6.5l4 4" />,
+);
+
+export const PlusIcon = icon(<path d="M12 5v14M5 12h14" />);
+
+export const MinusIcon = icon(<path d="M5 12h14" />);
+
+export const CheckIcon = icon(<path d="M5 12.5 10 17l9-10" />);
+
+export const ExternalIcon = icon(
+  <path d="M14 4h6v6M20 4 11 13M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />,
+);
+
+export const MegaphoneIcon = icon(
+  <path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1ZM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />,
+);
+
+export const SwapIcon = icon(<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />);
+
+export const WalkIcon = icon(
+  <>
+    <circle cx="13" cy="4" r="1.8" />
+    <path d="m9 21 2.5-6.5L14 17v4M7.5 12.5 9.5 8l3.5.5 2 3.5 2.5 1M11.5 14.5l1.5-6" />
+  </>,
+);
+
+export const FirstAidIcon = icon(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="3" />
+    <path d="M12 8v8M8 12h8" />
+  </>,
+);
+
+/** Prayer room: a crescent, the sign used on UK campus prayer rooms. */
+export const PrayerIcon = icon(<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />);
+
+export const ToiletIcon = icon(
+  <>
+    <circle cx="7" cy="4.5" r="1.6" />
+    <circle cx="17" cy="4.5" r="1.6" />
+    <path d="M5 9h4v6H8v6H6v-6H5V9ZM15.5 9h3l1.5 7h-2v5h-2v-5h-2l1.5-7ZM12 3v18" />
+  </>,
+);
+
+export const TrainIcon = icon(
+  <>
+    <rect x="5" y="3" width="14" height="14" rx="3" />
+    <path d="M5 11h14M9 21l-2-4M15 21l2-4M9 14h.01M15 14h.01" />
+  </>,
+);
+
+export const WifiOffIcon = icon(
+  <path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2-1.5M2 8.8a15 15 0 0 1 4.4-2.9M22 8.8A15 15 0 0 0 11.4 5M12 20h.01" />,
+);
+
+export const ListIcon = icon(<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />);
+
+export const BracketIcon = icon(<path d="M3 5h5v6H3M3 13h5v6H3M8 8h4v8H8M12 12h9" />);
+
 /**
  * The favourites star. Unlike the rest, its fill is driven by state — a filled
  * gold star means "following", an outline means "not following".

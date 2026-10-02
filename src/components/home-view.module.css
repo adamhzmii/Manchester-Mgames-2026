@@ -1,0 +1,608 @@
+/* ============================================================ BEFORE ==== */
+
+/* The hero is the one place the photograph appears: the real hall, darkened
+   into night so the type and the countdown carry the moment. */
+.hero {
+  position: relative;
+  color: var(--mg-night-text);
+  background:
+    linear-gradient(180deg, rgba(22, 15, 41, 0.72) 0%, rgba(22, 15, 41, 0.88) 55%, var(--mg-night) 100%),
+    url("/brand/banner.jpg") center 30% / cover no-repeat,
+    var(--mg-night);
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--mg-batik);
+  mask-image: linear-gradient(90deg, transparent 30%, #000);
+  pointer-events: none;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 28px;
+  padding-block: 32px 36px;
+}
+
+@media (min-width: 960px) {
+  .heroInner {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: end;
+    padding-block: 64px 64px;
+  }
+}
+
+.eyebrow {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mg-gold);
+}
+
+.heroTitle {
+  margin-top: 10px;
+  color: #fff;
+  font-size: clamp(64px, 19vw, 132px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+.heroYear {
+  color: var(--mg-gold);
+}
+
+.heroCity {
+  font-family: var(--mg-display);
+  font-size: clamp(22px, 6vw, 34px);
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--mg-night-text);
+  margin-top: 6px;
+}
+
+.heroWhen {
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--mg-night-muted);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 4px 22px;
+  margin: 22px 0 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.statValue {
+  margin: 0;
+  font-family: var(--mg-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.statLabel {
+  font-family: var(--mg-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.ghostLight {
+  color: var(--mg-night-text);
+}
+
+.heroClock {
+  display: grid;
+  gap: 10px;
+}
+
+.clockLabel {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+.clockFoot {
+  font-size: 13px;
+  color: var(--mg-night-muted);
+}
+
+/* ========================================================== MATCHDAY ==== */
+
+.band {
+  background:
+    var(--mg-batik),
+    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+  color: var(--mg-night-text);
+  padding-block: 18px 26px;
+  scroll-margin-top: var(--mg-header-height);
+}
+
+.bandTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.bandKicker {
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+.bandGold {
+  color: var(--mg-gold);
+}
+
+.bandCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ff8a8d;
+}
+
+.bandDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mg-live);
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+/* A swipeable rail on a phone, a grid once there is room. */
+.boards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 86%);
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  contain: paint;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding-inline: var(--mg-gutter);
+  scroll-padding-inline: var(--mg-gutter);
+}
+
+/* A lone live game takes the full width rather than leaving a gap where a
+   second card would peek in. */
+.boards:has(> :only-child) {
+  grid-auto-columns: 100%;
+}
+
+.boards::-webkit-scrollbar {
+  display: none;
+}
+
+.boards > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 760px) {
+  .boards {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+.morning {
+  display: grid;
+  gap: 14px;
+}
+
+.morningTitle {
+  color: #fff;
+  font-size: clamp(40px, 11vw, 72px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.lull {
+  display: grid;
+  gap: 10px;
+}
+
+.lullLabel {
+  font-size: 14px;
+  color: var(--mg-night-muted);
+}
+
+/* ============================================================= AFTER ==== */
+
+.championsTitle {
+  color: #fff;
+  font-size: clamp(44px, 12vw, 84px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.9;
+  margin-bottom: 18px;
+}
+
+.champions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.champion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: var(--mg-r-lg);
+  background: linear-gradient(160deg, rgba(242, 182, 48, 0.16), rgba(242, 182, 48, 0.02) 60%);
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.3);
+  color: var(--mg-night-text);
+}
+
+.championSport {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+  margin-bottom: 4px;
+}
+
+.championName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mg-display);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.championCup {
+  flex: 0 0 auto;
+  color: var(--mg-gold);
+}
+
+.championUni {
+  font-size: 13px;
+  color: var(--mg-gold);
+}
+
+.championScore {
+  font-size: 13px;
+  color: var(--mg-night-muted);
+}
+
+/* ============================================================== BODY ==== */
+
+/*
+ * One column on a phone, in the order a visitor needs things: your team
+ * first, then what is next. Two columns on a laptop, with your team and the
+ * news in the sidebar. The two column wrappers dissolve on narrow screens
+ * (display: contents) so `order` can interleave their sections.
+ */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-block: 24px 16px;
+}
+
+.main,
+.aside {
+  display: contents;
+}
+
+.sTeam {
+  order: 1;
+}
+.sMedals {
+  order: 2;
+}
+.sNext {
+  order: 3;
+}
+.sUpdates {
+  order: 4;
+}
+.sResults {
+  order: 5;
+}
+.sSports {
+  order: 6;
+}
+.sVenues {
+  order: 7;
+}
+
+@media (min-width: 1000px) {
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    align-items: start;
+    gap: 32px;
+    padding-block: 32px 24px;
+  }
+
+  .main,
+  .aside {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .aside {
+    position: sticky;
+    top: calc(var(--mg-header-height) + 20px);
+  }
+}
+
+.empty {
+  padding: 14px 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink-2);
+}
+
+/* ------------------------------------------------------------ sports ---- */
+
+.sports {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .sports {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.sportTile {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.sportTile:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mg-shadow), 0 6px 16px -8px rgba(22, 15, 41, 0.25);
+}
+
+.sportText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.sportName {
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.sportMeta {
+  font-size: 12px;
+  color: var(--mg-ink-3);
+}
+
+.sportStatus {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mg-ink-2);
+}
+
+.sportLive {
+  color: var(--mg-live);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sportChamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mg-gold-ink);
+}
+
+/* ----------------------------------------------------------- updates ---- */
+
+.updates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--mg-card);
+  border-radius: var(--mg-r-lg);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+}
+
+.updates li + li {
+  box-shadow: inset 0 1px 0 var(--mg-line);
+}
+
+.update {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--mg-ink);
+}
+
+.update:hover {
+  background: var(--mg-sunk);
+}
+
+.updateIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-plum-wash);
+  color: var(--mg-plum);
+}
+
+.update[data-type="delay"] .updateIcon,
+.update[data-type="schedule"] .updateIcon {
+  background: var(--mg-gold-wash);
+  color: var(--mg-gold-ink);
+}
+
+.updateText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.updateMeta {
+  font-family: var(--mg-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+.updateTitle {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.updateChevron {
+  color: var(--mg-ink-4);
+}
+
+/* ------------------------------------------------------------ venues ---- */
+
+.venues {
+  display: grid;
+  gap: 8px;
+}
+
+.venue {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+}
+
+.venueHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.venueName {
+  font-size: 19px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.venueLive {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mg-live);
+}
+
+.venueAddress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.venueSports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.venueSport {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-ink-2);
+}
+
+.venueActions {
+  display: flex;
+  gap: 18px;
+  padding-top: 4px;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

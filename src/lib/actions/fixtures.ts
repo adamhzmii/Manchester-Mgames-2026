@@ -99,7 +99,9 @@ export async function updateFixtureScore(
   // server-rendered versions of the same pages honest.
   revalidatePath("/");
   revalidatePath("/schedule");
-  revalidatePath("/scores");
+  revalidatePath("/standings");
+  revalidatePath("/match/[id]", "page");
+  revalidatePath("/team/[id]", "page");
 
   await notifyFixtureChange({
     fixtureId,
@@ -162,7 +164,9 @@ async function notifyFixtureChange(f: {
 
   try {
     await sendPush(
-      { title, body, url: "/schedule", tag: `fixture-${f.fixtureId}` },
+      // Straight to the match: "your game is live" should open that game, not
+      // a list of fifty to find it in.
+      { title, body, url: `/match/${f.fixtureId}`, tag: `fixture-${f.fixtureId}` },
       { teamIds },
     );
   } catch {
@@ -225,7 +229,9 @@ export async function assignFixtureTeam(
 
   revalidatePath("/");
   revalidatePath("/schedule");
-  revalidatePath("/scores");
+  revalidatePath("/standings");
+  revalidatePath("/match/[id]", "page");
+  revalidatePath("/team/[id]", "page");
 
   return { status: "success", message: "Team assigned." };
 }

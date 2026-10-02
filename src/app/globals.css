@@ -1,79 +1,172 @@
 /*
- * MGames 2026 — design tokens.
+ * MGames 2026 — design system.
  *
- * Ported from the Claude Design prototype (see mgames26_system_design_spec.md).
- * The prototype carried these values as inline styles on a fixed 440px phone
- * frame; here they are named once and the layout is made responsive.
+ * "Matchday": the site is a live matchday programme and scoreboard. Two
+ * registers, used deliberately:
  *
- * Every colour in the app should come from a variable in this block. Sport
- * accents are the one exception — those live in the database, because the
- * committee adds and drops sports without a redeploy.
+ *   night — the deep aubergine of the header, hero and scoreboards. Taken from
+ *           the crest's black outline, warmed toward the society's purple so
+ *           the two brands sit together instead of clashing.
+ *   paper — the light ground everything you read sits on.
+ *
+ * Bee-gold, from the crest, is the one accent. It marks what matters right now
+ * (live, next, champion) and nothing else, so it keeps its meaning.
+ *
+ * Sport colours are the exception to "every colour lives here": they are rows
+ * in the database, because the committee adds and drops sports without a
+ * redeploy. They are used only as wayfinding — a sport's glyph chip and the
+ * tick beside its games — never as large fills.
  */
 
 :root {
-  /* Brand */
-  --mg-purple: #3c2a6e;
-  --mg-purple-deep: #2a1d52;
-  --mg-purple-ink: #1c1830;
-  --mg-gold: #d4a93c;
-  --mg-gold-deep: #b8891f;
-  --mg-gold-text: #5c4410;
+  color-scheme: light;
 
-  /* Surfaces */
-  --mg-bg: #f4f2f8;
-  --mg-surface: #ffffff;
-  --mg-surface-alt: #ede9f5;
-  --mg-surface-cream: #fbf3dc;
-  --mg-border: #eceaf2;
-  /* Bracket connectors need to read as lines across open background, which
-     --mg-border (tuned for card edges against a surface) is too pale to do. */
-  --mg-bracket-line: #cfc9de;
-  --mg-border-strong: #e4dfee;
+  /* ------------------------------------------------------------ night ---- */
+  --mg-night: #160f29;
+  --mg-night-2: #1f1738;
+  --mg-night-3: #2e2550;
+  --mg-night-line: rgba(255, 255, 255, 0.1);
+  --mg-night-text: #f4f1fb;
+  --mg-night-muted: #a59dc3;
 
-  /* Text */
-  --mg-text: #1c1830;
-  --mg-text-strong: #2a1d52;
-  --mg-text-body: #3a3550;
-  --mg-text-muted: #79738c;
-  --mg-text-faint: #b0aac0;
-  --mg-text-inactive: #b4aec4;
+  /* ------------------------------------------------------------ brand ---- */
+  --mg-plum: #3c2a6e;
+  --mg-plum-2: #563f9b;
+  --mg-plum-wash: #ece7f7;
+  --mg-gold: #f2b630;
+  --mg-gold-2: #ffcd52;
+  /* Gold that passes contrast as text on paper. Raw bee-gold does not. */
+  --mg-gold-ink: #7a5706;
+  --mg-gold-wash: #fff3d4;
 
-  /* Status */
-  --mg-live: #e24b3b;
-  --mg-live-bg: #fdecea;
-  --mg-live-border: #f6c9c3;
-  --mg-danger: #c0392b;
-  --mg-win: #219653;
-  --mg-win-bg: #eaf5ee;
-  --mg-win-tint: #f2fbf5;
-  --mg-win-chip: #dff3e6;
-  --mg-online: #3ce28a;
+  /* ------------------------------------------------------------ paper ---- */
+  --mg-paper: #f5f3f8;
+  --mg-card: #ffffff;
+  --mg-sunk: #eeebf4;
+  --mg-line: #e6e2ee;
+  --mg-line-2: #d3cde0;
 
-  /* Shape */
-  --mg-radius-sm: 8px;
-  --mg-radius: 12px;
-  --mg-radius-lg: 16px;
-  --mg-radius-pill: 999px;
+  --mg-ink: #18122a;
+  --mg-ink-2: #4b4463;
+  --mg-ink-3: #7f7898;
+  --mg-ink-4: #b2acc5;
 
-  --mg-shadow-sm: 0 3px 10px rgba(60, 42, 110, 0.05);
-  --mg-shadow: 0 4px 14px rgba(60, 42, 110, 0.08);
-  --mg-shadow-lg: 0 8px 22px rgba(60, 42, 110, 0.25);
+  /* ----------------------------------------------------------- status ---- */
+  --mg-live: #e5484d;
+  --mg-live-wash: #fdeceb;
+  --mg-up: #15875a;
+  --mg-up-wash: #e4f4ec;
 
-  /* Layout */
-  --mg-content-width: 640px;
-  --mg-content-width-wide: 1040px;
+  /* Medals are drawn, not named, so they get real metal tones. */
+  --mg-medal-gold: #e2ac1f;
+  --mg-medal-silver: #a7adb8;
+  --mg-medal-bronze: #c27a43;
+
+  /* ------------------------------------------------------------- type ---- */
+  --mg-display: var(--font-barlow-condensed), "Arial Narrow", system-ui, sans-serif;
+  --mg-body: var(--font-barlow), system-ui, -apple-system, sans-serif;
+
+  /* -------------------------------------------------------------- shape -- */
+  --mg-r-sm: 6px;
+  --mg-r: 10px;
+  --mg-r-lg: 14px;
+  --mg-shadow: 0 1px 2px rgba(22, 15, 41, 0.06), 0 0 0 1px rgba(22, 15, 41, 0.04);
+  --mg-shadow-pop: 0 18px 40px -12px rgba(22, 15, 41, 0.35);
+
+  /* ------------------------------------------------------------- layout -- */
+  --mg-max: 1180px;
   --mg-gutter: 16px;
-  /* Measured, not guessed: the sticky header is 61px at every breakpoint.
-     The home hero pulls itself up by exactly this much so its photograph
-     runs behind the header to the very top of the page. */
-  --mg-header-height: 61px;
+  --mg-header-height: 56px;
   --mg-bottom-nav-height: 64px;
 
-  /* The batik motif behind the header and hero. Encoded once here so the two
-     places that use it cannot drift apart. */
-  --mg-batik: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='46'%20height='46'%3E%3Cg%20fill='none'%20stroke='%23D4A93C'%20stroke-width='1'%20opacity='0.28'%3E%3Ccircle%20cx='23'%20cy='23'%20r='7'/%3E%3Cpath%20d='M23%206%20L28%2023%20L23%2040%20L18%2023%20Z'/%3E%3Cpath%20d='M6%2023%20L23%2018%20L40%2023%20L23%2028%20Z'/%3E%3C/g%3E%3C/svg%3E");
-  --mg-batik-large: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='60'%20height='60'%3E%3Cg%20fill='none'%20stroke='%23D4A93C'%20stroke-width='1'%20opacity='0.16'%3E%3Ccircle%20cx='30'%20cy='30'%20r='10'/%3E%3Cpath%20d='M30%208%20L37%2030%20L30%2052%20L23%2030%20Z'/%3E%3Cpath%20d='M8%2030%20L30%2023%20L52%2030%20L30%2037%20Z'/%3E%3C/g%3E%3C/svg%3E");
+  /* The batik motif, kept from the first version: a quiet nod to the society
+     behind the event, used only on night surfaces. */
+  --mg-batik: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='60'%20height='60'%3E%3Cg%20fill='none'%20stroke='%23F2B630'%20stroke-width='1'%20opacity='0.13'%3E%3Ccircle%20cx='30'%20cy='30'%20r='10'/%3E%3Cpath%20d='M30%208%20L37%2030%20L30%2052%20L23%2030%20Z'/%3E%3Cpath%20d='M8%2030%20L30%2023%20L52%2030%20L30%2037%20Z'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* ---------------------------------------------------------- legacy ---- */
+  /* Names the first version's modules still use. Mapped onto the new palette
+     so nothing renders unstyled while screens are rebuilt one at a time. */
+  --mg-purple: var(--mg-plum);
+  --mg-purple-deep: var(--mg-night-2);
+  --mg-purple-ink: var(--mg-ink);
+  --mg-gold-deep: var(--mg-gold-ink);
+  --mg-gold-text: var(--mg-gold-ink);
+  --mg-bg: var(--mg-paper);
+  --mg-surface: var(--mg-card);
+  --mg-surface-alt: var(--mg-sunk);
+  --mg-surface-cream: var(--mg-gold-wash);
+  --mg-border: var(--mg-line);
+  --mg-border-strong: var(--mg-line-2);
+  --mg-bracket-line: var(--mg-line-2);
+  --mg-text: var(--mg-ink);
+  --mg-text-strong: var(--mg-ink);
+  --mg-text-body: var(--mg-ink-2);
+  --mg-text-muted: var(--mg-ink-3);
+  --mg-text-faint: var(--mg-ink-4);
+  --mg-text-inactive: var(--mg-ink-4);
+  --mg-live-bg: var(--mg-live-wash);
+  --mg-live-border: var(--mg-live-wash);
+  --mg-danger: var(--mg-live);
+  --mg-win: var(--mg-up);
+  --mg-win-bg: var(--mg-up-wash);
+  --mg-win-tint: var(--mg-up-wash);
+  --mg-win-chip: var(--mg-up-wash);
+  --mg-online: #3ce28a;
+  --mg-radius-sm: var(--mg-r-sm);
+  --mg-radius: var(--mg-r);
+  --mg-radius-lg: var(--mg-r-lg);
+  --mg-radius-pill: 999px;
+  --mg-shadow-sm: var(--mg-shadow);
+  --mg-shadow-lg: var(--mg-shadow-pop);
+  --mg-content-width: 680px;
+  --mg-content-width-wide: var(--mg-max);
 }
+
+@media (min-width: 768px) {
+  :root {
+    --mg-gutter: 24px;
+    --mg-header-height: 64px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --mg-gutter: 32px;
+  }
+}
+
+/* Dark: night becomes the ground, and the cards lift slightly off it. The
+   structure is identical — only the tokens move. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --mg-paper: #0e0a1a;
+    --mg-card: #181229;
+    --mg-sunk: #120d21;
+    --mg-line: #2a2242;
+    --mg-line-2: #3a3058;
+
+    --mg-ink: #f2eff9;
+    --mg-ink-2: #c3bcd8;
+    --mg-ink-3: #8e86ab;
+    --mg-ink-4: #5d5679;
+
+    --mg-plum: #b8a5f2;
+    --mg-plum-2: #cfc1fa;
+    --mg-plum-wash: #241c3d;
+    --mg-gold-ink: #f2b630;
+    --mg-gold-wash: #2c2410;
+
+    --mg-live-wash: #3a1517;
+    --mg-up: #4fd197;
+    --mg-up-wash: #10291f;
+
+    --mg-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* --------------------------------------------------------------- base ---- */
 
 *,
 *::before,
@@ -87,29 +180,40 @@ body {
   padding: 0;
 }
 
+html {
+  /* Room for the sticky header when jumping to an anchor. */
+  scroll-padding-top: calc(var(--mg-header-height) + 12px);
+}
+
 body {
-  /* Column layout so the sticky bottom bar sits at the foot of a short page
-     instead of floating directly under the content. */
+  /* Column layout so the bottom bar sits at the foot of a short page instead
+     of floating directly under the content. */
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--mg-bg);
-  color: var(--mg-text);
-  font-family: var(--font-barlow), system-ui, -apple-system, sans-serif;
+  background: var(--mg-paper);
+  color: var(--mg-ink);
+  font-family: var(--mg-body);
   font-size: 15px;
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
-  color: var(--mg-text-strong);
+  font-family: var(--mg-display);
+  color: var(--mg-ink);
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
 }
 
 main {
@@ -117,7 +221,7 @@ main {
 }
 
 a {
-  color: var(--mg-purple);
+  color: var(--mg-plum);
   text-decoration: none;
 }
 
@@ -126,15 +230,25 @@ button {
   color: inherit;
 }
 
-/* Keyboard focus is styled once, globally. The prototype was click-only; a
-   real site has to be operable from a keyboard. */
+img {
+  max-width: 100%;
+}
+
+/* Keyboard focus is styled once, globally, in the accent. */
 :focus-visible {
   outline: 2px solid var(--mg-gold);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* ------------------------------------------------------------- shared ---- */
+/* ------------------------------------------------------------- layout ---- */
+
+.mg-wrap {
+  width: 100%;
+  max-width: var(--mg-max);
+  margin: 0 auto;
+  padding-inline: var(--mg-gutter);
+}
 
 .mg-container {
   width: 100%;
@@ -143,66 +257,89 @@ button {
   padding-inline: var(--mg-gutter);
 }
 
-/*
- * A standalone container, not a modifier on .mg-container — every page that
- * uses it applies it alone. It used to only set max-width, which centers
- * nothing without `margin: 0 auto` alongside it: past 1040px wide, the whole
- * page sat flush against the left edge instead of centering.
- */
+/* A standalone container, not a modifier on .mg-container — every page that
+   uses it applies it alone, so it must center itself. */
 .mg-container-wide {
   width: 100%;
-  max-width: var(--mg-content-width-wide);
+  max-width: var(--mg-max);
   margin: 0 auto;
   padding-inline: var(--mg-gutter);
 }
 
-/* Standard vertical rhythm for a screen's content. */
+/* Standard vertical rhythm for a screen's content. Opacity only on entry: a
+   transform here would make this the containing block for every
+   position:fixed descendant, which is how a modal once ended up stuck at the
+   bottom of a long page. */
 .mg-page {
-  padding-block: 16px 32px;
-  animation: mg-slide-up 0.28s ease both;
+  padding-block: 20px 40px;
+  animation: mg-fade-in 0.22s ease both;
 }
 
+/* -------------------------------------------------------------- type ---- */
+
 .mg-page-title {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .mg-page-title {
+    font-size: 44px;
+  }
 }
 
 .mg-section-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
 }
 
-.mg-card {
-  background: var(--mg-surface);
-  border: 1px solid var(--mg-border);
-  border-radius: var(--mg-radius-lg);
-  box-shadow: var(--mg-shadow-sm);
+/* The small uppercase label that heads most sections — the broadcast
+   lower-third, essentially. */
+.mg-label {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+.mg-num {
+  font-family: var(--mg-display);
+  font-variant-numeric: tabular-nums;
 }
 
 .mg-muted {
-  color: var(--mg-text-muted);
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--mg-ink-3);
+  font-size: 13px;
+  font-weight: 500;
 }
 
-/* Horizontally scrolling filter rails. The scrollbar is hidden because the
-   rail sits under a heading where a permanent bar reads as a divider. */
+/* ------------------------------------------------------------ surfaces --- */
+
+.mg-card {
+  background: var(--mg-card);
+  border-radius: var(--mg-r-lg);
+  box-shadow: var(--mg-shadow);
+}
+
+/* Horizontally scrolling rails. The scrollbar is hidden because the rail sits
+   under a heading where a permanent bar reads as a divider. */
 .mg-rail {
   display: flex;
-  gap: 7px;
+  gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
   /*
    * `overflow-x: auto` clips the rail visually, but its off-screen children
    * still counted toward the document's content width — on the home page that
-   * reported an html scrollWidth of 916 against a 417px viewport. Nothing
-   * actually scrolled sideways; instead the browser derived a smaller minimum
-   * page scale from it, which let the whole page be pinch-zoomed out on a
-   * phone. `contain: paint` promises descendants never paint outside this box,
-   * so they stop inflating that measurement. Adds no new clipping: `overflow-x:
-   * auto` already forces overflow-y to `auto` here, so both axes were clipped
-   * regardless.
+   * reported an html scrollWidth of 916 against a 417px viewport, which let
+   * the whole page be pinch-zoomed out on a phone. `contain: paint` promises
+   * descendants never paint outside this box, so they stop inflating that
+   * measurement.
    */
   contain: paint;
 }
@@ -224,6 +361,64 @@ button {
   border: 0;
 }
 
+/* ---------------------------------------------------------- buttons ---- */
+
+.mg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--mg-r);
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.mg-btn:active {
+  transform: translateY(1px);
+}
+
+.mg-btn-gold {
+  background: var(--mg-gold);
+  color: var(--mg-night);
+}
+
+.mg-btn-gold:hover {
+  background: var(--mg-gold-2);
+}
+
+.mg-btn-plum {
+  background: var(--mg-plum);
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mg-btn-plum {
+    color: var(--mg-night);
+  }
+}
+
+.mg-btn-plum:hover {
+  background: var(--mg-plum-2);
+}
+
+.mg-btn-ghost {
+  background: transparent;
+  color: inherit;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+/* ------------------------------------------------------------ motion ---- */
+
 @keyframes mg-pulse {
   0%,
   100% {
@@ -236,14 +431,34 @@ button {
   }
 }
 
-@keyframes mg-slide-up {
+@keyframes mg-fade-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+  }
+}
+
+/* A score that just changed glows gold once, so a phone glanced at between
+   rallies shows what moved without anyone having to compare numbers. */
+@keyframes mg-score-flash {
+  0% {
+    background-color: var(--mg-gold);
+    color: var(--mg-night);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Kept for modules that have not been rebuilt yet. */
+@keyframes mg-slide-up {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
