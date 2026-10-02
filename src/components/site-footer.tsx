@@ -36,9 +36,6 @@ export function SiteFooter() {
         </nav>
 
         <div className={styles.bottom}>
-          <a href="tel:999" className={styles.emergency}>
-            Emergency: <strong>999</strong>
-          </a>
           <Link href="/login" className={styles.staff}>
             Coordinator sign-in
           </Link>

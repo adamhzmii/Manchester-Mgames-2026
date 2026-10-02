@@ -5,17 +5,15 @@
 /* ------------------------------------------------------------- band ---- */
 
 .band {
-  background:
-    var(--mg-batik),
-    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+  background: var(--mg-band-photo), var(--mg-night);
   color: var(--mg-night-text);
 }
 
 .band[data-status="live"] {
   background:
-    var(--mg-batik),
-    radial-gradient(120% 90% at 50% 0%, rgba(229, 72, 77, 0.22), transparent 60%),
-    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+    radial-gradient(120% 90% at 50% 0%, rgba(229, 72, 77, 0.24), transparent 60%),
+    var(--mg-band-photo),
+    var(--mg-night);
 }
 
 .bandInner {
@@ -112,11 +110,6 @@
 .tbc .sideName {
   font-style: italic;
   font-weight: 600;
-  color: var(--mg-night-muted);
-}
-
-.uni {
-  font-size: 12px;
   color: var(--mg-night-muted);
 }
 
@@ -225,6 +218,7 @@
 
 .body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   padding-block: 18px 12px;
   max-width: 760px;
@@ -312,4 +306,67 @@
 
 .sectionTitle a {
   color: var(--mg-ink);
+}
+
+/* -------------------------------------------------------------- food ---- */
+
+.food {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-gold-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-gold) 45%, transparent);
+  color: var(--mg-ink);
+}
+
+.foodStack {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.foodBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--mg-gold-wash);
+  color: #fff;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.foodBadge + .foodBadge {
+  margin-left: -10px;
+}
+
+.foodText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.foodTitle {
+  font-family: var(--mg-display);
+  font-size: 17px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.foodNames {
+  font-size: 13px;
+  color: var(--mg-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foodChevron {
+  flex: 0 0 auto;
+  color: var(--mg-gold-ink);
 }

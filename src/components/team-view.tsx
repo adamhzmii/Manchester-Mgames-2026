@@ -97,7 +97,6 @@ export function TeamView({
             {team.categoryName && team.categoryName !== "Open" ? ` · ${team.categoryName}` : ""}
           </p>
           <h1 className={styles.name}>{team.name}</h1>
-          {team.university ? <p className={styles.uni}>{team.university}</p> : null}
 
           <p className={styles.status}>{statusLine(team, games, table)}</p>
 

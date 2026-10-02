@@ -3,9 +3,7 @@
 }
 
 .band {
-  background:
-    var(--mg-batik),
-    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+  background: var(--mg-band-photo), var(--mg-night);
   color: var(--mg-night-text);
 }
 
@@ -32,13 +30,6 @@
   font-weight: 800;
   line-height: 0.92;
   text-transform: uppercase;
-}
-
-.uni {
-  margin-top: 6px;
-  color: var(--mg-gold);
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .status {
@@ -99,6 +90,7 @@
 
 .body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   padding-block: 20px 12px;
   max-width: 760px;

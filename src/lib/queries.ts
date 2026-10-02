@@ -10,7 +10,7 @@ import {
   type Fixture,
   type FixtureRow,
 } from "@/lib/fixtures";
-import { applyDemo, demoAnnouncements, demoScenario } from "@/lib/demo";
+import { applyDemo, applyDemoVendors, demoAnnouncements, demoScenario } from "@/lib/demo";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import { createClient } from "@/lib/supabase/server";
 import type { Coordinator } from "@/lib/coordinator";
@@ -65,6 +65,10 @@ export type Vendor = {
   /** Null until someone places the stall on the venue map; unplaced stalls are listed, not pinned. */
   latitude: number | null;
   longitude: number | null;
+  tagline: string | null;
+  /** Handle without the @, or null. */
+  instagram: string | null;
+  tags: string[];
   menu: { id: string; name: string; pricePence: number }[];
 };
 
@@ -77,8 +81,6 @@ export type Vendor = {
 export type PickerTeam = {
   id: string;
   name: string;
-  /** The institution behind the team — what the medal table counts by. */
-  university: string | null;
   categoryId: string;
   categoryName: string;
   sportId: string;
@@ -333,7 +335,7 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
     await supabase
       .from("teams")
       .select(
-        `id, name, university, category_id,
+        `id, name, category_id,
          category:categories ( name, sport:sports ( id, name, slug, code, color, sort_order ) )`,
       )
       .order("name"),
@@ -342,7 +344,6 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
   type Row = {
     id: string;
     name: string;
-    university: string | null;
     category_id: string;
     category: {
       name: string;
@@ -360,7 +361,6 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
   return (rows as unknown as Row[]).map((t) => ({
     id: t.id,
     name: t.name,
-    university: t.university,
     categoryId: t.category_id,
     categoryName: t.category?.name ?? "",
     sportId: t.category?.sport?.id ?? "",
@@ -402,6 +402,7 @@ export async function getVendors(): Promise<Vendor[]> {
       .from("vendors")
       .select(
         `id, name, cuisine, location, photo_url, sort_order, latitude, longitude,
+         tagline, instagram, tags,
          venue:venues ( slug, short_name ),
          menu_items ( id, name, price_pence, sort_order )`,
       )
@@ -416,11 +417,14 @@ export async function getVendors(): Promise<Vendor[]> {
     photo_url: string | null;
     latitude: number | null;
     longitude: number | null;
+    tagline: string | null;
+    instagram: string | null;
+    tags: string[] | null;
     venue: { slug: string; short_name: string } | null;
     menu_items: { id: string; name: string; price_pence: number; sort_order: number }[];
   };
 
-  return (rows as unknown as Row[]).map((v) => ({
+  return applyDemoVendors((rows as unknown as Row[]).map((v) => ({
     id: v.id,
     name: v.name,
     cuisine: v.cuisine,
@@ -430,12 +434,15 @@ export async function getVendors(): Promise<Vendor[]> {
     venueShortName: v.venue?.short_name ?? "",
     latitude: v.latitude,
     longitude: v.longitude,
+    tagline: v.tagline?.trim() || null,
+    instagram: v.instagram?.trim().replace(/^@/, "") || null,
+    tags: (v.tags ?? []).filter((t) => t.trim() !== ""),
     // Nested rows come back in insertion order, not the order requested on the
     // parent — sort the menu here so prices read top to bottom as intended.
     menu: [...v.menu_items]
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((m) => ({ id: m.id, name: m.name, pricePence: m.price_pence })),
-  }));
+  })));
 }
 
 export async function getCourts(): Promise<Court[]> {

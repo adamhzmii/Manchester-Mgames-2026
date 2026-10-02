@@ -1,6 +1,13 @@
 import { HomeView } from "@/components/home-view";
 import { serverNow } from "@/lib/demo";
-import { getAnnouncements, getFixtures, getSports, getTeams, getVenues } from "@/lib/queries";
+import {
+  getAnnouncements,
+  getFixtures,
+  getSports,
+  getTeams,
+  getVendors,
+  getVenues,
+} from "@/lib/queries";
 
 /**
  * Live data — never prerendered or cached. Scores and announcements change
@@ -10,12 +17,13 @@ import { getAnnouncements, getFixtures, getSports, getTeams, getVenues } from "@
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [fixtures, teams, sports, venues, updates] = await Promise.all([
+  const [fixtures, teams, sports, venues, updates, vendors] = await Promise.all([
     getFixtures(),
     getTeams(),
     getSports(),
     getVenues(),
     getAnnouncements(3),
+    getVendors(),
   ]);
 
   return (
@@ -25,6 +33,7 @@ export default async function HomePage() {
       sports={sports}
       venues={venues}
       updates={updates}
+      vendors={vendors}
       renderedAt={serverNow()}
     />
   );

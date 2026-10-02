@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   CalendarPlusIcon,
   ChevronLeftIcon,
+  ChevronRightIcon,
   ClockIcon,
   PinIcon,
   ShareIcon,
@@ -24,7 +25,8 @@ import { formatDay, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
 import { semiFinals } from "@/lib/progression";
-import type { PickerTeam, Venue } from "@/lib/queries";
+import type { PickerTeam, Vendor, Venue } from "@/lib/queries";
+import { monogram, stallTone } from "@/lib/vendors";
 import { computeStandings, QUALIFYING, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
@@ -37,6 +39,7 @@ type MatchViewProps = {
   groups: (GroupMeta & { sportSlug: string })[];
   standingTeams: (TeamMeta & { sportSlug: string })[];
   venues: Venue[];
+  vendors: Vendor[];
   canEdit: boolean;
 };
 
@@ -55,6 +58,7 @@ export function MatchView({
   groups,
   standingTeams,
   venues,
+  vendors,
   canEdit,
 }: MatchViewProps) {
   const fixtures = useLiveFixtures(initial);
@@ -95,9 +99,6 @@ export function MatchView({
           .filter((f) => f.id !== fixture.id && (f.teamAId === teamId || f.teamBId === teamId))
           .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
 
-  const university = (teamId: string | null) =>
-    teamId === null ? null : (teams.find((t) => t.id === teamId)?.university ?? null);
-
   return (
     <article className={styles.page}>
       <header className={styles.band} data-status={fixture.status}>
@@ -131,7 +132,6 @@ export function MatchView({
             <TeamSide
               name={fixture.teamA}
               teamId={fixture.teamAId}
-              university={university(fixture.teamAId)}
               state={winner === null ? null : winner === "a" ? "won" : "lost"}
               followed={fixture.teamAId !== null && favourites.has(fixture.teamAId)}
               onFollow={() => fixture.teamAId && favourites.toggle([fixture.teamAId])}
@@ -165,7 +165,6 @@ export function MatchView({
             <TeamSide
               name={fixture.teamB}
               teamId={fixture.teamBId}
-              university={university(fixture.teamBId)}
               state={winner === null ? null : winner === "b" ? "won" : "lost"}
               followed={fixture.teamBId !== null && favourites.has(fixture.teamBId)}
               onFollow={() => fixture.teamBId && favourites.toggle([fixture.teamBId])}
@@ -229,6 +228,12 @@ export function MatchView({
           </ShareButton>
         </div>
 
+        <FoodNearby
+          venueSlug={fixture.venueSlug}
+          venueName={fixture.venueShortName}
+          vendors={vendors.filter((v) => v.venueSlug === fixture.venueSlug)}
+        />
+
         {canEdit ? (
           <ScoreConsole
             fixture={fixture}
@@ -278,7 +283,6 @@ export function MatchView({
 function TeamSide({
   name,
   teamId,
-  university,
   state,
   followed,
   onFollow,
@@ -286,7 +290,6 @@ function TeamSide({
 }: {
   name: string;
   teamId: string | null;
-  university: string | null;
   state: "won" | "lost" | null;
   followed: boolean;
   onFollow: () => void;
@@ -309,7 +312,6 @@ function TeamSide({
       ) : (
         <span className={styles.sideName}>{name}</span>
       )}
-      {university ? <span className={styles.uni}>{university}</span> : null}
       {teamId ? (
         <button
           type="button"
@@ -399,4 +401,36 @@ function NextRound({
 /** "Johor Warriors' day", "KL Tigers' day", "Penang's day". */
 function possessive(name: string): string {
   return /s$/i.test(name) ? `${name}\u2019` : `${name}\u2019s`;
+}
+
+/**
+ * The stalls in the building this game is in. Someone waiting for kick-off is
+ * the stalls' best customer, and is already standing a corridor away.
+ */
+function FoodNearby({
+  venueSlug,
+  venueName,
+  vendors,
+}: {
+  venueSlug: string;
+  venueName: string;
+  vendors: Vendor[];
+}) {
+  if (vendors.length === 0) return null;
+  return (
+    <Link href={`/food?venue=${venueSlug}`} className={styles.food}>
+      <span className={styles.foodStack} aria-hidden="true">
+        {vendors.slice(0, 3).map((v) => (
+          <span key={v.id} className={styles.foodBadge} style={{ background: stallTone(v.name) }}>
+            {monogram(v.name)}
+          </span>
+        ))}
+      </span>
+      <span className={styles.foodText}>
+        <span className={styles.foodTitle}>Hungry? Food at {venueName}</span>
+        <span className={styles.foodNames}>{vendors.map((v) => v.name).join(" · ")}</span>
+      </span>
+      <ChevronRightIcon size={18} className={styles.foodChevron} />
+    </Link>
+  );
 }

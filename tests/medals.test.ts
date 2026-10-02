@@ -39,31 +39,29 @@ test("a split sport names its category", () => {
   assert.equal(podiums([final])[0].title, "Pickleball · Women's Doubles");
 });
 
-test("the medal table counts by university and ranks golds first", () => {
+test("the medal table counts by team and ranks golds first", () => {
   const list = podiums([
     played(["t1", "Melaka"], ["t2", "Kedah"], 2, 0, { ...football, stage: "final" }),
-    played(["t3", "Selangor"], ["t4", "Sarawak"], 30, 20, { ...netball, stage: "final" }),
+    played(["t3", "Selangor"], ["t4", "Melaka"], 30, 20, { ...netball, stage: "final" }),
   ]);
-  const uni: Record<string, string> = {
-    t1: "MMU",
-    t2: "Manchester",
-    t3: "Salford",
-    t4: "MMU",
-  };
-  const rows = medalTable(list, (id) => uni[id] ?? null);
-  // MMU: 1 gold + 1 silver; Salford: 1 gold; Manchester: 1 silver.
+  // Melaka: football gold + netball silver (different team rows, same name).
   assert.deepEqual(
-    rows.map((r) => [r.name, r.gold, r.silver, r.bronze, r.total]),
+    medalTable(list).map((r) => [r.name, r.gold, r.silver, r.bronze, r.total]),
     [
-      ["MMU", 1, 1, 0, 2],
-      ["Salford", 1, 0, 0, 1],
-      ["Manchester", 0, 1, 0, 1],
+      ["Melaka", 1, 1, 0, 2],
+      ["Selangor", 1, 0, 0, 1],
+      ["Kedah", 0, 1, 0, 1],
     ],
   );
 });
 
-test("a team with no university is counted under its own name", () => {
-  const list = podiums([played(["t1", "Melaka"], ["t2", "Kedah"], 2, 0, { ...football, stage: "final" })]);
-  const rows = medalTable(list, () => null);
-  assert.deepEqual(rows.map((r) => r.name), ["Melaka", "Kedah"]);
+test("teams level on every medal are listed alphabetically", () => {
+  const list = podiums([
+    played(["t1", "Zebras"], ["t2", "Ants"], 2, 0, { ...football, stage: "final" }),
+    played(["t3", "Bees"], ["t4", "Yaks"], 3, 1, { ...netball, stage: "final" }),
+  ]);
+  assert.deepEqual(
+    medalTable(list).map((r) => r.name),
+    ["Bees", "Zebras", "Ants", "Yaks"],
+  );
 });

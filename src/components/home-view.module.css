@@ -7,7 +7,7 @@
   color: var(--mg-night-text);
   background:
     linear-gradient(180deg, rgba(22, 15, 41, 0.72) 0%, rgba(22, 15, 41, 0.88) 55%, var(--mg-night) 100%),
-    url("/brand/banner.jpg") center 30% / cover no-repeat,
+    url("/brand/banner-band.jpg") center 30% / cover no-repeat,
     var(--mg-night);
   overflow: hidden;
 }
@@ -141,9 +141,7 @@
 /* ========================================================== MATCHDAY ==== */
 
 .band {
-  background:
-    var(--mg-batik),
-    linear-gradient(180deg, var(--mg-night) 0%, var(--mg-night-2) 100%);
+  background: var(--mg-band-photo), var(--mg-night);
   color: var(--mg-night-text);
   padding-block: 18px 26px;
   scroll-margin-top: var(--mg-header-height);
@@ -321,11 +319,6 @@
   color: var(--mg-gold);
 }
 
-.championUni {
-  font-size: 13px;
-  color: var(--mg-gold);
-}
-
 .nowrap {
   white-space: nowrap;
 }
@@ -367,14 +360,17 @@
 .sUpdates {
   order: 4;
 }
-.sResults {
+.sFood {
   order: 5;
 }
-.sSports {
+.sResults {
   order: 6;
 }
-.sVenues {
+.sSports {
   order: 7;
+}
+.sVenues {
+  order: 8;
 }
 
 @media (min-width: 1000px) {
@@ -619,4 +615,102 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------- food ---- */
+
+/* A swipeable row of stalls on a phone; a grid once there is room. */
+.foodRail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(200px, 62%);
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  contain: paint;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding: 2px var(--mg-gutter) 6px;
+  scroll-padding-inline: var(--mg-gutter);
+}
+
+.foodRail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .foodRail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+.foodTile {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+  color: var(--mg-ink);
+  scroll-snap-align: start;
+}
+
+.foodVisual {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 84px;
+  padding: 10px 12px;
+  background:
+    var(--mg-batik),
+    linear-gradient(160deg, color-mix(in srgb, var(--tone) 82%, #fff), var(--tone) 55%, color-mix(in srgb, var(--tone) 70%, #000));
+  overflow: hidden;
+}
+
+.foodPhoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foodMonogram {
+  font-family: var(--mg-display);
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.foodText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 12px 12px;
+}
+
+.foodName {
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.foodMeta {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.foodFrom {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mg-gold-ink);
 }

@@ -14,7 +14,7 @@ import { StandingsTable } from "@/components/standings-table";
 import type { Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { medalTable, podiums } from "@/lib/medals";
-import type { PickerTeam, Sport } from "@/lib/queries";
+import type { Sport } from "@/lib/queries";
 import {
   computeStandings,
   pointsRule,
@@ -31,7 +31,6 @@ export type StandingsTab = "table" | "bracket" | "games";
 type StandingsViewProps = {
   fixtures: Fixture[];
   sports: Sport[];
-  teams: PickerTeam[];
   groups: (GroupMeta & { sportSlug: string })[];
   standingTeams: (TeamMeta & { sportSlug: string })[];
   initialSport: string;
@@ -46,7 +45,6 @@ type StandingsViewProps = {
 export function StandingsView({
   fixtures: initial,
   sports,
-  teams,
   groups,
   standingTeams,
   initialSport,
@@ -88,7 +86,7 @@ export function StandingsView({
 
       <div className={`mg-wrap ${styles.body}`}>
         {sport === "overall" ? (
-          <Overall fixtures={fixtures} teams={teams} />
+          <Overall fixtures={fixtures} />
         ) : (
           <SportStandings
             key={sport}
@@ -106,15 +104,14 @@ export function StandingsView({
   );
 }
 
-function Overall({ fixtures, teams }: { fixtures: Fixture[]; teams: PickerTeam[] }) {
+function Overall({ fixtures }: { fixtures: Fixture[] }) {
   const list = podiums(fixtures);
-  const universityOf = (id: string) => teams.find((t) => t.id === id)?.university ?? null;
 
   return (
     <>
       <section className={styles.section}>
         <h2 className={styles.title}>Medal table</h2>
-        <MedalTable rows={medalTable(list, universityOf)} />
+        <MedalTable rows={medalTable(list)} />
       </section>
 
       <section className={styles.section}>

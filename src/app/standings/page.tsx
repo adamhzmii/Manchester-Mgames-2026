@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { StandingsView, type StandingsTab } from "@/components/standings-view";
 import { podiums } from "@/lib/medals";
-import { getFixtures, getSports, getStandingsData, getTeams } from "@/lib/queries";
+import { getFixtures, getSports, getStandingsData } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Standings",
@@ -20,12 +20,11 @@ function one(value: string | string[] | undefined): string | undefined {
 }
 
 export default async function StandingsPage({ searchParams }: PageProps<"/standings">) {
-  const [params, fixtures, sports, standings, teams] = await Promise.all([
+  const [params, fixtures, sports, standings] = await Promise.all([
     searchParams,
     getFixtures(),
     getSports(),
     getStandingsData(),
-    getTeams(),
   ]);
 
   // Opens on the medal table once there is one to show; before that, on the
@@ -40,7 +39,6 @@ export default async function StandingsPage({ searchParams }: PageProps<"/standi
     <StandingsView
       fixtures={fixtures}
       sports={sports}
-      teams={teams}
       groups={standings.groups}
       standingTeams={standings.teams}
       initialSport={sport}

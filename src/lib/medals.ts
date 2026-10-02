@@ -71,7 +71,7 @@ export function podiums(fixtures: readonly Fixture[]): Podium[] {
 }
 
 export type MedalRow = {
-  /** The university, or the team name where no university is recorded. */
+  /** The team, by name. */
   name: string;
   gold: number;
   silver: number;
@@ -80,23 +80,29 @@ export type MedalRow = {
 };
 
 /**
- * Medals by university, ranked the Olympic way: golds first, then silvers,
- * then bronzes. Teams carry a university because the same institution fields
- * different squads in different sports, and that institution is what people
- * cheer for across the whole day.
+ * Medals by team, ranked the Olympic way: golds first, then silvers, then
+ * bronzes.
+ *
+ * Counted by team name rather than by university. Teams are not reliably one
+ * university — some squads mix players from several — so a university table
+ * would credit medals to institutions that did not win them. A contingent
+ * that keeps its name across sports (the same "Melaka Mariners" in netball and
+ * volleyball) still adds up, because the name is the same.
  */
-export function medalTable(
-  list: readonly Podium[],
-  universityOf: (teamId: string) => string | null,
-): MedalRow[] {
+export function medalTable(list: readonly Podium[]): MedalRow[] {
   const rows = new Map<string, MedalRow>();
   const add = (medallist: Medallist | null, kind: "gold" | "silver" | "bronze") => {
     if (!medallist) return;
-    const name = universityOf(medallist.teamId) ?? medallist.name;
-    const row = rows.get(name) ?? { name, gold: 0, silver: 0, bronze: 0, total: 0 };
+    const row = rows.get(medallist.name) ?? {
+      name: medallist.name,
+      gold: 0,
+      silver: 0,
+      bronze: 0,
+      total: 0,
+    };
     row[kind] += 1;
     row.total += 1;
-    rows.set(name, row);
+    rows.set(medallist.name, row);
   };
 
   for (const podium of list) {

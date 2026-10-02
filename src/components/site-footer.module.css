@@ -64,7 +64,7 @@
 .bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid var(--mg-line);
@@ -74,11 +74,6 @@
   .bottom {
     grid-column: 1 / -1;
   }
-}
-
-.emergency {
-  color: var(--mg-live);
-  font-weight: 600;
 }
 
 .staff {

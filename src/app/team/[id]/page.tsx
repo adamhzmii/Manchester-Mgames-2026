@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: PageProps<"/team/[id]">): Pro
   const team = (await getTeams()).find((t) => t.id === id);
   if (!team) return { title: "Team not found" };
   const title = `${team.name} · ${team.sportName}`;
-  const description = `${team.name}${team.university ? ` (${team.university})` : ""} at MGames 2026 — fixtures, results and where they stand.`;
+  const description = `${team.name} at MGames 2026 — fixtures, results and where they stand.`;
   return { title, description, openGraph: { title, description } };
 }
 

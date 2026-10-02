@@ -241,12 +241,21 @@ export interface Database {
           photo_url: string | null;
           latitude: number | null;
           longitude: number | null;
+          tagline: string | null;
+          instagram: string | null;
+          tags: string[];
           sort_order: number;
           created_at: Timestamptz;
         };
-        Insert: Omit<Database["public"]["Tables"]["vendors"]["Row"], "id" | "created_at"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["vendors"]["Row"],
+          "id" | "created_at" | "tagline" | "instagram" | "tags"
+        > & {
           id?: string;
           created_at?: Timestamptz;
+          tagline?: string | null;
+          instagram?: string | null;
+          tags?: string[];
         };
         Update: Partial<Database["public"]["Tables"]["vendors"]["Insert"]>;
         Relationships: [

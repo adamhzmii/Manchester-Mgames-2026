@@ -16,7 +16,7 @@ import { UpdateTypeIcon, UPDATE_TYPE_LABEL } from "@/components/update-type-icon
 import { YourTeam } from "@/components/your-team";
 import { useMinute } from "@/lib/clock";
 import type { Fixture } from "@/lib/fixtures";
-import { formatTime } from "@/lib/format";
+import { formatPrice, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import {
   firstKickoff,
@@ -27,7 +27,8 @@ import {
   type Phase,
 } from "@/lib/matchday";
 import { medalTable, podiums, type Podium } from "@/lib/medals";
-import type { Announcement, PickerTeam, Sport, Venue } from "@/lib/queries";
+import type { Announcement, PickerTeam, Sport, Vendor, Venue } from "@/lib/queries";
+import { fromPrice, monogram, stallTone } from "@/lib/vendors";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./home-view.module.css";
@@ -38,6 +39,7 @@ type HomeViewProps = {
   sports: Sport[];
   venues: Venue[];
   updates: Announcement[];
+  vendors: Vendor[];
   /** The server's "now", so the first client render picks the same phase. */
   renderedAt: number;
 };
@@ -52,7 +54,15 @@ type HomeViewProps = {
  * Reads the shared live feed, so a game going live while the page is open
  * flips it into matchday without a reload.
  */
-export function HomeView({ fixtures: initial, teams, sports, venues, updates, renderedAt }: HomeViewProps) {
+export function HomeView({
+  fixtures: initial,
+  teams,
+  sports,
+  venues,
+  updates,
+  vendors,
+  renderedAt,
+}: HomeViewProps) {
   const fixtures = useLiveFixtures(initial);
   const minute = useMinute();
   const now = minute ?? renderedAt;
@@ -68,7 +78,7 @@ export function HomeView({ fixtures: initial, teams, sports, venues, updates, re
       ) : phase === "matchday" ? (
         <MatchdayBand fixtures={fixtures} now={now} />
       ) : (
-        <ChampionsBand finals={finals} teams={teams} />
+        <ChampionsBand finals={finals} />
       )}
 
       <div className={`mg-wrap ${styles.body}`}>
@@ -76,9 +86,7 @@ export function HomeView({ fixtures: initial, teams, sports, venues, updates, re
           {phase === "after" ? (
             <section className={styles.sMedals}>
               <SectionHead title="Medal table" href="/standings" action="Standings" />
-              <MedalTable
-                rows={medalTable(finals, (id) => teams.find((t) => t.id === id)?.university ?? null)}
-              />
+              <MedalTable rows={medalTable(finals)} />
             </section>
           ) : null}
 
@@ -97,6 +105,16 @@ export function HomeView({ fixtures: initial, teams, sports, venues, updates, re
                   <MatchRow key={f.id} fixture={f} followed={favourites.teamIds} />
                 ))}
               </MatchList>
+            </section>
+          ) : null}
+
+          {/* Selling the stalls out is part of the job, so they get a place on
+              the page everyone lands on — before and during the day, not after
+              it is over. */}
+          {phase !== "after" && vendors.length > 0 ? (
+            <section className={styles.sFood}>
+              <SectionHead title="Food & drink" count={vendors.length} href="/food" action="All stalls" />
+              <FoodRail vendors={vendors} />
             </section>
           ) : null}
 
@@ -286,7 +304,7 @@ function UpNextList({ fixtures, followed }: { fixtures: Fixture[]; followed: rea
 
 // -------------------------------------------------------------- after ----
 
-function ChampionsBand({ finals, teams }: { finals: Podium[]; teams: PickerTeam[] }) {
+function ChampionsBand({ finals }: { finals: Podium[] }) {
   return (
     <section className={styles.band}>
       <div className="mg-wrap">
@@ -298,7 +316,6 @@ function ChampionsBand({ finals, teams }: { finals: Podium[]; teams: PickerTeam[
         <h1 className={styles.championsTitle}>Champions</h1>
         <div className={styles.champions}>
           {finals.map((p) => {
-            const university = teams.find((t) => t.id === p.gold.teamId)?.university;
             const [a, b] =
               p.final.teamAId === p.gold.teamId
                 ? [p.final.scoreA, p.final.scoreB]
@@ -313,7 +330,6 @@ function ChampionsBand({ finals, teams }: { finals: Podium[]; teams: PickerTeam[
                   <TrophyIcon size={20} className={styles.championCup} />
                   {p.gold.name}
                 </span>
-                {university ? <span className={styles.championUni}>{university}</span> : null}
                 <span className={styles.championScore}>
                   Beat {p.silver.name}{" "}
                   <span className={styles.nowrap}>
@@ -462,6 +478,45 @@ function VenueCards({
               ) : null}
             </div>
           </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function FoodRail({ vendors }: { vendors: Vendor[] }) {
+  return (
+    <div className={styles.foodRail}>
+      {vendors.map((v) => {
+        const from = fromPrice(v);
+        return (
+          <Link
+            key={v.id}
+            href={`/food?venue=${v.venueSlug}#${v.id}`}
+            className={styles.foodTile}
+          >
+            <span
+              className={styles.foodVisual}
+              style={{ "--tone": stallTone(v.name) } as React.CSSProperties}
+            >
+              {v.photoUrl ? (
+                // Committee-pasted URLs; see VendorCard.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={v.photoUrl} alt="" className={styles.foodPhoto} />
+              ) : (
+                <span className={styles.foodMonogram} aria-hidden="true">
+                  {monogram(v.name)}
+                </span>
+              )}
+            </span>
+            <span className={styles.foodText}>
+              <span className={styles.foodName}>{v.name}</span>
+              <span className={styles.foodMeta}>
+                {v.cuisine} · {v.venueShortName}
+              </span>
+              {from !== null ? <span className={styles.foodFrom}>from {formatPrice(from)}</span> : null}
+            </span>
+          </Link>
         );
       })}
     </div>

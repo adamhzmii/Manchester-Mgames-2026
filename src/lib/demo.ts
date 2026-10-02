@@ -278,3 +278,54 @@ export function demoAnnouncements(): DemoAnnouncement[] | null {
     publishedAt: new Date(now - a.minutesAgo * 60_000).toISOString(),
   }));
 }
+
+// ------------------------------------------------------------ vendors ----
+
+/**
+ * Sample copy for the mock stalls, so the Food page can be seen filled in.
+ * Rehearsal only: real vendors' taglines, tags and handles come from the
+ * committee via the dashboard, and nothing here is ever shown to a visitor.
+ * The handles are deliberately obvious placeholders.
+ */
+const DEMO_VENDOR_COPY: Record<string, { tagline: string; tags: string[]; instagram: string }> = {
+  "Nasi Lemak Corner": {
+    tagline: "Sambal made the night before. Get there before the queue does.",
+    tags: ["Halal", "Spicy"],
+    instagram: "demo.nasilemakcorner",
+  },
+  "Satay Station": {
+    tagline: "Charcoal-grilled skewers with proper peanut sauce.",
+    tags: ["Halal"],
+    instagram: "demo.sataystation",
+  },
+  "Roti King Express": {
+    tagline: "Roti canai flipped to order, with dhal or curry on the side.",
+    tags: ["Halal", "Vegetarian options"],
+    instagram: "demo.rotiking",
+  },
+  "Wok This Way": {
+    tagline: "Wok-fried noodles in under five minutes — between-games fuel.",
+    tags: ["Halal"],
+    instagram: "demo.wokthisway",
+  },
+  "Boba Lab": {
+    tagline: "Brown sugar boba and Thai tea, cold, between games.",
+    tags: ["Vegetarian"],
+    instagram: "demo.bobalab",
+  },
+  "Sweet Kuih Co.": {
+    tagline: "Kuih lapis, onde-onde and seri muka, made by hand.",
+    tags: ["Halal", "Vegetarian"],
+    instagram: "demo.sweetkuih",
+  },
+};
+
+export function applyDemoVendors<
+  T extends { name: string; tagline: string | null; instagram: string | null; tags: string[] },
+>(vendors: T[]): T[] {
+  if (!demoScenario()) return vendors;
+  return vendors.map((v) => {
+    const copy = DEMO_VENDOR_COPY[v.name];
+    return copy && !v.tagline ? { ...v, ...copy } : v;
+  });
+}

@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { CalendarIcon, HomeIcon, InfoIcon, MapIcon, PodiumIcon } from "@/components/icons";
+import {
+  CalendarIcon,
+  FoodIcon,
+  HomeIcon,
+  InfoIcon,
+  MapIcon,
+  PodiumIcon,
+} from "@/components/icons";
 import { NAV_ITEMS, isActive, type NavItem } from "@/lib/nav";
 
 import styles from "./bottom-nav.module.css";
@@ -12,6 +19,7 @@ const ICONS: Record<NavItem["icon"], (props: { size?: number }) => React.ReactEl
   home: HomeIcon,
   calendar: CalendarIcon,
   standings: PodiumIcon,
+  food: FoodIcon,
   map: MapIcon,
   info: InfoIcon,
 };

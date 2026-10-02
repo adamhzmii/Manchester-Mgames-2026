@@ -10,6 +10,7 @@ import {
   getFixtures,
   getStandingsData,
   getTeams,
+  getVendors,
   getVenues,
 } from "@/lib/queries";
 
@@ -29,12 +30,13 @@ export async function generateMetadata({ params }: PageProps<"/match/[id]">): Pr
 
 export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
   const { id } = await params;
-  const [fixtures, teams, standings, venues, coordinator] = await Promise.all([
+  const [fixtures, teams, standings, venues, coordinator, vendors] = await Promise.all([
     getFixtures(),
     getTeams(),
     getStandingsData(),
     getVenues(),
     getCoordinator(),
+    getVendors(),
   ]);
 
   const fixture = fixtures.find((f) => f.id === id);
@@ -48,6 +50,7 @@ export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
       groups={standings.groups}
       standingTeams={standings.teams}
       venues={venues}
+      vendors={vendors}
       canEdit={coordinatorCanEdit(coordinator, fixture.sportId) || demoScorer()}
     />
   );

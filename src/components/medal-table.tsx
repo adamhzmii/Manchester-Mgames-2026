@@ -3,9 +3,9 @@ import type { MedalRow } from "@/lib/medals";
 import styles from "./medal-table.module.css";
 
 /**
- * Medals by university. Medals are drawn as coloured discs in the column
- * heads — the convention every Olympic table uses — so the numbers below read
- * without a legend.
+ * Medals by team. Medals are drawn as coloured discs in the column heads —
+ * the convention every Olympic table uses — so the numbers below read without
+ * a legend.
  */
 export function MedalTable({ rows }: { rows: MedalRow[] }) {
   if (rows.length === 0) {
@@ -25,7 +25,7 @@ export function MedalTable({ rows }: { rows: MedalRow[] }) {
               <span className="mg-sr-only">Rank</span>
             </th>
             <th scope="col" className={styles.name}>
-              University
+              Team
             </th>
             <th scope="col" className={styles.medal}>
               <span className={`${styles.disc} ${styles.gold}`} aria-hidden="true" />
