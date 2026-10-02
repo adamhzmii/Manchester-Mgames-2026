@@ -193,12 +193,10 @@
 
 /* ------------------------------------------------------------ strip ---- */
 
-/* A new update, in gold, directly under the frame. Sticky with the header so
-   it stays in view while someone scrolls the schedule looking for the game
-   it is about. */
+/* A new update, in gold, directly under the frame. Not sticky: pinned, it
+   stacked on top of the schedule's own sticky sport bar. */
 .strip {
-  position: sticky;
-  top: var(--mg-header-height);
+  position: relative;
   z-index: 49;
   background: var(--mg-gold);
   color: var(--mg-night);

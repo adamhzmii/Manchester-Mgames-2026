@@ -1,7 +1,8 @@
 import "server-only";
 
 import type { Fixture } from "@/lib/fixtures";
-import { computeStandings, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import { resolveSlot } from "@/lib/progression";
+import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import type { AnnouncementType } from "@/lib/supabase/types";
 
 /**
@@ -33,6 +34,16 @@ export function demoScenario(): DemoScenario | null {
   if (process.env.VERCEL) return null;
   const value = process.env.MGAMES_DEMO;
   return value === "morning" || value === "midday" || value === "post" ? value : null;
+}
+
+/**
+ * Shows the coordinator console in a rehearsal without signing in, to see
+ * and test its layout. Its saves still go through the real server action as
+ * an anonymous visitor, which the fixtures RLS policy refuses — so this
+ * previews the console, it does not grant anything.
+ */
+export function demoScorer(): boolean {
+  return demoScenario() !== null && process.env.MGAMES_DEMO_SCORER === "1";
 }
 
 /** The time the rehearsal is pretending it is, or null when not rehearsing. */
@@ -141,77 +152,6 @@ export type DemoMeta = {
   teams: (TeamMeta & { sportSlug: string })[];
 };
 
-const GROUP_SLOT = /^Group ([A-Z]) (winner|runner-up|1st|2nd|3rd|4th)$/;
-const SLOT_POSITION: Record<string, number> = {
-  winner: 0,
-  "1st": 0,
-  "runner-up": 1,
-  "2nd": 1,
-  "3rd": 2,
-  "4th": 3,
-};
-const SEMI_SLOT = /^(Winner|Loser) SF([12])$/;
-
-function winnerOf(f: Fixture): { id: string; name: string } | null {
-  if (f.status !== "finished" || f.scoreA === null || f.scoreB === null) return null;
-  if (f.teamAId === null || f.teamBId === null || f.scoreA === f.scoreB) return null;
-  return f.scoreA > f.scoreB
-    ? { id: f.teamAId, name: f.teamA }
-    : { id: f.teamBId, name: f.teamB };
-}
-
-function loserOf(f: Fixture): { id: string; name: string } | null {
-  const winner = winnerOf(f);
-  if (!winner) return null;
-  return winner.id === f.teamAId
-    ? { id: f.teamBId!, name: f.teamB }
-    : { id: f.teamAId!, name: f.teamA };
-}
-
-/**
- * Fills a knockout slot the way a coordinator would on the day: group places
- * once the whole group has been played, semi-final results once the semi is
- * over. Returns null while the feeder is still undecided.
- */
-function resolveSlot(
-  label: string,
-  fixture: Fixture,
-  done: readonly Fixture[],
-  meta: DemoMeta,
-): { id: string; name: string } | null {
-  const group = GROUP_SLOT.exec(label);
-  if (group) {
-    const [, letter, place] = group;
-    const groupMeta = meta.groups.find(
-      (g) => g.sportSlug === fixture.sportSlug && g.name === `Group ${letter}`,
-    );
-    if (!groupMeta) return null;
-    const groupGames = done.filter((f) => f.groupId === groupMeta.id);
-    if (groupGames.some((f) => f.status !== "finished")) return null;
-    const [table] = computeStandings(
-      groupGames,
-      [groupMeta],
-      meta.teams.filter((t) => t.sportSlug === fixture.sportSlug),
-      fixture.sportSlug,
-    );
-    const row = table?.rows[SLOT_POSITION[place]];
-    return row ? { id: row.teamId, name: row.teamName } : null;
-  }
-
-  const semi = SEMI_SLOT.exec(label);
-  if (semi) {
-    const [, outcome, number] = semi;
-    const semis = done
-      .filter((f) => f.categoryId === fixture.categoryId && f.stage === "semifinal")
-      .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
-    const feeder = semis[Number(number) - 1];
-    if (!feeder) return null;
-    return outcome === "Winner" ? winnerOf(feeder) : loserOf(feeder);
-  }
-
-  return null;
-}
-
 /**
  * Plays the tournament forward to the scenario's clock: every game that has
  * ended gets a result, every game in progress a partial score, and knockout
@@ -228,12 +168,13 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
   for (const original of ordered) {
     let f: Fixture = { ...original };
 
+    // Fill knockout slots the way a coordinator would on the day.
     if (f.teamAId === null) {
-      const team = resolveSlot(f.teamA, f, played, meta);
+      const team = resolveSlot(f.teamA, f, played, meta.groups, meta.teams);
       if (team) f = { ...f, teamAId: team.id, teamA: team.name };
     }
     if (f.teamBId === null) {
-      const team = resolveSlot(f.teamB, f, played, meta);
+      const team = resolveSlot(f.teamB, f, played, meta.groups, meta.teams);
       if (team) f = { ...f, teamBId: team.id, teamB: team.name };
     }
 

@@ -1,0 +1,257 @@
+/* The console is committee chrome, so it is framed in night like the header —
+   unmistakably not part of what spectators see. */
+.console {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-night);
+  color: var(--mg-night-text);
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.35);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  color: var(--mg-gold);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.saving,
+.saved,
+.unsaved,
+.error {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.saving {
+  color: var(--mg-night-muted);
+}
+
+.saved {
+  color: #6ee7a8;
+}
+
+.unsaved {
+  color: var(--mg-gold);
+}
+
+.error {
+  color: #ff8a8d;
+  text-align: right;
+}
+
+/* ----------------------------------------------------------- steppers --- */
+
+.sides {
+  display: grid;
+  gap: 10px;
+}
+
+.side {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-2);
+}
+
+.sideName {
+  font-family: var(--mg-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* 64px targets: hit reliably with a thumb, without looking, mid-rally. */
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-3);
+  color: var(--mg-night-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.step:active {
+  transform: scale(0.97);
+}
+
+.step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.plus {
+  background: var(--mg-gold);
+  color: var(--mg-night);
+}
+
+.value {
+  width: 100%;
+  min-width: 0;
+  height: 64px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  text-align: center;
+  font-family: var(--mg-display);
+  font-size: 40px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.value::placeholder {
+  color: var(--mg-night-muted);
+}
+
+/* ------------------------------------------------------------ actions --- */
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions > * {
+  flex: 1;
+  min-height: 52px;
+}
+
+.primary {
+  background: var(--mg-gold);
+  color: var(--mg-night);
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.finish {
+  background: var(--mg-live);
+  color: #fff;
+}
+
+.secondary {
+  background: var(--mg-night-3);
+  color: var(--mg-night-text);
+}
+
+.warning {
+  padding: 10px 12px;
+  border-radius: var(--mg-r-sm);
+  background: rgba(229, 72, 77, 0.16);
+  color: #ffb3b5;
+  font-size: 14px;
+}
+
+.reset {
+  justify-self: start;
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  color: var(--mg-night-muted);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------- assign --- */
+
+.assign {
+  display: grid;
+  gap: 12px;
+}
+
+.assignIntro {
+  font-size: 14px;
+  color: var(--mg-night-muted);
+}
+
+.slot {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-2);
+}
+
+.slotLabel {
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-style: italic;
+  color: var(--mg-night-muted);
+}
+
+.suggest {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-gold);
+  color: var(--mg-night);
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestLead {
+  font-family: var(--mg-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.suggestTeam {
+  font-family: var(--mg-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.manual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.select {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-3);
+  color: var(--mg-night-text);
+  font: inherit;
+  font-weight: 600;
+}

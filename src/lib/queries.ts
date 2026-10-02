@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { PostgrestError } from "@supabase/supabase-js";
+import { cache } from "react";
 
 import {
   FIXTURE_SELECT,
@@ -18,9 +19,13 @@ import type { AnnouncementType } from "@/lib/supabase/types";
 /**
  * Every read the app does, in one place.
  *
- * None of these are cached. Scores and announcements change during the event
- * and a stale render is worse than an extra query against a dataset this size;
- * the pages that use them render dynamically on purpose.
+ * None of these are cached across requests. Scores and announcements change
+ * during the event and a stale render is worse than an extra query against a
+ * dataset this size; the pages that use them render dynamically on purpose.
+ *
+ * The common reads are wrapped in React's cache(), which only memoises within
+ * one request: a match page's generateMetadata and its body both need the
+ * fixture list, and this makes that one query rather than two.
  */
 
 export type Sport = {
@@ -117,7 +122,7 @@ function unwrap<T>(
   return result.data;
 }
 
-export async function getSports(): Promise<Sport[]> {
+export const getSports = cache(async function getSports(): Promise<Sport[]> {
   const supabase = await createClient();
   const rows = unwrap(
     "sports",
@@ -127,9 +132,9 @@ export async function getSports(): Promise<Sport[]> {
       .order("sort_order"),
   );
   return rows;
-}
+});
 
-export async function getVenues(): Promise<Venue[]> {
+export const getVenues = cache(async function getVenues(): Promise<Venue[]> {
   const supabase = await createClient();
   const rows = unwrap(
     "venues",
@@ -147,17 +152,17 @@ export async function getVenues(): Promise<Venue[]> {
     latitude: v.latitude,
     longitude: v.longitude,
   }));
-}
+});
 
 /** Every fixture in the tournament, sorted live → upcoming → finished. */
-export async function getFixtures(): Promise<Fixture[]> {
+export const getFixtures = cache(async function getFixtures(): Promise<Fixture[]> {
   const supabase = await createClient();
   const rows = unwrap(
     "fixtures",
     await supabase.from("fixtures").select(FIXTURE_SELECT).order("scheduled_time"),
   );
   return (await withDemo((rows as unknown as FixtureRow[]).map(toFixture))).sort(byRelevance);
-}
+});
 
 /**
  * Passes fixtures through the matchday rehearsal when one is running locally
@@ -261,7 +266,7 @@ export async function getGroupsAndTeams(
  * couple of hundred rows, so they are loaded once and the tables are computed
  * in the browser.
  */
-export async function getStandingsData(): Promise<{
+export const getStandingsData = cache(async function getStandingsData(): Promise<{
   groups: (GroupMeta & { sportSlug: string })[];
   teams: (TeamMeta & { sportSlug: string })[];
 }> {
@@ -312,7 +317,7 @@ export async function getStandingsData(): Promise<{
       sportSlug: t.categories?.sports?.slug ?? "",
     })),
   };
-}
+});
 
 /**
  * Every team, for the "My Games" picker and the coordinator's bracket-slot
@@ -321,7 +326,7 @@ export async function getStandingsData(): Promise<{
  * team pools, and sport alone isn't a fine-grained enough filter to stop a
  * women's doubles team showing up as a candidate for a men's doubles slot.
  */
-export async function getTeams(): Promise<PickerTeam[]> {
+export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
   const supabase = await createClient();
   const rows = unwrap(
     "teams",
@@ -365,7 +370,7 @@ export async function getTeams(): Promise<PickerTeam[]> {
     sportColor: t.category?.sport?.color ?? "#3C2A6E",
     sportOrder: t.category?.sport?.sort_order ?? 0,
   }));
-}
+});
 
 export async function getAnnouncements(limit?: number): Promise<Announcement[]> {
   const rehearsal = demoAnnouncements();
@@ -470,7 +475,7 @@ export async function getCourts(): Promise<Court[]> {
  *
  * `sportId: null` means a committee admin who may edit every sport.
  */
-export async function getCoordinator(): Promise<Coordinator | null> {
+export const getCoordinator = cache(async function getCoordinator(): Promise<Coordinator | null> {
   const supabase = await createClient();
 
   const { data: claims } = await supabase.auth.getClaims();
@@ -487,5 +492,5 @@ export async function getCoordinator(): Promise<Coordinator | null> {
   if (error || !data || data.length === 0) return null;
 
   return { name: data[0].name, sportId: data[0].sport_id };
-}
+});
 

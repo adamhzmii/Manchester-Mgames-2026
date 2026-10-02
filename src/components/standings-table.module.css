@@ -1,0 +1,164 @@
+.card {
+  background: var(--mg-card);
+  border-radius: var(--mg-r-lg);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  caption-side: top;
+  text-align: left;
+  padding: 12px 14px 10px;
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mg-ink);
+}
+
+.table th,
+.table td {
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.table thead th {
+  padding-block: 7px;
+  font-family: var(--mg-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+  background: var(--mg-sunk);
+}
+
+.table tbody td {
+  color: var(--mg-ink-2);
+}
+
+.table tbody tr + tr {
+  box-shadow: inset 0 1px 0 var(--mg-line);
+}
+
+.pos {
+  position: relative;
+  width: 30px;
+  padding-left: 12px !important;
+  font-family: var(--mg-display);
+  font-weight: 700;
+  color: var(--mg-ink-3) !important;
+}
+
+/* The qualification tick in the margin. */
+.through .pos::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--mg-up);
+}
+
+/* The cut: a dashed line under the last place that goes through. */
+.cut {
+  box-shadow: inset 0 -1px 0 transparent;
+  background-image: linear-gradient(90deg, var(--mg-ink-4) 50%, transparent 50%);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+.team {
+  text-align: left !important;
+  max-width: 0;
+  width: 100%;
+}
+
+.team a {
+  display: block;
+  font-family: var(--mg-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mg-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table thead .team {
+  max-width: none;
+}
+
+.highlight {
+  background-color: var(--mg-gold-wash);
+}
+
+.diff {
+  width: 40px;
+}
+
+.pts {
+  width: 40px;
+  padding-right: 14px !important;
+  font-family: var(--mg-display);
+  font-size: 18px !important;
+  font-weight: 800;
+  color: var(--mg-ink) !important;
+}
+
+/* Form needs room a phone does not have; it appears from tablet width. */
+.form {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .form {
+    display: table-cell;
+    width: 104px;
+  }
+}
+
+.formRow {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.formDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-family: var(--mg-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.formDot[data-r="W"] {
+  background: var(--mg-up);
+}
+
+.formDot[data-r="D"] {
+  background: var(--mg-ink-4);
+}
+
+.formDot[data-r="L"] {
+  background: var(--mg-live);
+}
+
+.table td:nth-child(n + 3):nth-child(-n + 6) {
+  width: 28px;
+}

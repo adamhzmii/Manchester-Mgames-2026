@@ -189,3 +189,35 @@ export function computeStandings(
     })
     .filter((group) => group.rows.length > 0);
 }
+
+export type FormResult = "W" | "D" | "L";
+
+/**
+ * A team's results in kick-off order — the "form" column every football table
+ * carries. Counts every finished game the team has played, knockouts
+ * included, because that is the run a spectator is asking about.
+ */
+export function teamForm(fixtures: readonly Fixture[], teamId: string): FormResult[] {
+  return fixtures
+    .filter(
+      (f) =>
+        f.status === "finished" &&
+        f.scoreA !== null &&
+        f.scoreB !== null &&
+        (f.teamAId === teamId || f.teamBId === teamId),
+    )
+    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime))
+    .map((f) => {
+      const mine = f.teamAId === teamId ? f.scoreA! : f.scoreB!;
+      const theirs = f.teamAId === teamId ? f.scoreB! : f.scoreA!;
+      return mine > theirs ? "W" : mine < theirs ? "L" : "D";
+    });
+}
+
+/** Points a win and a draw are worth in this sport, for explaining the table. */
+export function pointsRule(sportSlug: string): { win: number; draw: number } {
+  return POINTS_RULES[sportSlug] ?? DEFAULT_POINTS;
+}
+
+/** How many places in a group go through. */
+export const QUALIFYING = QUALIFYING_PLACES;

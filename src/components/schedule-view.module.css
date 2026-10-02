@@ -1,131 +1,257 @@
+.page {
+  padding-block: 20px 32px;
+  animation: mg-fade-in 0.2s ease both;
+}
+
 .head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px var(--mg-gutter) 12px;
 }
 
-.myGames {
+.sub {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--mg-ink-3);
+}
+
+.mine {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1.5px solid var(--mg-border-strong);
-  background: var(--mg-surface);
-  color: #5a5470;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink);
+  font-family: var(--mg-display);
+  font-size: 15px;
   font-weight: 700;
-  font-size: 12px;
-  padding: 7px 12px;
-  border-radius: var(--mg-radius-pill);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.myGamesOn {
-  border-color: var(--mg-gold);
+.mineOn {
   background: var(--mg-gold);
-  color: var(--mg-purple-deep);
+  color: var(--mg-night);
+  box-shadow: none;
 }
 
-.count {
+.coordinator {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px var(--mg-gutter);
-  font-size: 12px;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-plum-wash);
+  color: var(--mg-plum);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--mg-text-muted);
 }
 
-.reset {
-  background: none;
+/* --------------------------------------------------------- toolbar ---- */
+
+/* The sport selector sticks under the header: on a long list, switching
+   sport should not mean scrolling back to the top first. */
+.toolbar {
+  position: sticky;
+  top: var(--mg-header-height);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  height: var(--toolbar-height);
+  margin-top: 16px;
+  /* Solid, not frosted: on a phone in a bright hall, text ghosting through a
+     translucent bar costs more than the effect is worth. */
+  background: var(--mg-paper);
+  box-shadow: 0 1px 0 var(--mg-line);
+}
+
+.page {
+  --toolbar-height: 54px;
+}
+
+.toolbar > * {
+  width: 100%;
+  max-width: var(--mg-max);
+  margin-inline: auto;
+}
+
+.secondary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.segment {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--mg-r);
+  background: var(--mg-sunk);
+  box-shadow: inset 0 0 0 1px var(--mg-line);
+}
+
+.segmentItem {
   border: 0;
-  color: var(--mg-purple);
+  background: transparent;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-family: var(--mg-display);
+  font-size: 15px;
   font-weight: 700;
-  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: var(--mg-ink-3);
   cursor: pointer;
-  padding: 2px 4px;
 }
 
-.list {
+.segmentOn {
+  background: var(--mg-card);
+  color: var(--mg-ink);
+  box-shadow: var(--mg-shadow);
+}
+
+.liveToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-live-wash);
+  color: var(--mg-live);
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.liveToggleOn {
+  background: var(--mg-live);
+  color: #fff;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.clear {
+  border: 0;
+  background: none;
+  padding: 0 6px;
+  height: 38px;
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mg-plum);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------ hours ---- */
+
+.blocks {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 6px var(--mg-gutter) 0;
+  gap: 20px;
+  margin-top: 16px;
 }
-
-.empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--mg-text-muted);
-}
-
-.emptyTitle {
-  font-weight: 700;
-  color: var(--mg-purple);
-}
-
-.emptyBody {
-  font-size: 13px;
-}
-
-@media (min-width: 768px) {
-  .list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    align-items: start;
-  }
-}
-
-/* ------------------------------------------------------- hour blocks ---- */
 
 .block {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  /* Offsets the sticky heading so scrollIntoView does not tuck the first card
-     of a block under the site header. */
-  scroll-margin-top: calc(var(--mg-header-height) + 8px);
+  gap: 8px;
+  /* Clears the header and the sticky sport bar when jumped to. */
+  scroll-margin-top: calc(var(--mg-header-height) + var(--toolbar-height) + 8px);
 }
 
-.blockGames {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Sticky so the hour a player is looking at stays named while they scroll
-   through it. */
+/* Sticky under the sport bar, so the hour you are scrolling through stays
+   named. */
 .hour {
   position: sticky;
-  top: var(--mg-header-height);
-  z-index: 2;
+  top: calc(var(--mg-header-height) + var(--toolbar-height));
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0;
-  padding: 8px 0 6px;
-  background: var(--mg-bg);
+  padding: 6px 0;
+  background: var(--mg-paper);
 }
 
 .hourTime {
-  font-family: var(--font-barlow-condensed), sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.06em;
-  color: var(--mg-purple);
+  font-family: var(--mg-display);
+  font-size: 22px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  color: var(--mg-ink);
+}
+
+.block[data-past] .hourTime {
+  color: var(--mg-ink-3);
+}
+
+.now {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--mg-live);
+  color: #fff;
+  font-family: var(--mg-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .hourRule {
   flex: 1;
   height: 1px;
-  background: var(--mg-border);
+  background: var(--mg-line-2);
 }
 
 .hourCount {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--mg-text-faint);
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+/* ------------------------------------------------------------ empty ---- */
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 22px 18px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+}
+
+.emptyTitle {
+  font-family: var(--mg-display);
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.emptyBody {
+  color: var(--mg-ink-2);
 }
