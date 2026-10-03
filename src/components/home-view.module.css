@@ -1,7 +1,8 @@
 /* =============================================================== TOP ==== */
 
-/* The one place the photograph appears: the real hall, darkened into night
-   so the event's name, and then whatever the day brings, carry the moment. */
+/* The real hall, darkened into night so the event's name, and then whatever
+   the day brings, carry the moment. Just the photograph: a pattern over it
+   only fought it. */
 .top {
   position: relative;
   color: var(--mg-night-text);
@@ -10,15 +11,6 @@
     url("/brand/banner-band.jpg") center 30% / cover no-repeat,
     var(--mg-night);
   overflow: hidden;
-}
-
-.top::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--mg-batik);
-  mask-image: linear-gradient(90deg, transparent 30%, #000);
-  pointer-events: none;
 }
 
 .topInner {
