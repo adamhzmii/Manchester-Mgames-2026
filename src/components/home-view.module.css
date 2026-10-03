@@ -1,8 +1,8 @@
-/* ============================================================ BEFORE ==== */
+/* =============================================================== TOP ==== */
 
-/* The hero is the one place the photograph appears: the real hall, darkened
-   into night so the type and the countdown carry the moment. */
-.hero {
+/* The one place the photograph appears: the real hall, darkened into night
+   so the event's name, and then whatever the day brings, carry the moment. */
+.top {
   position: relative;
   color: var(--mg-night-text);
   background:
@@ -12,7 +12,7 @@
   overflow: hidden;
 }
 
-.hero::after {
+.top::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -21,23 +21,53 @@
   pointer-events: none;
 }
 
-.heroInner {
+.topInner {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 28px;
-  padding-block: 32px 36px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  padding-block: 26px 28px;
 }
 
 @media (min-width: 960px) {
-  .heroInner {
+  .topInner {
+    gap: 30px;
+    padding-block: 52px 56px;
+  }
+
+  /* Before the day, on a laptop: the name, the numbers and the buttons on
+     the left; the countdown on the right. */
+  .topInner[data-phase="before"] {
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      "mast clock"
+      "extra clock";
     align-items: end;
-    padding-block: 64px 64px;
+  }
+
+  .topInner[data-phase="before"] .masthead {
+    grid-area: mast;
+  }
+
+  .topInner[data-phase="before"] .beforeExtra {
+    grid-area: extra;
+  }
+
+  .topInner[data-phase="before"] .beforeClock {
+    grid-area: clock;
   }
 }
 
-.eyebrow {
+/* ---------------------------------------------------------- masthead ---- */
+
+.masthead {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.mastKicker {
   font-family: var(--mg-display);
   font-size: 13px;
   font-weight: 700;
@@ -46,34 +76,66 @@
   color: var(--mg-gold);
 }
 
-.heroTitle {
-  margin-top: 10px;
+/* Big enough to read as the name of the event from across a sports hall,
+   small enough that the live scores under it still make the first screen. */
+.mastTitle {
   color: #fff;
-  font-size: clamp(64px, 19vw, 132px);
+  font-size: clamp(46px, 15vw, 104px);
   font-weight: 800;
-  line-height: 0.86;
-  letter-spacing: -0.015em;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 
-.heroYear {
+.gold {
   color: var(--mg-gold);
 }
 
-.heroCity {
-  font-family: var(--mg-display);
-  font-size: clamp(22px, 6vw, 34px);
-  font-weight: 700;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--mg-night-text);
-  margin-top: 6px;
+.mastFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.heroWhen {
-  margin-top: 14px;
-  font-size: 15px;
-  color: var(--mg-night-muted);
+/* Sized so both fit on one line on a 360px Android phone. */
+.mastFact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mastIcon {
+  flex: 0 0 auto;
+  color: var(--mg-gold);
+}
+
+/* Whatever comes under the name sits below a hairline. */
+.beforeExtra,
+.phaseBlock {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* "Live" in the header jumps here, clear of the sticky header. */
+.phaseBlock {
+  scroll-margin-top: calc(var(--mg-header-height) + 8px);
+}
+
+/* ============================================================ BEFORE ==== */
+
+.beforeExtra {
+  display: grid;
+  gap: 22px;
 }
 
 .stats {
@@ -81,7 +143,7 @@
   grid-template-columns: repeat(4, auto);
   justify-content: start;
   gap: 4px 22px;
-  margin: 22px 0 0;
+  margin: 0;
 }
 
 .stat {
@@ -112,14 +174,13 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 26px;
 }
 
 .ghostLight {
   color: var(--mg-night-text);
 }
 
-.heroClock {
+.beforeClock {
   display: grid;
   gap: 10px;
 }
@@ -139,13 +200,6 @@
 }
 
 /* ========================================================== MATCHDAY ==== */
-
-.band {
-  background: var(--mg-band-photo), var(--mg-night);
-  color: var(--mg-night-text);
-  padding-block: 18px 26px;
-  scroll-margin-top: var(--mg-header-height);
-}
 
 .bandTop {
   display: flex;
@@ -235,7 +289,8 @@
 
 .morningTitle {
   color: #fff;
-  font-size: clamp(40px, 11vw, 72px);
+  font-family: var(--mg-display);
+  font-size: clamp(30px, 9vw, 52px);
   font-weight: 800;
   text-transform: uppercase;
   line-height: 0.95;
@@ -255,11 +310,11 @@
 
 .championsTitle {
   color: #fff;
-  font-size: clamp(44px, 12vw, 84px);
+  font-size: clamp(30px, 9vw, 52px);
   font-weight: 800;
   text-transform: uppercase;
-  line-height: 0.9;
-  margin-bottom: 18px;
+  line-height: 0.95;
+  margin-bottom: 14px;
 }
 
 /* Two up on a phone: six champions stacked one per row pushed everything
@@ -652,64 +707,63 @@
 .foodTile {
   display: flex;
   flex-direction: column;
+  gap: 3px;
+  padding: 14px 14px 12px;
   border-radius: var(--mg-r-lg);
   background: var(--mg-card);
   box-shadow: var(--mg-shadow);
-  overflow: hidden;
   color: var(--mg-ink);
   scroll-snap-align: start;
 }
 
-.foodVisual {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  height: 84px;
-  padding: 10px 12px;
-  background:
-    var(--mg-batik),
-    linear-gradient(160deg, color-mix(in srgb, var(--tone) 82%, #fff), var(--tone) 55%, color-mix(in srgb, var(--tone) 70%, #000));
-  overflow: hidden;
-}
-
-.foodPhoto {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.foodMonogram {
+.foodCuisine {
   font-family: var(--mg-display);
-  font-size: 44px;
+  font-size: 12px;
   font-weight: 800;
-  line-height: 0.8;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.foodText {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 10px 12px 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-gold-ink);
 }
 
 .foodName {
   font-family: var(--mg-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
-.foodMeta {
+.foodTagline {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   font-size: 13px;
+  line-height: 1.35;
+  color: var(--mg-ink-2);
+}
+
+.foodFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.foodWhere {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--mg-ink-3);
 }
 
 .foodFrom {
-  margin-top: 4px;
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 700;
   color: var(--mg-gold-ink);

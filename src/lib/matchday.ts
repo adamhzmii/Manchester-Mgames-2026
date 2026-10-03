@@ -86,8 +86,16 @@ export function relative(target: number, now: number): string {
   const abs = Math.abs(diff);
   const hours = Math.floor(abs / 60);
   const minutes = abs % 60;
+  // Weeks out, "in 493 hr 25 min" is noise; whole days say it.
+  const days = Math.floor(hours / 24);
   const text =
-    hours === 0 ? `${minutes} min` : minutes === 0 ? `${hours} hr` : `${hours} hr ${minutes} min`;
+    days > 0
+      ? `${days} ${days === 1 ? "day" : "days"}`
+      : hours === 0
+        ? `${minutes} min`
+        : minutes === 0
+          ? `${hours} hr`
+          : `${hours} hr ${minutes} min`;
   return diff > 0 ? `in ${text}` : `${text} ago`;
 }
 

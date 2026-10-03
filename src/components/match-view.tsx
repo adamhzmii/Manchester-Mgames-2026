@@ -8,6 +8,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
+  FoodIcon,
   PinIcon,
   ShareIcon,
   StarIcon,
@@ -26,7 +27,6 @@ import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
 import { semiFinals } from "@/lib/progression";
 import type { PickerTeam, Vendor, Venue } from "@/lib/queries";
-import { monogram, stallTone } from "@/lib/vendors";
 import { computeStandings, QUALIFYING, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
@@ -419,12 +419,8 @@ function FoodNearby({
   if (vendors.length === 0) return null;
   return (
     <Link href={`/food?venue=${venueSlug}`} className={styles.food}>
-      <span className={styles.foodStack} aria-hidden="true">
-        {vendors.slice(0, 3).map((v) => (
-          <span key={v.id} className={styles.foodBadge} style={{ background: stallTone(v.name) }}>
-            {monogram(v.name)}
-          </span>
-        ))}
+      <span className={styles.foodIcon} aria-hidden="true">
+        <FoodIcon size={20} />
       </span>
       <span className={styles.foodText}>
         <span className={styles.foodTitle}>Hungry? Food at {venueName}</span>

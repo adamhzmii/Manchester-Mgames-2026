@@ -52,6 +52,9 @@ test("relative times read the way they are said", () => {
   assert.equal(relative(now + 120 * 60_000, now), "in 2 hr");
   assert.equal(relative(now - 8 * 60_000, now), "8 min ago");
   assert.equal(relative(now + 20_000, now), "now");
+  assert.equal(relative(now + (30 * 60 + 5) * 60_000, now), "in 1 day");
+  assert.equal(relative(now + (493 * 60 + 25) * 60_000, now), "in 20 days");
+  assert.equal(relative(now - 3 * 24 * 60 * 60_000, now), "3 days ago");
 });
 
 test("up next counts a game still waiting to start, even past its slot", () => {

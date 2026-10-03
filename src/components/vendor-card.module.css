@@ -8,75 +8,6 @@
   scroll-margin-top: calc(var(--mg-header-height) + 12px);
 }
 
-/* The poster: the stall's own photo, or its initials on a colour of its own
-   with the batik over it — never an empty grey box. */
-.visual {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  height: 116px;
-  padding: 12px 14px;
-  background:
-    var(--mg-batik),
-    linear-gradient(160deg, color-mix(in srgb, var(--tone) 82%, #fff) 0%, var(--tone) 55%, color-mix(in srgb, var(--tone) 70%, #000) 100%);
-  color: #fff;
-  overflow: hidden;
-}
-
-.visual[data-photo] {
-  height: auto;
-  aspect-ratio: 16 / 9;
-  padding: 0;
-  background: var(--mg-sunk);
-}
-
-.photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.monogram {
-  font-family: var(--mg-display);
-  font-size: 64px;
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.02em;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-
-.venue,
-.from {
-  position: absolute;
-  top: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-family: var(--mg-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.venue {
-  left: 10px;
-  background: rgba(22, 15, 41, 0.75);
-  color: #fff;
-}
-
-.from {
-  right: 10px;
-  background: var(--mg-gold);
-  color: var(--mg-night);
-}
-
 /* -------------------------------------------------------------- body ---- */
 
 .body {
@@ -84,10 +15,34 @@
   flex-direction: column;
   gap: 8px;
   flex: 1;
-  padding: 14px 16px 16px;
+  padding: 16px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.from {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--mg-gold);
+  color: var(--mg-night);
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .cuisine {
+  min-width: 0;
   font-family: var(--mg-display);
   font-size: 13px;
   font-weight: 800;
@@ -97,7 +52,7 @@
 }
 
 .name {
-  margin-top: -4px;
+  margin-top: -2px;
   font-size: 28px;
   font-weight: 800;
   line-height: 1;
@@ -171,32 +126,36 @@
   font-variant-numeric: tabular-nums;
 }
 
+.insta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mg-plum);
+}
+
+.insta svg {
+  flex: 0 0 auto;
+}
+
+/* Long handles break rather than push the card wider than the phone. */
+.handle {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   margin-top: auto;
   padding-top: 8px;
 }
 
-/* The stall button keeps its words on one line; a long handle gives way
-   instead, truncating rather than squeezing it. */
 .find {
-  flex: 1 0 auto;
-  white-space: nowrap;
+  flex: 1;
   background: var(--mg-night);
   color: #fff;
-}
-
-.insta {
-  flex: 1 1 0;
-  min-width: 0;
-  background: var(--mg-sunk);
-  color: var(--mg-ink);
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 15px;
-  box-shadow: inset 0 0 0 1px var(--mg-line);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -204,15 +163,4 @@
     background: var(--mg-gold);
     color: var(--mg-night);
   }
-}
-
-.handle {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.insta svg {
-  flex: 0 0 auto;
 }

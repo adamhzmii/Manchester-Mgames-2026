@@ -168,14 +168,17 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
   for (const original of ordered) {
     let f: Fixture = { ...original };
 
-    // Fill knockout slots the way a coordinator would on the day.
+    // Fill knockout slots the way a coordinator would on the day. Never the
+    // team already in the other slot: the database refuses a team playing
+    // itself, and a slot a coordinator filled by hand (in a dry run, say)
+    // can disagree with what the rehearsed results say.
     if (f.teamAId === null) {
       const team = resolveSlot(f.teamA, f, played, meta.groups, meta.teams);
-      if (team) f = { ...f, teamAId: team.id, teamA: team.name };
+      if (team && team.id !== f.teamBId) f = { ...f, teamAId: team.id, teamA: team.name };
     }
     if (f.teamBId === null) {
       const team = resolveSlot(f.teamB, f, played, meta.groups, meta.teams);
-      if (team) f = { ...f, teamBId: team.id, teamB: team.name };
+      if (team && team.id !== f.teamAId) f = { ...f, teamBId: team.id, teamB: team.name };
     }
 
     const start = Date.parse(f.scheduledTime);

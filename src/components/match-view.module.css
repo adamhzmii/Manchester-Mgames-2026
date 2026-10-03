@@ -321,27 +321,16 @@
   color: var(--mg-ink);
 }
 
-.foodStack {
-  display: flex;
-  flex: 0 0 auto;
-}
-
-.foodBadge {
+.foodIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--mg-gold-wash);
-  color: #fff;
-  font-family: var(--mg-display);
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.foodBadge + .foodBadge {
-  margin-left: -10px;
+  background: var(--mg-gold);
+  color: var(--mg-night);
 }
 
 .foodText {

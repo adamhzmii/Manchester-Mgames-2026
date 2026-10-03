@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { Countdown } from "@/components/countdown";
 import { FindTeamButton } from "@/components/find-team-button";
-import { ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
+import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
 import { LiveScoreboard } from "@/components/live-scoreboard";
 import { MatchList, MatchRow } from "@/components/match-row";
 import { MedalTable } from "@/components/medal-table";
@@ -28,7 +28,7 @@ import {
 } from "@/lib/matchday";
 import { medalTable, podiums, type Podium } from "@/lib/medals";
 import type { Announcement, PickerTeam, Sport, Vendor, Venue } from "@/lib/queries";
-import { fromPrice, monogram, stallTone } from "@/lib/vendors";
+import { fromPrice } from "@/lib/vendors";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./home-view.module.css";
@@ -73,13 +73,21 @@ export function HomeView({
 
   return (
     <>
-      {phase === "before" ? (
-        <BeforeHero fixtures={fixtures} teams={teams} sports={sports} venues={venues} />
-      ) : phase === "matchday" ? (
-        <MatchdayBand fixtures={fixtures} now={now} />
-      ) : (
-        <ChampionsBand finals={finals} />
-      )}
+      {/* One photo band: the event's name first, whatever the day, then what
+          the day calls for under it. Someone arriving from a link in a group
+          chat should see "Manchester MGames 2026" before anything else. */}
+      <section className={styles.top}>
+        <div className={`mg-wrap ${styles.topInner}`} data-phase={phase}>
+          <Masthead />
+          {phase === "before" ? (
+            <BeforeHero fixtures={fixtures} teams={teams} sports={sports} venues={venues} />
+          ) : phase === "matchday" ? (
+            <MatchdayLive fixtures={fixtures} now={now} />
+          ) : (
+            <Champions finals={finals} />
+          )}
+        </div>
+      </section>
 
       <div className={`mg-wrap ${styles.body}`}>
         <div className={styles.main}>
@@ -170,6 +178,32 @@ export function HomeView({
   );
 }
 
+// ----------------------------------------------------------- masthead ----
+
+/** The event's name, as a poster would set it, at the top of every phase. */
+function Masthead() {
+  return (
+    <div className={styles.masthead}>
+      <p className={styles.mastKicker}>Malaysian Students&rsquo; Society · Manchester</p>
+      <h1 className={styles.mastTitle}>
+        Manchester
+        <br />
+        MGames <span className={styles.gold}>2026</span>
+      </h1>
+      <div className={styles.mastFacts}>
+        <span className={styles.mastFact}>
+          <CalendarIcon size={15} className={styles.mastIcon} />
+          Sat 24 October 2026
+        </span>
+        <span className={styles.mastFact}>
+          <PinIcon size={15} className={styles.mastIcon} />
+          Trinity &amp; Sugden
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------- before ----
 
 function BeforeHero({
@@ -186,44 +220,33 @@ function BeforeHero({
   const first = firstKickoff(fixtures);
 
   return (
-    <section className={styles.hero}>
-      <div className={`mg-wrap ${styles.heroInner}`}>
-        <div className={styles.heroText}>
-          <p className={styles.eyebrow}>Malaysian Students&rsquo; Society of Manchester presents</p>
-          <h1 className={styles.heroTitle}>
-            MGames <span className={styles.heroYear}>2026</span>
-          </h1>
-          <p className={styles.heroCity}>Manchester</p>
-          <p className={styles.heroWhen}>
-            Saturday 24 October · Trinity &amp; Sugden Sports Centres
-          </p>
+    <>
+      <div className={styles.beforeExtra}>
+        <dl className={styles.stats}>
+          <Stat value={sports.length} label="Sports" />
+          <Stat value={teams.length} label="Teams" />
+          <Stat value={fixtures.length} label="Matches" />
+          <Stat value={venues.length} label="Venues" />
+        </dl>
 
-          <dl className={styles.stats}>
-            <Stat value={sports.length} label="Sports" />
-            <Stat value={teams.length} label="Teams" />
-            <Stat value={fixtures.length} label="Matches" />
-            <Stat value={venues.length} label="Venues" />
-          </dl>
-
-          <div className={styles.ctas}>
-            <FindTeamButton teams={teams} className="mg-btn mg-btn-gold" />
-            <Link href="/schedule" className={`mg-btn mg-btn-ghost ${styles.ghostLight}`}>
-              The schedule
-            </Link>
-          </div>
+        <div className={styles.ctas}>
+          <FindTeamButton teams={teams} className="mg-btn mg-btn-gold" />
+          <Link href="/schedule" className={`mg-btn mg-btn-ghost ${styles.ghostLight}`}>
+            The schedule
+          </Link>
         </div>
-
-        {first !== null ? (
-          <div className={styles.heroClock}>
-            <p className={styles.clockLabel}>Until the first whistle</p>
-            <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
-            <p className={styles.clockFoot}>
-              First game {formatTime(new Date(first).toISOString())} · doors 08:30
-            </p>
-          </div>
-        ) : null}
       </div>
-    </section>
+
+      {first !== null ? (
+        <div className={styles.beforeClock}>
+          <p className={styles.clockLabel}>Until the first whistle</p>
+          <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
+          <p className={styles.clockFoot}>
+            First game {formatTime(new Date(first).toISOString())} · doors 08:30
+          </p>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -238,53 +261,53 @@ function Stat({ value, label }: { value: number; label: string }) {
 
 // ----------------------------------------------------------- matchday ----
 
-function MatchdayBand({ fixtures, now }: { fixtures: Fixture[]; now: number }) {
+function MatchdayLive({ fixtures, now }: { fixtures: Fixture[]; now: number }) {
   const live = liveFixtures(fixtures);
   const [next] = upNext(fixtures, 1);
   const first = firstKickoff(fixtures);
   const notStarted = live.length === 0 && fixtures.every((f) => f.status === "upcoming");
 
   return (
-    <section className={styles.band} id="live">
-      <div className="mg-wrap">
-        <div className={styles.bandTop}>
-          <p className={styles.bandKicker}>
-            <span className={styles.bandGold}>Matchday</span> · Sat 24 October
-          </p>
-          {live.length > 0 ? (
-            <p className={styles.bandCount}>
-              <span className={styles.bandDot} aria-hidden="true" />
-              {live.length} live now
-            </p>
-          ) : null}
-        </div>
-
+    // "Live" in the header links here, past the masthead to the scores.
+    <div className={styles.phaseBlock} id="live">
+      <div className={styles.bandTop}>
+        <p className={styles.bandKicker}>
+          <span className={styles.bandGold}>Matchday</span>
+          {live.length === 0 && next && !notStarted ? " · between games" : null}
+        </p>
         {live.length > 0 ? (
-          <div className={styles.boards}>
-            {live.map((f) => (
-              <LiveScoreboard key={f.id} fixture={f} />
-            ))}
-          </div>
-        ) : notStarted && first !== null && now < first ? (
-          <div className={styles.morning}>
-            <h1 className={styles.morningTitle}>Today&rsquo;s the day</h1>
-            <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
-            <p className={styles.clockFoot}>
-              First game {formatTime(new Date(first).toISOString())} · doors 08:30
-            </p>
-          </div>
-        ) : next ? (
-          <div className={styles.lull}>
-            <p className={styles.lullLabel}>
-              Nothing live right now · next up <RelTime iso={next.scheduledTime} />
-            </p>
-            <div className={styles.boards}>
-              <LiveScoreboard fixture={next} />
-            </div>
-          </div>
+          <p className={styles.bandCount}>
+            <span className={styles.bandDot} aria-hidden="true" />
+            {live.length} live now
+          </p>
         ) : null}
       </div>
-    </section>
+
+      {live.length > 0 ? (
+        <div className={styles.boards}>
+          {live.map((f) => (
+            <LiveScoreboard key={f.id} fixture={f} />
+          ))}
+        </div>
+      ) : notStarted && first !== null && now < first ? (
+        <div className={styles.morning}>
+          <p className={styles.morningTitle}>Today&rsquo;s the day</p>
+          <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
+          <p className={styles.clockFoot}>
+            First game {formatTime(new Date(first).toISOString())} · doors 08:30
+          </p>
+        </div>
+      ) : next ? (
+        <div className={styles.lull}>
+          <p className={styles.lullLabel}>
+            Next up <RelTime iso={next.scheduledTime} />
+          </p>
+          <div className={styles.boards}>
+            <LiveScoreboard fixture={next} />
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -304,44 +327,42 @@ function UpNextList({ fixtures, followed }: { fixtures: Fixture[]; followed: rea
 
 // -------------------------------------------------------------- after ----
 
-function ChampionsBand({ finals }: { finals: Podium[] }) {
+function Champions({ finals }: { finals: Podium[] }) {
   return (
-    <section className={styles.band}>
-      <div className="mg-wrap">
-        <div className={styles.bandTop}>
-          <p className={styles.bandKicker}>
-            <span className={styles.bandGold}>That&rsquo;s a wrap</span> · MGames 2026
-          </p>
-        </div>
-        <h1 className={styles.championsTitle}>Champions</h1>
-        <div className={styles.champions}>
-          {finals.map((p) => {
-            const [a, b] =
-              p.final.teamAId === p.gold.teamId
-                ? [p.final.scoreA, p.final.scoreB]
-                : [p.final.scoreB, p.final.scoreA];
-            return (
-              <Link key={p.categoryId} href={`/match/${p.final.id}`} className={styles.champion}>
-                <span className={styles.championSport}>
-                  <SportBadge code={p.sportCode} color={p.sportColor} slug={p.sportSlug} size={22} />
-                  {p.title}
-                </span>
-                <span className={styles.championName}>
-                  <TrophyIcon size={20} className={styles.championCup} />
-                  {p.gold.name}
-                </span>
-                <span className={styles.championScore}>
-                  Beat {p.silver.name}{" "}
-                  <span className={styles.nowrap}>
-                    {a}–{b}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+    <div className={styles.phaseBlock}>
+      <div className={styles.bandTop}>
+        <p className={styles.bandKicker}>
+          <span className={styles.bandGold}>That&rsquo;s a wrap</span> · thanks for coming
+        </p>
       </div>
-    </section>
+      <h2 className={styles.championsTitle}>Champions</h2>
+      <div className={styles.champions}>
+        {finals.map((p) => {
+          const [a, b] =
+            p.final.teamAId === p.gold.teamId
+              ? [p.final.scoreA, p.final.scoreB]
+              : [p.final.scoreB, p.final.scoreA];
+          return (
+            <Link key={p.categoryId} href={`/match/${p.final.id}`} className={styles.champion}>
+              <span className={styles.championSport}>
+                <SportBadge code={p.sportCode} color={p.sportColor} slug={p.sportSlug} size={22} />
+                {p.title}
+              </span>
+              <span className={styles.championName}>
+                <TrophyIcon size={20} className={styles.championCup} />
+                {p.gold.name}
+              </span>
+              <span className={styles.championScore}>
+                Beat {p.silver.name}{" "}
+                <span className={styles.nowrap}>
+                  {a}–{b}
+                </span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -495,24 +516,13 @@ function FoodRail({ vendors }: { vendors: Vendor[] }) {
             href={`/food?venue=${v.venueSlug}#${v.id}`}
             className={styles.foodTile}
           >
-            <span
-              className={styles.foodVisual}
-              style={{ "--tone": stallTone(v.name) } as React.CSSProperties}
-            >
-              {v.photoUrl ? (
-                // Committee-pasted URLs; see VendorCard.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={v.photoUrl} alt="" className={styles.foodPhoto} />
-              ) : (
-                <span className={styles.foodMonogram} aria-hidden="true">
-                  {monogram(v.name)}
-                </span>
-              )}
-            </span>
-            <span className={styles.foodText}>
-              <span className={styles.foodName}>{v.name}</span>
-              <span className={styles.foodMeta}>
-                {v.cuisine} · {v.venueShortName}
+            <span className={styles.foodCuisine}>{v.cuisine}</span>
+            <span className={styles.foodName}>{v.name}</span>
+            {v.tagline ? <span className={styles.foodTagline}>{v.tagline}</span> : null}
+            <span className={styles.foodFoot}>
+              <span className={styles.foodWhere}>
+                <PinIcon size={13} />
+                {v.venueShortName}
               </span>
               {from !== null ? <span className={styles.foodFrom}>from {formatPrice(from)}</span> : null}
             </span>

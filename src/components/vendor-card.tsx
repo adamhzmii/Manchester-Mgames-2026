@@ -1,14 +1,15 @@
-import { ExternalIcon, PinIcon } from "@/components/icons";
+import { InstagramIcon, PinIcon } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import type { Vendor, Venue } from "@/lib/queries";
-import { fromPrice, instagramHref, monogram, stallDirections, stallTone } from "@/lib/vendors";
+import { fromPrice, instagramHref, stallDirections } from "@/lib/vendors";
 
 import styles from "./vendor-card.module.css";
 
 /**
- * A stall, presented to be chosen: a poster header (its photo, or its
- * initials on a colour of its own), then the line that sells it, where it
- * is, the menu with prices, and a way to find it and follow it.
+ * A stall, presented to be chosen: what it cooks, the line that sells it,
+ * where it is, the menu with prices, and a way to find it and follow it.
+ * Every card has the same shape — no photo or logo slot, since only some
+ * stalls would have one to put in it.
  */
 export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue }) {
   const from = fromPrice(vendor);
@@ -17,30 +18,11 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
   return (
     // The id is the anchor other pages link to ("Food at Sugden" → this card).
     <article id={vendor.id} className={styles.card}>
-      <div
-        className={styles.visual}
-        style={{ "--tone": stallTone(vendor.name) } as React.CSSProperties}
-        data-photo={vendor.photoUrl ? "" : undefined}
-      >
-        {vendor.photoUrl ? (
-          // Vendor photos are arbitrary URLs pasted by the committee;
-          // next/image would need every host allow-listed up front.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={vendor.photoUrl} alt="" className={styles.photo} />
-        ) : (
-          <span className={styles.monogram} aria-hidden="true">
-            {monogram(vendor.name)}
-          </span>
-        )}
-        <span className={styles.venue}>
-          <PinIcon size={12} />
-          {vendor.venueShortName}
-        </span>
-        {from !== null ? <span className={styles.from}>from {formatPrice(from)}</span> : null}
-      </div>
-
       <div className={styles.body}>
-        <p className={styles.cuisine}>{vendor.cuisine}</p>
+        <div className={styles.head}>
+          <p className={styles.cuisine}>{vendor.cuisine}</p>
+          {from !== null ? <span className={styles.from}>from {formatPrice(from)}</span> : null}
+        </div>
         <h2 className={styles.name}>{vendor.name}</h2>
         {vendor.tagline ? <p className={styles.tagline}>{vendor.tagline}</p> : null}
 
@@ -59,6 +41,19 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
           {vendor.venueShortName}
           {vendor.location ? ` · ${vendor.location}` : ""}
         </p>
+        {/* A line of its own, so the whole handle shows — squeezed into a
+            button beside "Find the stall" it was cut to "@dem…". */}
+        {vendor.instagram ? (
+          <a
+            href={instagramHref(vendor.instagram)}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.insta}
+          >
+            <InstagramIcon size={14} />
+            <span className={styles.handle}>@{vendor.instagram}</span>
+          </a>
+        ) : null}
 
         {vendor.menu.length > 0 ? (
           <ul className={styles.menu} aria-label={`${vendor.name} menu`}>
@@ -72,25 +67,13 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
           </ul>
         ) : null}
 
-        <div className={styles.actions}>
-          {directions ? (
+        {directions ? (
+          <div className={styles.actions}>
             <a href={directions} target="_blank" rel="noreferrer" className={`mg-btn ${styles.find}`}>
               Find the stall
             </a>
-          ) : null}
-          {vendor.instagram ? (
-            <a
-              href={instagramHref(vendor.instagram)}
-              target="_blank"
-              rel="noreferrer"
-              className={`mg-btn ${styles.insta}`}
-            >
-              {/* The handle truncates; the icon after it stays put. */}
-              <span className={styles.handle}>@{vendor.instagram}</span>
-              <ExternalIcon size={15} />
-            </a>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </article>
   );

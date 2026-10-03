@@ -154,6 +154,14 @@ export const ExternalIcon = icon(
   <path d="M14 4h6v6M20 4 11 13M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />,
 );
 
+export const InstagramIcon = icon(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <path d="M17.5 6.5h.01" />
+  </>,
+);
+
 export const MegaphoneIcon = icon(
   <path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1ZM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />,
 );
