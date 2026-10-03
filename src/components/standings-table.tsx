@@ -14,17 +14,18 @@ export function StandingsTable({
   group,
   fixtures,
   highlight = [],
-  qualifying = 2,
   captionHidden = false,
 }: {
   group: StandingsGroup;
   fixtures: readonly Fixture[];
   /** Team ids to emphasise — the two sides of an open match, or followed teams. */
   highlight?: readonly string[];
-  qualifying?: number;
   /** When the page already heads the table with the group's name. */
   captionHidden?: boolean;
 }) {
+  // No line under the last row: when everyone goes through there is no cut.
+  const cut = group.places < group.rows.length ? group.places : 0;
+
   return (
     <div className={styles.card}>
       <table className={styles.table}>
@@ -60,13 +61,14 @@ export function StandingsTable({
                 key={row.teamId}
                 className={[
                   row.qualifying ? styles.through : "",
-                  row.position === qualifying ? styles.cut : "",
+                  row.position === cut ? styles.cut : "",
                   highlight.includes(row.teamId) ? styles.highlight : "",
                 ].join(" ")}
               >
                 <td className={styles.pos}>{row.position}</td>
                 <th scope="row" className={styles.team}>
                   <Link href={`/team/${row.teamId}`}>{row.teamName}</Link>
+                  {row.group ? <span className={styles.from}>{row.group}</span> : null}
                 </th>
                 <td>{row.played}</td>
                 <td>{row.won}</td>

@@ -5,6 +5,7 @@ import { Score } from "@/components/score";
 import type { Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import { winningSide } from "@/lib/matchday";
+import { bracketOrder } from "@/lib/progression";
 import type { FixtureStage } from "@/lib/supabase/types";
 
 import styles from "./bracket.module.css";
@@ -17,22 +18,26 @@ import styles from "./bracket.module.css";
  * through it into the final — which reads as "its winner plays the final".
  * It is shown as its own card under the bracket instead.
  */
-const ROUNDS: readonly FixtureStage[] = ["playoff", "quarterfinal", "semifinal", "final"];
+const ROUNDS: readonly FixtureStage[] = ["playoff", "round_of_16", "quarterfinal", "semifinal", "final"];
 
 const ROUND_NAME: Partial<Record<FixtureStage, string>> = {
   playoff: "Play-off",
+  round_of_16: "Round of 16",
   quarterfinal: "Quarter-finals",
   semifinal: "Semi-finals",
   final: "Final",
 };
 
 export function Bracket({ fixtures }: { fixtures: readonly Fixture[] }) {
-  const rounds = ROUNDS.map((stage) => ({
-    stage,
-    matches: fixtures
-      .filter((f) => f.stage === stage)
-      .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime)),
-  })).filter((round) => round.matches.length > 0);
+  const rounds = bracketOrder(
+    ROUNDS.map((stage) => ({
+      stage,
+      matches: fixtures
+        .filter((f) => f.stage === stage)
+        .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime)),
+    })).filter((round) => round.matches.length > 0),
+    fixtures,
+  );
 
   const third = fixtures.filter((f) => f.stage === "third_place");
   const final = fixtures.find((f) => f.stage === "final");

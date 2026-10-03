@@ -25,9 +25,16 @@ import type { Fixture } from "@/lib/fixtures";
 import { formatDay, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
-import { semiFinals } from "@/lib/progression";
+import { nextGames } from "@/lib/progression";
+import { roundGames } from "@/lib/slots";
 import type { PickerTeam, Vendor, Venue } from "@/lib/queries";
-import { computeStandings, QUALIFYING, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import {
+  computeStandings,
+  type GroupMeta,
+  type StandingsGroup,
+  type TeamMeta,
+} from "@/lib/standings";
+import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./match-view.module.css";
@@ -210,7 +217,12 @@ export function MatchView({
             </div>
           </div>
 
-          <NextRound fixture={fixture} fixtures={fixtures} groupName={group?.name} />
+          <NextRound
+            fixture={fixture}
+            fixtures={fixtures}
+            table={table}
+            groupCount={groups.filter((g) => g.categoryId === fixture.categoryId).length}
+          />
         </div>
 
         <div className={styles.actions}>
@@ -351,42 +363,68 @@ function BackLink() {
 function NextRound({
   fixture,
   fixtures,
-  groupName,
+  table,
+  groupCount,
 }: {
   fixture: Fixture;
   fixtures: Fixture[];
-  groupName?: string;
+  table?: StandingsGroup;
+  groupCount: number;
 }) {
-  const sameCategory = fixtures.filter((f) => f.categoryId === fixture.categoryId);
   let text: React.ReactNode = null;
 
-  if (fixture.stage === "group" && groupName) {
-    const hasKnockout = sameCategory.some((f) => f.stage !== "group");
-    if (hasKnockout) {
-      text = `Top ${QUALIFYING} in ${groupName} go through to the knockouts.`;
-    }
-  } else if (fixture.stage === "semifinal") {
-    const index = semiFinals(fixture.categoryId, fixtures).findIndex((f) => f.id === fixture.id);
-    const final = sameCategory.find((f) => f.stage === "final");
-    const third = sameCategory.find((f) => f.stage === "third_place");
-    if (final) {
-      text = (
-        <>
-          Winner plays the{" "}
-          <Link href={`/match/${final.id}`}>final at {formatTime(final.scheduledTime)}</Link>
-          {third ? (
-            <>
-              , loser the <Link href={`/match/${third.id}`}>3rd-place game at {formatTime(third.scheduledTime)}</Link>
-            </>
-          ) : null}
-          .{index >= 0 ? <span className="mg-sr-only"> This is semi-final {index + 1}.</span> : null}
-        </>
-      );
+  if (fixture.stage === "group") {
+    const round = firstKnockoutRound(fixture.categoryId, fixtures);
+    if (table && round) {
+      text = throughLine(table, {
+        groups: groupCount,
+        groupSize: table.rows.length,
+        round,
+        group: table.groupName,
+      });
     }
   } else if (fixture.stage === "final") {
     text = "The winner is the MGames 2026 champion.";
   } else if (fixture.stage === "third_place") {
     text = "The winner takes bronze.";
+  } else {
+    const sameCategory = fixtures.filter((f) => f.categoryId === fixture.categoryId);
+    let { winner, loser } = nextGames(fixture, fixtures);
+    // Knockouts entered by name, with no "Winner SF1" to follow: a semi-final
+    // still leads to its category's final and 3rd-place game.
+    if (!winner && fixture.stage === "semifinal") {
+      winner = sameCategory.find((f) => f.stage === "final") ?? null;
+      loser = sameCategory.find((f) => f.stage === "third_place") ?? null;
+    }
+    const index = roundGames(fixture.categoryId, fixture.stage, fixtures).findIndex(
+      (f) => f.id === fixture.id,
+    );
+    if (winner) {
+      text = (
+        <>
+          Winner plays the{" "}
+          <Link href={`/match/${winner.id}`}>
+            {winner.stageLabel.toLowerCase()} at {formatTime(winner.scheduledTime)}
+          </Link>
+          {loser ? (
+            <>
+              , loser the{" "}
+              <Link href={`/match/${loser.id}`}>
+                {loser.stage === "third_place" ? "3rd-place game" : loser.stageLabel.toLowerCase()}{" "}
+                at {formatTime(loser.scheduledTime)}
+              </Link>
+            </>
+          ) : null}
+          .
+          {index >= 0 ? (
+            <span className="mg-sr-only">
+              {" "}
+              This is {fixture.stageLabel.toLowerCase()} {index + 1}.
+            </span>
+          ) : null}
+        </>
+      );
+    }
   }
 
   if (!text) return null;

@@ -1,5 +1,6 @@
 import type { Fixture } from "@/lib/fixtures";
-import { pointsRule, QUALIFYING, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import { qualification, type Qualification } from "@/lib/slots";
+import { pointsRule, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import type { FixtureStage } from "@/lib/supabase/types";
 
 /**
@@ -18,6 +19,7 @@ export type SportFormat = {
 
 const ROUND_ORDER: readonly FixtureStage[] = [
   "playoff",
+  "round_of_16",
   "quarterfinal",
   "semifinal",
   "third_place",
@@ -27,6 +29,7 @@ const ROUND_ORDER: readonly FixtureStage[] = [
 const ROUND_LABEL: Record<FixtureStage, string> = {
   group: "Group stage",
   playoff: "Play-off",
+  round_of_16: "Round of 16",
   quarterfinal: "Quarter-finals",
   semifinal: "Semi-finals",
   third_place: "3rd-place game",
@@ -66,7 +69,11 @@ export function describeFormat(
     const firstKnockout = rounds.find((r) => r !== "third_place");
     if (firstKnockout) {
       lines.push(
-        `Top ${QUALIFYING} ${sportGroups.length === 1 ? "go" : "in each group go"} through to the ${ROUND_LABEL[firstKnockout].toLowerCase()}.`,
+        throughLine(qualification(sportGroups[0].categoryId, games), {
+          groups: sportGroups.length,
+          groupSize: Math.max(...sizes),
+          round: firstKnockout,
+        }),
       );
     }
   } else if (rounds.length > 0 || games.length > 0) {
@@ -82,4 +89,45 @@ export function describeFormat(
     lines,
     rounds: rounds.filter((r) => r !== "third_place").map((r) => ROUND_LABEL[r]),
   };
+}
+
+/**
+ * Who goes through, in a sentence: "Top 2 in each group, and the 4 best
+ * third-placed teams, go through to the round of 16." Said of one group when
+ * `group` names it, as a match or team page does.
+ */
+export function throughLine(
+  rule: Qualification,
+  {
+    groups,
+    groupSize,
+    round,
+    group,
+  }: { groups: number; groupSize: number; round: FixtureStage | null; group?: string },
+): string {
+  const to = round ? ` to the ${ROUND_LABEL[round].toLowerCase()}` : "";
+
+  if (rule.places >= groupSize && rule.bestThirds === 0) {
+    return `Everyone goes through${to}; the table decides who plays whom.`;
+  }
+
+  const where = group ? ` in ${group}` : groups > 1 ? " in each group" : "";
+  if (rule.bestThirds > 0) {
+    return group
+      ? `Top ${rule.places}${where} go through${to}. Third might too: the ` +
+          `${rule.bestThirds} best third-placed teams across the groups join them.`
+      : `Top ${rule.places}${where}, and the ${rule.bestThirds} best third-placed teams, ` +
+          `go through${to}.`;
+  }
+  return `Top ${rule.places}${where} go through${to}.`;
+}
+
+/** The first knockout round a category's groups lead into. */
+export function firstKnockoutRound(
+  categoryId: string,
+  fixtures: readonly Fixture[],
+): FixtureStage | null {
+  const played = (stage: FixtureStage) =>
+    fixtures.some((f) => f.categoryId === categoryId && f.stage === stage);
+  return ROUND_ORDER.find((stage) => stage !== "third_place" && played(stage)) ?? null;
 }

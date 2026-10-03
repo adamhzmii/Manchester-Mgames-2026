@@ -40,7 +40,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-demo/types/**/*.ts",
-    ".next-demo/dev/types/**/*.ts"
+    ".next-demo/dev/types/**/*.ts",
+    ".next-preview-eve/types/**/*.ts",
+    ".next-preview-eve/dev/types/**/*.ts",
+    ".next-preview-midday/types/**/*.ts",
+    ".next-preview-midday/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

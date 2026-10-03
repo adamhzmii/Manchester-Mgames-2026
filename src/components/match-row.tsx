@@ -13,6 +13,7 @@ import styles from "./match-row.module.css";
 /** The abbreviations score apps use, so a knockout reads at a glance. */
 const STAGE_TAG: Partial<Record<FixtureStage, string>> = {
   playoff: "PO",
+  round_of_16: "R16",
   quarterfinal: "QF",
   semifinal: "SF",
   third_place: "3RD",

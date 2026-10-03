@@ -11,6 +11,7 @@ import {
   type FixtureRow,
 } from "@/lib/fixtures";
 import { applyDemo, applyDemoVendors, demoAnnouncements, demoScenario } from "@/lib/demo";
+import { applyPreviewFixtures, applyPreviewStandings, applyPreviewTeams } from "@/lib/preview";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import { createClient } from "@/lib/supabase/server";
 import type { Coordinator } from "@/lib/coordinator";
@@ -167,13 +168,15 @@ export const getFixtures = cache(async function getFixtures(): Promise<Fixture[]
 });
 
 /**
- * Passes fixtures through the matchday rehearsal when one is running locally
- * (see demo.ts), and straight through otherwise. Exported for /api/live, which
- * reads fixtures through its own cookie-free client.
+ * Passes fixtures through a format preview (see preview.ts) and the matchday
+ * rehearsal (see demo.ts) when either is running locally, and straight
+ * through otherwise. Exported for /api/live, which reads fixtures through its
+ * own cookie-free client.
  */
 export async function withDemo(fixtures: Fixture[]): Promise<Fixture[]> {
-  if (!demoScenario()) return fixtures;
-  return applyDemo(fixtures, await getStandingsData());
+  const previewed = applyPreviewFixtures(fixtures);
+  if (!demoScenario()) return previewed;
+  return applyDemo(previewed, await getStandingsData());
 }
 
 /** The "Happening now" rail on the home page. */
@@ -304,7 +307,7 @@ export const getStandingsData = cache(async function getStandingsData(): Promise
     categories: { sports: { slug: string } | null } | null;
   };
 
-  return {
+  return applyPreviewStandings({
     groups: (groupRows as unknown as GroupRow[]).map((g) => ({
       id: g.id,
       name: g.name,
@@ -318,7 +321,7 @@ export const getStandingsData = cache(async function getStandingsData(): Promise
       groupId: t.group_id,
       sportSlug: t.categories?.sports?.slug ?? "",
     })),
-  };
+  });
 });
 
 /**
@@ -358,7 +361,7 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
     } | null;
   };
 
-  return (rows as unknown as Row[]).map((t) => ({
+  return applyPreviewTeams((rows as unknown as Row[]).map((t) => ({
     id: t.id,
     name: t.name,
     categoryId: t.category_id,
@@ -369,7 +372,7 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
     sportCode: t.category?.sport?.code ?? "??",
     sportColor: t.category?.sport?.color ?? "#3C2A6E",
     sportOrder: t.category?.sport?.sort_order ?? 0,
-  }));
+  })));
 });
 
 export async function getAnnouncements(limit?: number): Promise<Announcement[]> {

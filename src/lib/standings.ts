@@ -1,4 +1,5 @@
 import type { Fixture } from "@/lib/fixtures";
+import { DEFAULT_PLACES, qualification } from "@/lib/slots";
 
 /**
  * Group tables are computed here rather than in the database. The whole
@@ -34,14 +35,21 @@ export type StandingsRow = {
   scoreAgainst: number;
   scoreDifference: number;
   points: number;
-  /** Top two of each group go through — drives the highlight and the "Q" tag. */
+  /** In a place that goes through, as things stand — drives the tick and the highlight. */
   qualifying: boolean;
+  /** The group a row comes from, in a table drawn across groups (the third-placed teams). */
+  group?: string;
 };
 
 export type StandingsGroup = {
   groupId: string;
   groupName: string;
+  categoryId: string;
   rows: StandingsRow[];
+  /** How many go through from this table: the line is drawn under that place. */
+  places: number;
+  /** How many of the groups' third-placed teams also go through, across all the groups. */
+  bestThirds: number;
 };
 
 export type GroupMeta = {
@@ -57,15 +65,7 @@ export type TeamMeta = {
   groupId: string | null;
 };
 
-const QUALIFYING_PLACES = 2;
 
-/**
- * Builds one table per group for a single sport.
- *
- * Only finished group-stage fixtures count. A live match is deliberately not
- * folded in early: a half-played score would reorder the table and then
- * reorder it back, which reads as a bug to anyone watching.
- */
 /**
  * Strictly better on the tiebreaker chain — the same comparison the table sorts
  * by, minus the alphabetical fallback, which orders tied teams for display
@@ -86,6 +86,27 @@ function isAheadOf(
   );
 }
 
+/** Points, then difference, then scored — the usual order. */
+function byRanking(a: StandingsRow, b: StandingsRow): number {
+  return (
+    b.points - a.points ||
+    b.scoreDifference - a.scoreDifference ||
+    b.scoreFor - a.scoreFor ||
+    // Alphabetical last so the table never jitters between renders on a dead tie.
+    a.teamName.localeCompare(b.teamName)
+  );
+}
+
+/**
+ * Builds one table per group for a single sport.
+ *
+ * Only finished group-stage fixtures count. A live match is deliberately not
+ * folded in early: a half-played score would reorder the table and then
+ * reorder it back, which reads as a bug to anyone watching.
+ *
+ * How many go through comes from the knockout slots in `fixtures` (see
+ * slots.ts), so pass the sport's knockout games along with its group games.
+ */
 export function computeStandings(
   fixtures: readonly Fixture[],
   groups: readonly GroupMeta[],
@@ -107,6 +128,7 @@ export function computeStandings(
   return [...groups]
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
     .map((group) => {
+      const { places, bestThirds } = qualification(group.categoryId, fixtures);
       const tallies = new Map<string, StandingsRow>();
 
       for (const team of teams) {
@@ -164,15 +186,7 @@ export function computeStandings(
           ...row,
           scoreDifference: row.scoreFor - row.scoreAgainst,
         }))
-        // Points, then difference, then scored — the usual order. Alphabetical
-        // last so the table never jitters between renders on a dead tie.
-        .sort(
-          (a, b) =>
-            b.points - a.points ||
-            b.scoreDifference - a.scoreDifference ||
-            b.scoreFor - a.scoreFor ||
-            a.teamName.localeCompare(b.teamName),
-        )
+        .sort(byRanking)
         .map((row, index, sorted) => ({
           ...row,
           position: index + 1,
@@ -182,12 +196,45 @@ export function computeStandings(
           // it had qualified on the strength of its name. So a row only counts
           // as qualifying if it is strictly ahead of the first team below the
           // line; while that tie stands, qualification is genuinely undecided.
-          qualifying: index < QUALIFYING_PLACES && isAheadOf(row, sorted[QUALIFYING_PLACES]),
+          qualifying: index < places && isAheadOf(row, sorted[places]),
         }));
 
-      return { groupId: group.id, groupName: group.name, rows };
+      return {
+        groupId: group.id,
+        groupName: group.name,
+        categoryId: group.categoryId,
+        rows,
+        places,
+        bestThirds,
+      };
     })
     .filter((group) => group.rows.length > 0);
+}
+
+/**
+ * The teams finishing third in a category's groups, ranked against each
+ * other, for a format where the best of them go through ("the four best
+ * third-placed teams"). Ranked and ticked exactly like a group table, as
+ * things stand. Null when the format has no such rule.
+ */
+export function thirdPlaceTable(tables: readonly StandingsGroup[]): StandingsGroup | null {
+  const first = tables[0];
+  if (!first || first.bestThirds === 0) return null;
+  const places = first.bestThirds;
+
+  const rows = rankThirds(tables).map((row, index, sorted) => ({
+    ...row,
+    qualifying: index < places && isAheadOf(row, sorted[places]),
+  }));
+
+  return {
+    groupId: `${first.categoryId}-thirds`,
+    groupName: "Third-placed teams",
+    categoryId: first.categoryId,
+    rows,
+    places,
+    bestThirds: 0,
+  };
 }
 
 export type FormResult = "W" | "D" | "L";
@@ -219,5 +266,20 @@ export function pointsRule(sportSlug: string): { win: number; draw: number } {
   return POINTS_RULES[sportSlug] ?? DEFAULT_POINTS;
 }
 
-/** How many places in a group go through. */
-export const QUALIFYING = QUALIFYING_PLACES;
+/** How many places in a group go through when the knockout slots do not say. */
+export const QUALIFYING = DEFAULT_PLACES;
+
+/**
+ * Every group's third-placed team, best first, whatever the format says
+ * about them — for reading "Best 3rd (2)" off a bracket that is still being
+ * filled in, before every slot naming a third is in place.
+ */
+export function rankThirds(tables: readonly StandingsGroup[]): StandingsRow[] {
+  const first = tables[0];
+  if (!first) return [];
+  return tables
+    .filter((t) => t.categoryId === first.categoryId)
+    .flatMap((t) => t.rows.filter((r) => r.position === 3).map((r) => ({ ...r, group: t.groupName })))
+    .sort(byRanking)
+    .map((row, index) => ({ ...row, position: index + 1 }));
+}

@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Fixture } from "@/lib/fixtures";
+import { previewDurationMin } from "@/lib/preview";
 import { resolveSlot } from "@/lib/progression";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import type { AnnouncementType } from "@/lib/supabase/types";
@@ -18,13 +19,15 @@ import type { AnnouncementType } from "@/lib/supabase/types";
  * variables — a rehearsal score must never reach a real visitor.
  *
  * Scenarios, by the clock they pretend it is:
+ *   eve     — 19:00 the evening before, nothing played, the countdown on
  *   morning — 08:40, doors open, nothing started yet
  *   midday  — 13:20, groups done, semi-finals live
  *   post    — 18:00, every game played
  */
-export type DemoScenario = "morning" | "midday" | "post";
+export type DemoScenario = "eve" | "morning" | "midday" | "post";
 
 const SCENARIO_CLOCK: Record<DemoScenario, string> = {
+  eve: "2026-10-23T19:00:00+01:00",
   morning: "2026-10-24T08:40:00+01:00",
   midday: "2026-10-24T13:20:00+01:00",
   post: "2026-10-24T18:00:00+01:00",
@@ -33,7 +36,9 @@ const SCENARIO_CLOCK: Record<DemoScenario, string> = {
 export function demoScenario(): DemoScenario | null {
   if (process.env.VERCEL) return null;
   const value = process.env.MGAMES_DEMO;
-  return value === "morning" || value === "midday" || value === "post" ? value : null;
+  return value === "eve" || value === "morning" || value === "midday" || value === "post"
+    ? value
+    : null;
 }
 
 /**
@@ -182,7 +187,7 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
     }
 
     const start = Date.parse(f.scheduledTime);
-    const minutes = DURATION_MIN[f.sportSlug] ?? 30;
+    const minutes = previewDurationMin(f) ?? DURATION_MIN[f.sportSlug] ?? 30;
     const end = start + minutes * 60_000;
     const ready = f.teamAId !== null && f.teamBId !== null;
 
@@ -219,6 +224,14 @@ const SCRIPT: Record<
   DemoScenario,
   { minutesAgo: number; type: AnnouncementType; title: string; body: string | null }[]
 > = {
+  eve: [
+    {
+      minutesAgo: 90,
+      type: "notice",
+      title: "See you tomorrow",
+      body: "Doors open at 08:30. Find your team's first game on the Schedule page.",
+    },
+  ],
   morning: [
     {
       minutesAgo: 10,

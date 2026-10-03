@@ -18,6 +18,8 @@ export function fixture(overrides: Partial<Fixture> = {}): Fixture {
     teamBId: "b",
     teamA: "Team A",
     teamB: "Team B",
+    slotA: null,
+    slotB: null,
     groupId: null,
     categoryId: "c-football",
     categoryName: "Open",

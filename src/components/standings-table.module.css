@@ -101,6 +101,15 @@
   max-width: none;
 }
 
+/* Which group a third-placed team comes from, under its name. */
+.from {
+  display: block;
+  margin-top: -1px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mg-ink-3);
+}
+
 .highlight {
   background-color: var(--mg-gold-wash);
 }

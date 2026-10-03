@@ -11,6 +11,7 @@
 export type FixtureStage =
   | "group"
   | "playoff"
+  | "round_of_16"
   | "quarterfinal"
   | "semifinal"
   | "third_place"

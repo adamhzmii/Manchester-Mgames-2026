@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     // A matchday rehearsal's build output (see next.config.ts).
     ".next-demo/**",
+    ".next-preview-*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

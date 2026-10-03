@@ -18,10 +18,11 @@ import type { Sport } from "@/lib/queries";
 import {
   computeStandings,
   pointsRule,
-  QUALIFYING,
+  thirdPlaceTable,
   type GroupMeta,
   type TeamMeta,
 } from "@/lib/standings";
+import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./standings-view.module.css";
@@ -163,6 +164,7 @@ function SportStandings({
   onTab: (tab: StandingsTab) => void;
 }) {
   const tables = computeStandings(fixtures, groups, standingTeams, sport.slug);
+  const thirds = thirdPlaceTable(tables);
   const hasKnockout = fixtures.some((f) => f.stage !== "group");
 
   // A sport with no groups has no table to open on.
@@ -201,9 +203,25 @@ function SportStandings({
               highlight={followed}
             />
           ))}
+          {thirds ? (
+            <>
+              <StandingsTable group={thirds} fixtures={fixtures} highlight={followed} />
+              <p className={styles.note}>
+                The {thirds.places} best of the teams finishing third go through too, ranked the
+                same way as a group.
+              </p>
+            </>
+          ) : null}
           <p className={styles.note}>
-            Top {QUALIFYING} in each group go through. {rule.win} points for a win, {rule.draw} for
-            a draw. Level on points is split by score difference, then by score.
+            {tables[0]
+              ? `${throughLine(tables[0], {
+                  groups: tables.length,
+                  groupSize: Math.max(...tables.map((t) => t.rows.length)),
+                  round: firstKnockoutRound(tables[0].categoryId, fixtures),
+                })} `
+              : null}
+            {rule.win} points for a win, {rule.draw} for a draw. Level on points is split by score
+            difference, then by score.
           </p>
         </section>
       ) : null}

@@ -36,6 +36,8 @@ function match(
     teamBId: b,
     teamA: a,
     teamB: b,
+    slotA: null,
+    slotB: null,
     groupId: "g1",
     categoryId: "c1",
     categoryName: "Open",

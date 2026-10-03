@@ -1,5 +1,7 @@
 import type { Fixture } from "@/lib/fixtures";
-import { computeStandings, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import { feederGame, parseSlot, roundGames } from "@/lib/slots";
+import { computeStandings, rankThirds, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import type { FixtureStage } from "@/lib/supabase/types";
 
 /**
  * Works out who a knockout placeholder refers to, from results already in.
@@ -11,20 +13,9 @@ import { computeStandings, type GroupMeta, type TeamMeta } from "@/lib/standings
  * the coordinator still confirms it, because they are the one watching.
  *
  * Returns null while the feeder is undecided: a group with games still to
- * play, or a semi-final not yet finished.
+ * play, or a semi-final not yet finished. The label grammar is in slots.ts.
  */
 export type SlotTeam = { id: string; name: string };
-
-const GROUP_SLOT = /^Group ([A-Z]) (winner|runner-up|1st|2nd|3rd|4th)$/i;
-const POSITION: Record<string, number> = {
-  winner: 0,
-  "1st": 0,
-  "runner-up": 1,
-  "2nd": 1,
-  "3rd": 2,
-  "4th": 3,
-};
-const SEMI_SLOT = /^(Winner|Loser) SF([12])$/i;
 
 export function winnerOf(f: Fixture): SlotTeam | null {
   if (f.status !== "finished" || f.scoreA === null || f.scoreB === null) return null;
@@ -47,39 +38,91 @@ export function resolveSlot(
   groups: readonly (GroupMeta & { sportSlug: string })[],
   teams: readonly (TeamMeta & { sportSlug: string })[],
 ): SlotTeam | null {
-  const group = GROUP_SLOT.exec(label);
-  if (group) {
-    const [, letter, place] = group;
-    const meta = groups.find(
-      (g) => g.categoryId === fixture.categoryId && g.name.toLowerCase() === `group ${letter.toLowerCase()}`,
-    );
-    if (!meta) return null;
-    const games = fixtures.filter((f) => f.groupId === meta.id);
-    if (games.length === 0 || games.some((f) => f.status !== "finished")) return null;
-    const [table] = computeStandings(
-      games,
-      [meta],
-      teams.filter((t) => t.sportSlug === fixture.sportSlug),
-      fixture.sportSlug,
-    );
-    const row = table?.rows[POSITION[place.toLowerCase()]];
+  const ref = parseSlot(label);
+  if (!ref) return null;
+
+  const categoryGroups = groups.filter((g) => g.categoryId === fixture.categoryId);
+  const sportTeams = teams.filter((t) => t.sportSlug === fixture.sportSlug);
+  const finished = (groupIds: string[]) => {
+    const games = fixtures.filter((f) => f.groupId !== null && groupIds.includes(f.groupId));
+    return games.length > 0 && games.every((f) => f.status === "finished");
+  };
+
+  if (ref.kind === "group") {
+    const meta = categoryGroups.find((g) => g.name.toLowerCase() === `group ${ref.group.toLowerCase()}`);
+    if (!meta || !finished([meta.id])) return null;
+    const [table] = computeStandings(fixtures, [meta], sportTeams, fixture.sportSlug);
+    const row = table?.rows[ref.place - 1];
     return row ? { id: row.teamId, name: row.teamName } : null;
   }
 
-  const semi = SEMI_SLOT.exec(label);
-  if (semi) {
-    const [, outcome, number] = semi;
-    const feeder = semiFinals(fixture.categoryId, fixtures)[Number(number) - 1];
-    if (!feeder) return null;
-    return outcome.toLowerCase() === "winner" ? winnerOf(feeder) : loserOf(feeder);
+  if (ref.kind === "best-third") {
+    // Every group has to be done: one game anywhere can reorder the thirds.
+    if (!finished(categoryGroups.map((g) => g.id))) return null;
+    const thirds = rankThirds(
+      computeStandings(fixtures, categoryGroups, sportTeams, fixture.sportSlug),
+    );
+    const row = thirds[ref.rank - 1];
+    return row ? { id: row.teamId, name: row.teamName } : null;
   }
 
-  return null;
+  const feeder = feederGame(label, fixture.categoryId, fixtures);
+  if (!feeder) return null;
+  return feeder.outcome === "winner" ? winnerOf(feeder.game) : loserOf(feeder.game);
 }
 
-/** A category's semi-finals in kick-off order: index 0 is SF1. */
+/** A category's semi-finals in the order they are numbered: index 0 is SF1. */
 export function semiFinals(categoryId: string, fixtures: readonly Fixture[]): Fixture[] {
-  return fixtures
-    .filter((f) => f.categoryId === categoryId && f.stage === "semifinal")
-    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+  return roundGames(categoryId, "semifinal", fixtures);
+}
+
+/**
+ * Where a knockout game sends its winner and its loser: the games whose
+ * slots name it ("Winner QF2", "Loser SF1").
+ */
+export function nextGames(
+  fixture: Fixture,
+  fixtures: readonly Fixture[],
+): { winner: Fixture | null; loser: Fixture | null } {
+  const result: { winner: Fixture | null; loser: Fixture | null } = { winner: null, loser: null };
+  for (const f of fixtures) {
+    if (f.categoryId !== fixture.categoryId || f.id === fixture.id) continue;
+    for (const label of [f.slotA, f.slotB]) {
+      const feeder = feederGame(label, f.categoryId, fixtures);
+      if (feeder?.game.id === fixture.id) result[feeder.outcome] ??= f;
+    }
+  }
+  return result;
+}
+
+/**
+ * Knockout rounds arranged the way a bracket is drawn: the two games feeding
+ * a game sit next to each other, the upper feeding its top slot.
+ *
+ * Kick-off order is not that order once two pitches run side by side —
+ * 2025's quarter-final 1 took the winners of round-of-16 games 1 and 7 — so
+ * each round is ordered from the slots of the round after it, working back
+ * from the final. Games no slot names keep their kick-off order, at the end.
+ */
+export function bracketOrder(
+  rounds: readonly { stage: FixtureStage; matches: readonly Fixture[] }[],
+  fixtures: readonly Fixture[],
+): { stage: FixtureStage; matches: Fixture[] }[] {
+  const ordered = rounds.map((round) => ({ stage: round.stage, matches: [...round.matches] }));
+
+  for (let i = ordered.length - 2; i >= 0; i -= 1) {
+    const round = ordered[i];
+    const placed: Fixture[] = [];
+    for (const next of ordered[i + 1].matches) {
+      for (const label of [next.slotA, next.slotB]) {
+        const feeder = feederGame(label, next.categoryId, fixtures);
+        if (feeder?.outcome !== "winner") continue;
+        const game = round.matches.find((m) => m.id === feeder.game.id);
+        if (game && !placed.includes(game)) placed.push(game);
+      }
+    }
+    round.matches = [...placed, ...round.matches.filter((m) => !placed.includes(m))];
+  }
+
+  return ordered;
 }

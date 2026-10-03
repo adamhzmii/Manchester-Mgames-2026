@@ -76,6 +76,13 @@ export type Fixture = {
   teamBId: string | null;
   teamA: string;
   teamB: string;
+  /**
+   * The label each side was drawn with ("Group A winner", "Winner QF1"), kept
+   * after a team fills it: it is the only record of where a game sits in its
+   * bracket. Null for a side entered by name. See slots.ts.
+   */
+  slotA: string | null;
+  slotB: string | null;
   groupId: string | null;
   categoryId: string;
   categoryName: string;
@@ -94,6 +101,7 @@ export type Fixture = {
 const STAGE_LABELS: Record<FixtureStage, string> = {
   group: "Group",
   playoff: "Play-off",
+  round_of_16: "Round of 16",
   quarterfinal: "Quarter-final",
   semifinal: "Semi-final",
   third_place: "3rd place",
@@ -141,6 +149,8 @@ export function toFixture(row: FixtureRow): Fixture {
     // the placeholder label the bracket was built with.
     teamA: row.team_a?.name ?? row.placeholder_a ?? "TBC",
     teamB: row.team_b?.name ?? row.placeholder_b ?? "TBC",
+    slotA: row.placeholder_a?.trim() || null,
+    slotB: row.placeholder_b?.trim() || null,
     groupId: row.group_id,
     categoryId: row.category?.id ?? "",
     categoryName: row.category?.name ?? "",

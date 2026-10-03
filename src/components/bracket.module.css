@@ -25,23 +25,18 @@
   }
 }
 
+/* Rounds share the width there is, between a card a name fits on and one
+   that would look stretched; past that — a round of 16 on a phone — the
+   bracket scrolls sideways instead. */
 .bracket {
-  display: flex;
-  align-items: stretch;
-  width: max-content;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(196px, 248px);
 }
 
 .round {
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
-  width: 200px;
-}
-
-@media (min-width: 760px) {
-  .round {
-    width: 232px;
-  }
 }
 
 .roundName {
@@ -167,7 +162,10 @@
   color: var(--mg-ink-3);
 }
 
+/* The padding gives the slanted last letter room; clipped, "Winner R16 1"
+   read as "Winner R16 ı". */
 .tbc .team {
+  padding-right: 0.2em;
   font-style: italic;
   font-weight: 500;
   color: var(--mg-ink-3);

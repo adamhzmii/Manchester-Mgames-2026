@@ -11,14 +11,16 @@ import { StandingsTable } from "@/components/standings-table";
 import type { Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
+import { nextGames } from "@/lib/progression";
 import type { PickerTeam, Venue } from "@/lib/queries";
 import {
   computeStandings,
-  QUALIFYING,
+  thirdPlaceTable,
   type GroupMeta,
   type StandingsGroup,
   type TeamMeta,
 } from "@/lib/standings";
+import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./team-view.module.css";
@@ -55,14 +57,19 @@ export function TeamView({
   const next = games.find((f) => f.status === "live") ?? games.find((f) => f.status === "upcoming");
 
   const group = groups.find((g) => g.id === groupId);
+  const categoryGroups = groups.filter((g) => g.categoryId === team.categoryId);
+  const sportTeams = standingTeams.filter((t) => t.sportSlug === team.sportSlug);
   const table = group
-    ? computeStandings(
-        fixtures,
-        [group],
-        standingTeams.filter((t) => t.sportSlug === team.sportSlug),
-        team.sportSlug,
-      )[0]
+    ? computeStandings(fixtures, [group], sportTeams, team.sportSlug)[0]
     : undefined;
+  // Only where the format sends some third-placed teams through.
+  const thirds =
+    table && table.bestThirds > 0
+      ? thirdPlaceTable(computeStandings(fixtures, categoryGroups, sportTeams, team.sportSlug))
+      : null;
+  const groupsDone = fixtures
+    .filter((f) => f.categoryId === team.categoryId && f.stage === "group")
+    .every((f) => f.status === "finished");
 
   const record = games.reduce(
     (acc, f) => {
@@ -98,7 +105,9 @@ export function TeamView({
           </p>
           <h1 className={styles.name}>{team.name}</h1>
 
-          <p className={styles.status}>{statusLine(team, games, table)}</p>
+          <p className={styles.status}>
+            {statusLine(team, games, fixtures, table, thirds, groupsDone)}
+          </p>
 
           <dl className={styles.record}>
             {(
@@ -153,8 +162,13 @@ export function TeamView({
             <h2 className={styles.title}>{table.groupName}</h2>
             <StandingsTable group={table} fixtures={fixtures} highlight={[team.id]} captionHidden />
             <p className={styles.note}>
-              Top {QUALIFYING} go through. Level on points is split by score difference, then by
-              score.
+              {throughLine(table, {
+                groups: categoryGroups.length,
+                groupSize: table.rows.length,
+                round: firstKnockoutRound(team.categoryId, fixtures),
+                group: table.groupName,
+              })}{" "}
+              Level on points is split by score difference, then by score.
             </p>
           </section>
         ) : null}
@@ -195,7 +209,10 @@ function ordinal(n: number): string {
 function statusLine(
   team: PickerTeam,
   games: Fixture[],
+  fixtures: Fixture[],
   table: StandingsGroup | undefined,
+  thirds: StandingsGroup | null,
+  groupsDone: boolean,
 ): string {
   const mine = (f: Fixture) => (f.teamAId === team.id ? "a" : "b");
   const won = (f: Fixture) => winningSide(f) === mine(f);
@@ -210,7 +227,20 @@ function statusLine(
   if (live) return `Playing now · ${live.stageLabel}`;
 
   const knockout = games.find((f) => f.stage !== "group" && f.status === "upcoming");
+  if (knockout?.stage === "third_place") return "Playing for 3rd place";
   if (knockout) return `Through to the ${knockout.stageLabel.toLowerCase()}`;
+
+  // The latest knockout result outranks the group table: a team that went
+  // through and then lost is out, not "2nd in Group A · through".
+  const lastKnockout = [...games]
+    .reverse()
+    .find((f) => f.stage !== "group" && f.status === "finished");
+  if (lastKnockout) {
+    if (!won(lastKnockout)) return `Out in the ${lastKnockout.stageLabel.toLowerCase()}`;
+    // Won, and the next slot not filled in yet.
+    const next = nextGames(lastKnockout, fixtures).winner;
+    return next ? `Through to the ${next.stageLabel.toLowerCase()}` : "Through";
+  }
 
   if (table) {
     const row = table.rows.find((r) => r.teamId === team.id);
@@ -218,17 +248,26 @@ function statusLine(
       .filter((f) => f.stage === "group")
       .every((f) => f.status === "finished");
     if (row) {
+      const place = `${ordinal(row.position)} in ${table.groupName}`;
       if (groupDone && row.played > 0) {
-        return row.position <= QUALIFYING
-          ? `${ordinal(row.position)} in ${table.groupName} · through`
-          : `${ordinal(row.position)} in ${table.groupName} · out`;
+        if (row.position <= table.places) return `${place} · through`;
+        // Third can still go through as one of the best thirds, which no
+        // single group decides.
+        if (thirds && row.position === 3) {
+          if (!groupsDone) return `${place} · waiting on the other groups`;
+          const third = thirds.rows.find((r) => r.teamId === team.id);
+          if (third?.qualifying) return `${place} · through as a best third`;
+          // Inside the cut but dead level with the first team outside it.
+          if (third && third.position <= thirds.places) {
+            return `${place} · level for a best-third place`;
+          }
+          return `${place} · out`;
+        }
+        return `${place} · out`;
       }
-      if (row.played > 0) return `${ordinal(row.position)} in ${table.groupName} so far`;
+      if (row.played > 0) return `${place} so far`;
     }
   }
-
-  const lostKnockout = games.find((f) => f.stage !== "group" && f.status === "finished" && !won(f));
-  if (lostKnockout) return `Out in the ${lostKnockout.stageLabel.toLowerCase()}`;
 
   return games.length > 0 ? `${games.length} ${games.length === 1 ? "game" : "games"} on Saturday` : "No games scheduled yet";
 }
