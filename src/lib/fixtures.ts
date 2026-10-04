@@ -167,6 +167,19 @@ export function toFixture(row: FixtureRow): Fixture {
   };
 }
 
+/**
+ * Kick-off order, by the moment itself rather than the text. The same time
+ * can be written two ways ("08:30+01:00" and "07:30+00:00"), and sorted as
+ * text those land an hour apart: a schedule mixing them opened a second
+ * 09:00 block after the 08:00 one.
+ */
+export function byKickoff(
+  a: Pick<Fixture, "scheduledTime">,
+  b: Pick<Fixture, "scheduledTime">,
+): number {
+  return Date.parse(a.scheduledTime) - Date.parse(b.scheduledTime);
+}
+
 /** Live first, then what's coming up, then what's done — each by kick-off. */
 const STATUS_ORDER: Record<FixtureStatus, number> = {
   live: 0,
@@ -177,7 +190,7 @@ const STATUS_ORDER: Record<FixtureStatus, number> = {
 export function byRelevance(a: Fixture, b: Fixture): number {
   const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
   if (byStatus !== 0) return byStatus;
-  return a.scheduledTime.localeCompare(b.scheduledTime);
+  return byKickoff(a, b);
 }
 
 export type FixtureFilters = {

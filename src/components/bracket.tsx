@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { TrophyIcon } from "@/components/icons";
 import { Score } from "@/components/score";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import { winningSide } from "@/lib/matchday";
 import { bracketOrder } from "@/lib/progression";
@@ -34,7 +34,7 @@ export function Bracket({ fixtures }: { fixtures: readonly Fixture[] }) {
       stage,
       matches: fixtures
         .filter((f) => f.stage === stage)
-        .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime)),
+        .sort(byKickoff),
     })).filter((round) => round.matches.length > 0),
     fixtures,
   );

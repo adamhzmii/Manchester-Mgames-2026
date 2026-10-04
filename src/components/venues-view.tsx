@@ -17,7 +17,7 @@ import {
 } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
 import { SportBadge } from "@/components/sport-badge";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatPrice, formatTime } from "@/lib/format";
 import { TRAVEL, VENUE_FACILITIES } from "@/lib/info-content";
 import { useLiveFixtures } from "@/lib/live-feed";
@@ -271,7 +271,7 @@ function courtsAt(fixtures: Fixture[]) {
   }
   return [...byCourt.entries()]
     .map(([name, games]) => {
-      const sorted = [...games].sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+      const sorted = [...games].sort(byKickoff);
       const sports = [...new Map(sorted.map((f) => [f.sportSlug, f])).values()].sort(
         (a, b) => a.sportOrder - b.sportOrder,
       );

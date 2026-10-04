@@ -1,4 +1,4 @@
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import type { FixtureStage } from "@/lib/supabase/types";
 
 /**
@@ -76,7 +76,7 @@ export function roundGames(
     .filter((f) => f.categoryId === categoryId && f.stage === stage)
     .sort(
       (a, b) =>
-        a.scheduledTime.localeCompare(b.scheduledTime) || byCourt.compare(a.courtName, b.courtName),
+        byKickoff(a, b) || byCourt.compare(a.courtName, b.courtName),
     );
 }
 

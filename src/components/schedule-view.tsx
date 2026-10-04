@@ -9,7 +9,7 @@ import { EditIcon, StarIcon } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
 import { TeamPicker } from "@/components/team-picker";
 import type { Coordinator } from "@/lib/coordinator";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatHour, hourKey } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import type { PickerTeam, Sport, Venue } from "@/lib/queries";
@@ -100,19 +100,20 @@ export function ScheduleView({
    * Grouped by kick-off hour, strictly in time order — an hour heading is a
    * claim about when a game starts, so a finished match sorted elsewhere would
    * open a second 09:00 block under the 16:00 one.
+   *
+   * One block per hour whatever the order, too: the hour is each block's key,
+   * and two blocks sharing one left React unable to tell them apart, so
+   * filtering kept stale games on screen under the right count.
    */
   const blocks = useMemo(() => {
-    const chronological = [...visible].sort((a, b) =>
-      a.scheduledTime.localeCompare(b.scheduledTime),
-    );
-    const out: { key: string; label: string; fixtures: Fixture[] }[] = [];
-    for (const fixture of chronological) {
+    const byHour = new Map<string, { key: string; label: string; fixtures: Fixture[] }>();
+    for (const fixture of [...visible].sort(byKickoff)) {
       const key = hourKey(fixture.scheduledTime);
-      const last = out[out.length - 1];
-      if (last?.key === key) last.fixtures.push(fixture);
-      else out.push({ key, label: formatHour(fixture.scheduledTime), fixtures: [fixture] });
+      const block = byHour.get(key);
+      if (block) block.fixtures.push(fixture);
+      else byHour.set(key, { key, label: formatHour(fixture.scheduledTime), fixtures: [fixture] });
     }
-    return out;
+    return [...byHour.values()];
   }, [visible]);
 
   // The hour the day is up to: the first block with a game still to finish.

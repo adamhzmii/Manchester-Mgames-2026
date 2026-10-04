@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { previewDurationMin } from "@/lib/preview";
 import { resolveSlot } from "@/lib/progression";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
@@ -168,7 +168,7 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
   if (now === null) return [...fixtures];
 
   const played: Fixture[] = [];
-  const ordered = [...fixtures].sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+  const ordered = [...fixtures].sort(byKickoff);
 
   for (const original of ordered) {
     let f: Fixture = { ...original };

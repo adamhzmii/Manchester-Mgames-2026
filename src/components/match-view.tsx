@@ -21,7 +21,7 @@ import { ScoreConsole } from "@/components/score-console";
 import { ShareButton } from "@/components/share-button";
 import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatDay, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
@@ -104,7 +104,7 @@ export function MatchView({
       ? []
       : fixtures
           .filter((f) => f.id !== fixture.id && (f.teamAId === teamId || f.teamBId === teamId))
-          .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+          .sort(byKickoff);
 
   return (
     <article className={styles.page}>

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { stageLabel, type Fixture } from "@/lib/fixtures";
+import { byKickoff, stageLabel, type Fixture } from "@/lib/fixtures";
 import type { PickerTeam } from "@/lib/queries";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import type { FixtureStage } from "@/lib/supabase/types";
@@ -142,6 +142,14 @@ function slug(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+/**
+ * A UK kick-off on the day, written the way the database writes times (UTC,
+ * "+00:00"), so preview games sit among the real ones exactly as stored ones would.
+ */
+function kickoff(time: string): string {
+  return new Date(`2026-10-24T${time}:00+01:00`).toISOString().replace(".000Z", "+00:00");
+}
+
 const teamId = (name: string) => `${ID_PREFIX}${slug(name)}`;
 const groupId = (letter: string) => `${ID_PREFIX}group-${letter.toLowerCase()}`;
 
@@ -167,7 +175,7 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       stage,
       stageLabel: stageLabel(stage),
       status: "upcoming" as const,
-      scheduledTime: `2026-10-24T${time}:00+01:00`,
+      scheduledTime: kickoff(time),
       updatedAt: "2026-10-01T12:00:00+01:00",
       scoreA: null,
       scoreB: null,
@@ -218,7 +226,7 @@ export function applyPreviewFixtures(fixtures: Fixture[]): Fixture[] {
     sportOrder: real.sportOrder,
   };
   return [...fixtures.filter((f) => f.sportSlug !== "football"), ...previewFixtures(meta)].sort(
-    (a, b) => a.scheduledTime.localeCompare(b.scheduledTime),
+    byKickoff,
   );
 }
 

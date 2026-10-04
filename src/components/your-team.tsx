@@ -9,7 +9,7 @@ import { MatchList, MatchRow } from "@/components/match-row";
 import { NextGame } from "@/components/next-game";
 import { NotifyToggle } from "@/components/notify-toggle";
 import { SportBadge } from "@/components/sport-badge";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import type { PickerTeam } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
@@ -43,7 +43,7 @@ export function YourTeam({
             (f.teamAId !== null && followed.includes(f.teamAId)) ||
             (f.teamBId !== null && followed.includes(f.teamBId)),
         )
-        .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime)),
+        .sort(byKickoff),
     [fixtures, followed],
   );
 

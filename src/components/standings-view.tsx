@@ -11,7 +11,7 @@ import { MatchList, MatchRow } from "@/components/match-row";
 import { MedalTable } from "@/components/medal-table";
 import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { medalTable, podiums } from "@/lib/medals";
 import type { Sport } from "@/lib/queries";
@@ -236,7 +236,7 @@ function SportStandings({
         <section className={styles.section}>
           <MatchList>
             {[...fixtures]
-              .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime))
+              .sort(byKickoff)
               .map((f) => (
                 <MatchRow key={f.id} fixture={f} followed={followed} hideSport />
               ))}

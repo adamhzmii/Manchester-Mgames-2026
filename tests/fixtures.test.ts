@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  byKickoff,
   byRelevance,
   filterFixtures,
   isStageFilter,
@@ -168,4 +169,14 @@ test("stage filter values are recognised, anything else is not", () => {
 test("every stage has a readable label", () => {
   assert.equal(stageLabel("third_place"), "3rd place");
   assert.equal(stageLabel("quarterfinal"), "Quarter-final");
+});
+
+test("kick-offs sort by the moment, however the time is written", () => {
+  // 08:30 in Manchester is 07:30 UTC: earlier than 07:45 UTC, though later as text.
+  const ukMorning = toFixture(row({ id: "uk", scheduled_time: "2026-10-24T08:30:00+01:00" }));
+  const utcLater = toFixture(row({ id: "utc", scheduled_time: "2026-10-24T07:45:00+00:00" }));
+  assert.deepEqual(
+    [utcLater, ukMorning].sort(byKickoff).map((f) => f.id),
+    ["uk", "utc"],
+  );
 });

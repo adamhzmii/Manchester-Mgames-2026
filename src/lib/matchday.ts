@@ -1,4 +1,4 @@
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 
 /**
  * Where the tournament is, read from the fixtures themselves rather than a
@@ -36,7 +36,7 @@ export function firstKickoff(fixtures: readonly Fixture[]): number | null {
 export function liveFixtures(fixtures: readonly Fixture[]): Fixture[] {
   return fixtures
     .filter((f) => f.status === "live")
-    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+    .sort(byKickoff);
 }
 
 /**
@@ -47,14 +47,14 @@ export function liveFixtures(fixtures: readonly Fixture[]): Fixture[] {
 export function upNext(fixtures: readonly Fixture[], limit: number): Fixture[] {
   return fixtures
     .filter((f) => f.status === "upcoming")
-    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime))
+    .sort(byKickoff)
     .slice(0, limit);
 }
 
 export function latestResults(fixtures: readonly Fixture[], limit: number): Fixture[] {
   return fixtures
     .filter((f) => f.status === "finished")
-    .sort((a, b) => b.scheduledTime.localeCompare(a.scheduledTime))
+    .sort((a, b) => byKickoff(b, a))
     .slice(0, limit);
 }
 

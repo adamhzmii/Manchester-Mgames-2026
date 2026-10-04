@@ -1,4 +1,4 @@
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { DEFAULT_PLACES, qualification } from "@/lib/slots";
 
 /**
@@ -253,7 +253,7 @@ export function teamForm(fixtures: readonly Fixture[], teamId: string): FormResu
         f.scoreB !== null &&
         (f.teamAId === teamId || f.teamBId === teamId),
     )
-    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime))
+    .sort(byKickoff)
     .map((f) => {
       const mine = f.teamAId === teamId ? f.scoreA! : f.scoreB!;
       const theirs = f.teamAId === teamId ? f.scoreB! : f.scoreA!;

@@ -6,6 +6,7 @@ import { cache } from "react";
 import {
   FIXTURE_SELECT,
   toFixture,
+  byKickoff,
   byRelevance,
   type Fixture,
   type FixtureRow,
@@ -186,7 +187,7 @@ export async function getLiveFixtures(): Promise<Fixture[]> {
   if (demoScenario()) {
     return (await getFixtures())
       .filter((f) => f.status === "live")
-      .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+      .sort(byKickoff);
   }
   const supabase = await createClient();
   const rows = unwrap(

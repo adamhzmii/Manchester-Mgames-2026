@@ -15,7 +15,7 @@ import { SportBadge } from "@/components/sport-badge";
 import { UpdateTypeIcon, UPDATE_TYPE_LABEL } from "@/components/update-type-icon";
 import { YourTeam } from "@/components/your-team";
 import { useMinute } from "@/lib/clock";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatPrice, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import {
@@ -137,7 +137,7 @@ export function HomeView({
                 {(phase === "after"
                   ? fixtures
                       .filter((f) => f.stage === "final")
-                      .sort((a, b) => b.scheduledTime.localeCompare(a.scheduledTime))
+                      .sort((a, b) => byKickoff(b, a))
                   : latestResults(fixtures, 5)
                 ).map((f) => (
                   <MatchRow key={f.id} fixture={f} followed={favourites.teamIds} />

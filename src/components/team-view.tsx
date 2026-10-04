@@ -8,7 +8,7 @@ import { NextGame } from "@/components/next-game";
 import { NotifyToggle } from "@/components/notify-toggle";
 import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
-import type { Fixture } from "@/lib/fixtures";
+import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
 import { nextGames } from "@/lib/progression";
@@ -52,7 +52,7 @@ export function TeamView({
 
   const games = fixtures
     .filter((f) => f.teamAId === team.id || f.teamBId === team.id)
-    .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
+    .sort(byKickoff);
 
   const next = games.find((f) => f.status === "live") ?? games.find((f) => f.status === "upcoming");
 
