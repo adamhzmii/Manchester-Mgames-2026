@@ -13,6 +13,9 @@ export const FIXTURE_SELECT = `
   score_b,
   scheduled_time,
   updated_at,
+  started_at,
+  finished_at,
+  delay_minutes,
   placeholder_a,
   placeholder_b,
   group_id,
@@ -31,6 +34,9 @@ export type FixtureRow = {
   score_b: number | null;
   scheduled_time: string;
   updated_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  delay_minutes: number;
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
@@ -93,9 +99,19 @@ export type Fixture = {
   sportCode: string;
   sportColor: string;
   sportOrder: number;
+  courtId: string | null;
   courtName: string;
   venueSlug: string;
   venueShortName: string;
+  /**
+   * When it really kicked off and ended: the database stamps them as a
+   * coordinator taps Start game and Final whistle. They are what the site
+   * works out "running late" from — see delays.ts.
+   */
+  startedAt: string | null;
+  finishedAt: string | null;
+  /** "Starting late": the minutes a coordinator expects kick-off to slip. */
+  delayMinutes: number;
 };
 
 const STAGE_LABELS: Record<FixtureStage, string> = {
@@ -161,9 +177,13 @@ export function toFixture(row: FixtureRow): Fixture {
     sportCode: sport?.code ?? "??",
     sportColor: sport?.color ?? "#3C2A6E",
     sportOrder: sport?.sort_order ?? 0,
+    courtId: row.court?.id ?? null,
     courtName: row.court?.name ?? "TBC",
     venueSlug: row.court?.venue?.slug ?? "",
     venueShortName: row.court?.venue?.short_name ?? "TBC",
+    startedAt: row.started_at,
+    finishedAt: row.finished_at,
+    delayMinutes: row.delay_minutes ?? 0,
   };
 }
 

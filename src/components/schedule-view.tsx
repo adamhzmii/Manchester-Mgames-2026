@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { LateCourts } from "@/components/delays";
 import { FilterChips, type ChipOption } from "@/components/filter-chips";
 import { EditIcon, StarIcon } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
@@ -229,6 +230,10 @@ export function ScheduleView({
             Clear
           </button>
         ) : null}
+      </div>
+
+      <div className="mg-wrap">
+        <LateCourts className={styles.late} />
       </div>
 
       <div className={`mg-wrap ${styles.blocks}`} ref={listRef}>

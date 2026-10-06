@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useMemo } from "react";
 
 import { Countdown } from "@/components/countdown";
+import { KickoffCountdown, LateCourts } from "@/components/delays";
 import { FindTeamButton } from "@/components/find-team-button";
 import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
 import { LiveScoreboard } from "@/components/live-scoreboard";
 import { MatchList, MatchRow } from "@/components/match-row";
 import { MedalTable } from "@/components/medal-table";
-import { RelTime } from "@/components/rel-time";
 import { SectionHead } from "@/components/section-head";
 import { SportBadge } from "@/components/sport-badge";
 import { UpdateTypeIcon, UPDATE_TYPE_LABEL } from "@/components/update-type-icon";
@@ -101,6 +101,7 @@ export function HomeView({
           {phase === "matchday" ? (
             <section className={styles.sNext}>
               <SectionHead title="Up next" href="/schedule" action="Full schedule" />
+              <LateCourts className={styles.late} />
               <UpNextList fixtures={fixtures} followed={favourites.teamIds} />
             </section>
           ) : null}
@@ -300,7 +301,7 @@ function MatchdayLive({ fixtures, now }: { fixtures: Fixture[]; now: number }) {
       ) : next ? (
         <div className={styles.lull}>
           <p className={styles.lullLabel}>
-            Next up <RelTime iso={next.scheduledTime} />
+            Next up <KickoffCountdown fixture={next} />
           </p>
           <div className={styles.boards}>
             <LiveScoreboard fixture={next} />

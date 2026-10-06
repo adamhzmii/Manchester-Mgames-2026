@@ -3,11 +3,11 @@
 import Link from "next/link";
 
 import { PinIcon } from "@/components/icons";
-import { RelTime } from "@/components/rel-time";
+import { KickoffCountdown, KickoffTime, LateNote } from "@/components/delays";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
 import type { Fixture } from "@/lib/fixtures";
-import { formatDay, formatTime } from "@/lib/format";
+import { formatDay } from "@/lib/format";
 
 import styles from "./next-game.module.css";
 
@@ -44,7 +44,7 @@ export function NextGame({
           ) : (
             <>
               Next game
-              <RelTime iso={fixture.scheduledTime} className={styles.nextIn} />
+              <KickoffCountdown fixture={fixture} className={styles.nextIn} />
             </>
           )}
         </span>
@@ -80,9 +80,10 @@ export function NextGame({
         </span>
 
         <span className={styles.when}>
-          <span className={styles.kickoff}>{formatTime(fixture.scheduledTime)}</span>
+          <KickoffTime fixture={fixture} className={styles.kickoff} />
           <span className={styles.whenDay}>{formatDay(fixture.scheduledTime)}</span>
         </span>
+        <LateNote fixture={fixture} className={styles.late} />
       </Link>
 
       <div className={styles.where}>

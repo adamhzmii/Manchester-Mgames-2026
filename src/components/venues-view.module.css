@@ -227,6 +227,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.courtTime[data-late] {
+  color: var(--mg-late);
+}
+
+.courtLate {
+  margin-left: 6px;
+}
+
 .courtMatch {
   flex: 1;
   min-width: 0;

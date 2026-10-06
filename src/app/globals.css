@@ -56,6 +56,10 @@
   --mg-live-wash: #fdeceb;
   --mg-up: #15875a;
   --mg-up-wash: #e4f4ec;
+  /* Running late: orange, apart from live's red and the brand's gold. */
+  --mg-late: #c2410c;
+  --mg-late-wash: #ffedd5;
+  --mg-late-night: #ffb070;
 
   /* Medals are drawn, not named, so they get real metal tones. */
   --mg-medal-gold: #e2ac1f;
@@ -167,6 +171,8 @@
     --mg-live-wash: #3a1517;
     --mg-up: #4fd197;
     --mg-up-wash: #10291f;
+    --mg-late: #fb923c;
+    --mg-late-wash: #3a1f0c;
 
     --mg-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
   }

@@ -182,6 +182,22 @@
   color: var(--mg-gold);
 }
 
+.kickoff[data-late] {
+  color: var(--mg-late-night);
+}
+
+/* Under the board rather than in its middle column, which is narrow: there
+   it squeezed the team names until they broke mid-word. */
+.lateLine {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.lateLine:empty {
+  display: none;
+}
+
 .livePill {
   display: inline-flex;
   align-items: center;

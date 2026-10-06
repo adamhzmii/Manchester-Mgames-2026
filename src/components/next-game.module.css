@@ -124,6 +124,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.kickoff[data-late] {
+  color: var(--mg-late);
+}
+
+.late {
+  margin-top: -2px;
+}
+
 .whenDay {
   font-size: 13px;
   font-weight: 600;

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
+import { KickoffTime, LateTag } from "@/components/delays";
 import { TrophyIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
-import { formatTime } from "@/lib/format";
 import { winningSide } from "@/lib/matchday";
 import { bracketOrder } from "@/lib/progression";
 import type { FixtureStage } from "@/lib/supabase/types";
@@ -124,7 +124,9 @@ function BracketMatch({ fixture }: { fixture: Fixture }) {
         ) : fixture.status === "finished" ? (
           "Full time"
         ) : (
-          formatTime(fixture.scheduledTime)
+          <>
+            <KickoffTime fixture={fixture} className={styles.metaTime} /> <LateTag fixture={fixture} />
+          </>
         )}
         {" · "}
         {fixture.venueShortName} {fixture.courtName}

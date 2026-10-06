@@ -7,6 +7,7 @@ import { demoScorer } from "@/lib/demo";
 import { formatDay, formatTime } from "@/lib/format";
 import {
   getCoordinator,
+  getCourts,
   getFixtures,
   getStandingsData,
   getTeams,
@@ -38,6 +39,9 @@ export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
     getCoordinator(),
     getVendors(),
   ]);
+  const canEdit = coordinatorCanEdit(coordinator) || demoScorer();
+  // Only the scorer's "Move this game" needs the courts.
+  const courts = canEdit ? await getCourts() : [];
 
   const fixture = fixtures.find((f) => f.id === id);
   if (!fixture) notFound();
@@ -51,7 +55,8 @@ export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
       standingTeams={standings.teams}
       venues={venues}
       vendors={vendors}
-      canEdit={coordinatorCanEdit(coordinator, fixture.sportId) || demoScorer()}
+      courts={courts}
+      canEdit={canEdit}
     />
   );
 }

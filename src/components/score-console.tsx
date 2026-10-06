@@ -2,16 +2,21 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 
+import { useKickoff } from "@/components/delays";
 import { CheckIcon, MinusIcon, PlusIcon } from "@/components/icons";
 import {
   assignFixtureTeam,
+  correctKickoff,
+  moveFixture,
+  setFixtureDelay,
   updateFixtureScore,
+  type ActionResult,
   type AssignTeamState,
 } from "@/lib/actions/fixtures";
 import type { Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import { resolveSlot } from "@/lib/progression";
-import type { PickerTeam } from "@/lib/queries";
+import type { Court, PickerTeam, Venue } from "@/lib/queries";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import type { FixtureStatus } from "@/lib/supabase/types";
 
@@ -32,6 +37,8 @@ type ScoreConsoleProps = {
   teams: PickerTeam[];
   groups: (GroupMeta & { sportSlug: string })[];
   standingTeams: (TeamMeta & { sportSlug: string })[];
+  courts: Court[];
+  venues: Venue[];
 };
 
 /**
@@ -46,7 +53,15 @@ type ScoreConsoleProps = {
  * on `fixtures` is what decides whether it lands; showing this console to the
  * wrong person would let them press buttons, not change scores.
  */
-export function ScoreConsole({ fixture, fixtures, teams, groups, standingTeams }: ScoreConsoleProps) {
+export function ScoreConsole({
+  fixture,
+  fixtures,
+  teams,
+  groups,
+  standingTeams,
+  courts,
+  venues,
+}: ScoreConsoleProps) {
   const [scoreA, setScoreA] = useState<number | null>(fixture.scoreA);
   const [scoreB, setScoreB] = useState<number | null>(fixture.scoreB);
   const [status, setStatus] = useState<FixtureStatus>(fixture.status);
@@ -242,7 +257,201 @@ export function ScoreConsole({ fixture, fixtures, teams, groups, standingTeams }
           ) : null}
         </>
       )}
+
+      {/* Timing works whether or not the slots are filled: a semi-final can
+          be running late, or move court, before anyone knows who plays. */}
+      {fixture.status === "upcoming" ? (
+        <>
+          <StartingLate fixture={fixture} />
+          <MoveGame fixture={fixture} courts={courts} venues={venues} />
+        </>
+      ) : (
+        <KickoffFix fixture={fixture} />
+      )}
     </section>
+  );
+}
+
+/** A server action's answer, under the control that asked. */
+function Result({ result }: { result: ActionResult | null }) {
+  if (!result) return null;
+  return (
+    <p className={result.ok ? styles.done : styles.warning} role="status">
+      {result.message}
+    </p>
+  );
+}
+
+const LATE_STEPS = [0, 5, 10, 15, 20, 30];
+
+/**
+ * "Starting late", before kick-off: a team not here, the court not clear.
+ * One tap moves this game's time on every phone, and the court's later games
+ * with it.
+ */
+function StartingLate({ fixture }: { fixture: Fixture }) {
+  const { iso, lateMin } = useKickoff(fixture);
+  const [chosen, setChosen] = useState(fixture.delayMinutes);
+  const [result, setResult] = useState<ActionResult | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  // Follow another coordinator's change, as the scores do.
+  const [seen, setSeen] = useState(fixture.delayMinutes);
+  if (fixture.delayMinutes !== seen) {
+    setSeen(fixture.delayMinutes);
+    setChosen(fixture.delayMinutes);
+  }
+
+  const pick = (minutes: number) => {
+    setChosen(minutes);
+    startTransition(async () => setResult(await setFixtureDelay(fixture.id, minutes)));
+  };
+
+  return (
+    <div className={styles.tool}>
+      <p className={styles.toolTitle}>Starting late?</p>
+      <div className={styles.chips} role="radiogroup" aria-label="How late this game will start">
+        {LATE_STEPS.map((minutes) => (
+          <button
+            key={minutes}
+            type="button"
+            role="radio"
+            aria-checked={chosen === minutes}
+            className={`${styles.chip} ${chosen === minutes ? styles.chipOn : ""}`}
+            disabled={pending}
+            onClick={() => pick(minutes)}
+          >
+            {minutes === 0 ? "On time" : `+${minutes}`}
+          </button>
+        ))}
+      </div>
+      <p className={styles.toolNote}>
+        {lateMin === 0
+          ? `Phones show kick-off at ${formatTime(fixture.scheduledTime)}. Later games on ${fixture.courtName} move with this one.`
+          : chosen === 0
+            ? `${fixture.courtName} is running behind, so phones already show ${formatTime(iso)} (${lateMin} min late). Only add more if you know it will be later still.`
+            : `Phones show kick-off at ${formatTime(iso)}, ${lateMin} min late. Later games on ${fixture.courtName} move with it.`}
+      </p>
+      <Result result={result} />
+    </div>
+  );
+}
+
+/** When it really kicked off — for a Start game tapped a few minutes late. */
+function KickoffFix({ fixture }: { fixture: Fixture }) {
+  const [open, setOpen] = useState(false);
+  const [time, setTime] = useState(fixture.startedAt ? formatTime(fixture.startedAt) : "");
+  const [result, setResult] = useState<ActionResult | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <div className={styles.kickoffFix}>
+      <p className={styles.toolNote}>
+        {fixture.startedAt
+          ? `Kicked off ${formatTime(fixture.startedAt)}.`
+          : "Kick-off time not recorded."}{" "}
+        {open ? null : (
+          <button type="button" className={styles.linkish} onClick={() => setOpen(true)}>
+            Change
+          </button>
+        )}
+      </p>
+      {open ? (
+        <form
+          className={styles.inline}
+          onSubmit={(event) => {
+            event.preventDefault();
+            startTransition(async () => {
+              const answer = await correctKickoff(fixture.id, time);
+              setResult(answer);
+              if (answer.ok) setOpen(false);
+            });
+          }}
+        >
+          <label className="mg-sr-only" htmlFor="kickoff-time">
+            Real kick-off time
+          </label>
+          <input
+            id="kickoff-time"
+            type="time"
+            required
+            className={styles.input}
+            value={time}
+            onChange={(event) => setTime(event.target.value)}
+          />
+          <button type="submit" className={`mg-btn ${styles.secondary}`} disabled={pending}>
+            {pending ? "Saving…" : "Save"}
+          </button>
+        </form>
+      ) : null}
+      <Result result={result} />
+    </div>
+  );
+}
+
+/**
+ * Moves a game for good — a new official time, another court. Folded away:
+ * it is the rare tool, and the scorer above it is the common one.
+ */
+function MoveGame({ fixture, courts, venues }: { fixture: Fixture; courts: Court[]; venues: Venue[] }) {
+  const [time, setTime] = useState(formatTime(fixture.scheduledTime));
+  const [courtId, setCourtId] = useState(fixture.courtId ?? "");
+  const [result, setResult] = useState<ActionResult | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const venueName = (slug: string) => venues.find((v) => v.slug === slug)?.shortName ?? slug;
+  const options = [...courts].sort(
+    (a, b) =>
+      venues.findIndex((v) => v.slug === a.venueSlug) - venues.findIndex((v) => v.slug === b.venueSlug) ||
+      a.name.localeCompare(b.name, undefined, { numeric: true }),
+  );
+
+  return (
+    <details className={styles.move}>
+      <summary className={styles.moveSummary}>Move this game</summary>
+      <form
+        className={styles.moveBody}
+        onSubmit={(event) => {
+          event.preventDefault();
+          startTransition(async () => setResult(await moveFixture(fixture.id, time, courtId)));
+        }}
+      >
+        <div className={styles.moveFields}>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>New kick-off</span>
+            <input
+              type="time"
+              required
+              className={styles.input}
+              value={time}
+              onChange={(event) => setTime(event.target.value)}
+            />
+          </label>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Court</span>
+            <select
+              className={styles.select}
+              value={courtId}
+              onChange={(event) => setCourtId(event.target.value)}
+            >
+              {options.map((court) => (
+                <option key={court.id} value={court.id}>
+                  {venueName(court.venueSlug)} · {court.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className={styles.toolNote}>
+          This changes the official time and place. Anyone following either team gets a
+          notification.
+        </p>
+        <button type="submit" className={`mg-btn ${styles.primary}`} disabled={pending}>
+          {pending ? "Moving…" : "Move game"}
+        </button>
+        <Result result={result} />
+      </form>
+    </details>
   );
 }
 

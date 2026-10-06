@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { KickoffTime, LateTag } from "@/components/delays";
 import { GoogleVenueMap } from "@/components/google-venue-map";
 import {
   BusIcon,
@@ -18,7 +19,7 @@ import {
 import { MatchList, MatchRow } from "@/components/match-row";
 import { SportBadge } from "@/components/sport-badge";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
-import { formatPrice, formatTime } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { TRAVEL, VENUE_FACILITIES } from "@/lib/info-content";
 import { useLiveFixtures } from "@/lib/live-feed";
 import type { Vendor, Venue } from "@/lib/queries";
@@ -148,10 +149,17 @@ export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initia
                 {court.current ? (
                   <Link href={`/match/${court.current.id}`} className={styles.courtNow}>
                     <span className={court.current.status === "live" ? styles.courtLive : styles.courtNext}>
-                      {court.current.status === "live" ? "Live" : formatTime(court.current.scheduledTime)}
+                      {court.current.status === "live" ? (
+                        "Live"
+                      ) : (
+                        <KickoffTime fixture={court.current} className={styles.courtTime} />
+                      )}
                     </span>
                     <span className={styles.courtMatch}>
                       {court.current.teamA} v {court.current.teamB}
+                      {court.current.status === "upcoming" ? (
+                        <LateTag fixture={court.current} className={styles.courtLate} />
+                      ) : null}
                     </span>
                     <ChevronRightIcon size={16} />
                   </Link>

@@ -293,6 +293,10 @@
   gap: 10px;
 }
 
+.late {
+  margin-bottom: 10px;
+}
+
 .lullLabel {
   font-size: 14px;
   color: var(--mg-night-muted);

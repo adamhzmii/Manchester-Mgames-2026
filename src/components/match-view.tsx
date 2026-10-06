@@ -15,7 +15,7 @@ import {
   TrophyIcon,
 } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
-import { RelTime } from "@/components/rel-time";
+import { KickoffCountdown, KickoffTime, LateNote } from "@/components/delays";
 import { Score } from "@/components/score";
 import { ScoreConsole } from "@/components/score-console";
 import { ShareButton } from "@/components/share-button";
@@ -27,7 +27,7 @@ import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
 import { nextGames } from "@/lib/progression";
 import { roundGames } from "@/lib/slots";
-import type { PickerTeam, Vendor, Venue } from "@/lib/queries";
+import type { Court, PickerTeam, Vendor, Venue } from "@/lib/queries";
 import {
   computeStandings,
   type GroupMeta,
@@ -47,6 +47,8 @@ type MatchViewProps = {
   standingTeams: (TeamMeta & { sportSlug: string })[];
   venues: Venue[];
   vendors: Vendor[];
+  /** Every court, for moving a game — only fetched for coordinators. */
+  courts: Court[];
   canEdit: boolean;
 };
 
@@ -66,6 +68,7 @@ export function MatchView({
   standingTeams,
   venues,
   vendors,
+  courts,
   canEdit,
 }: MatchViewProps) {
   const fixtures = useLiveFixtures(initial);
@@ -147,8 +150,8 @@ export function MatchView({
             <div className={styles.centre}>
               {fixture.status === "upcoming" ? (
                 <>
-                  <span className={styles.kickoff}>{formatTime(fixture.scheduledTime)}</span>
-                  <RelTime iso={fixture.scheduledTime} className={styles.until} />
+                  <KickoffTime fixture={fixture} className={styles.kickoff} />
+                  <KickoffCountdown fixture={fixture} className={styles.until} />
                 </>
               ) : (
                 <>
@@ -178,6 +181,11 @@ export function MatchView({
               right
             />
           </div>
+          {fixture.status === "upcoming" ? (
+            <p className={styles.lateLine}>
+              <LateNote fixture={fixture} onNight />
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -193,9 +201,10 @@ export function MatchView({
                 {fixture.status === "upcoming"
                   ? "Be courtside 10 minutes before kick-off."
                   : fixture.status === "live"
-                    ? "In progress now."
+                    ? `In progress now${fixture.startedAt ? ` · kicked off ${formatTime(fixture.startedAt)}` : ""}.`
                     : "Played."}
               </p>
+              {fixture.status === "upcoming" ? <LateNote fixture={fixture} /> : null}
             </div>
           </div>
 
@@ -253,6 +262,8 @@ export function MatchView({
             teams={teams}
             groups={groups}
             standingTeams={standingTeams}
+            courts={courts}
+            venues={venues}
           />
         ) : null}
 

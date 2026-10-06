@@ -181,6 +181,10 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       scoreB: null,
       ...meta,
       ...PITCH[pitch],
+      courtId: null,
+      startedAt: null,
+      finishedAt: null,
+      delayMinutes: 0,
     };
   };
 

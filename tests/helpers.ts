@@ -30,9 +30,13 @@ export function fixture(overrides: Partial<Fixture> = {}): Fixture {
     sportCode: "FB",
     sportColor: "#3C2A6E",
     sportOrder: 1,
+    courtId: "court-1",
     courtName: "Court 1",
     venueSlug: "sugden",
     venueShortName: "Sugden",
+    startedAt: null,
+    finishedAt: null,
+    delayMinutes: 0,
     ...overrides,
   };
 }

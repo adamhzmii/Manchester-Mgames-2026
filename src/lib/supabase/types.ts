@@ -186,13 +186,31 @@ export interface Database {
           status: FixtureStatus;
           score_a: number | null;
           score_b: number | null;
+          started_at: Timestamptz | null;
+          finished_at: Timestamptz | null;
+          delay_minutes: number;
+          delay_notified_minutes: number;
           created_at: Timestamptz;
           updated_at: Timestamptz;
         };
         Insert: Omit<
           Database["public"]["Tables"]["fixtures"]["Row"],
-          "id" | "created_at" | "updated_at"
-        > & { id?: string; created_at?: Timestamptz; updated_at?: Timestamptz };
+          | "id"
+          | "created_at"
+          | "updated_at"
+          | "started_at"
+          | "finished_at"
+          | "delay_minutes"
+          | "delay_notified_minutes"
+        > & {
+          id?: string;
+          created_at?: Timestamptz;
+          updated_at?: Timestamptz;
+          started_at?: Timestamptz | null;
+          finished_at?: Timestamptz | null;
+          delay_minutes?: number;
+          delay_notified_minutes?: number;
+        };
         Update: Partial<Database["public"]["Tables"]["fixtures"]["Insert"]>;
         Relationships: [
           {

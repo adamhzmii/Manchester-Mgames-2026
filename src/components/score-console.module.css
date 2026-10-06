@@ -255,3 +255,156 @@
   font: inherit;
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------- timing --- */
+
+.tool,
+.kickoffFix {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mg-night-line);
+}
+
+.toolTitle {
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+}
+
+/* "On time" gets the room a two-word label needs on a 360px phone. */
+.chips {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.chip {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-2);
+  color: var(--mg-night-text);
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chip:first-child {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.chipOn {
+  background: var(--mg-late-night);
+  color: var(--mg-night);
+}
+
+.chip:first-child.chipOn {
+  background: var(--mg-gold);
+}
+
+.toolNote {
+  font-size: 13px;
+  color: var(--mg-night-muted);
+}
+
+.done {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6ee7a8;
+}
+
+.linkish {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--mg-gold);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.inline {
+  display: flex;
+  gap: 8px;
+}
+
+.inline .input {
+  flex: 1;
+}
+
+.input {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-3);
+  color: var(--mg-night-text);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color-scheme: dark;
+}
+
+.move {
+  padding-top: 14px;
+  border-top: 1px solid var(--mg-night-line);
+}
+
+.moveSummary {
+  font-family: var(--mg-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-night-muted);
+  cursor: pointer;
+}
+
+.moveBody {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.moveFields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 8px;
+}
+
+/* A phone's time picker can be wider than half a small screen ("01:40 PM"
+   in a 12-hour locale): one field per line there. */
+@media (max-width: 380px) {
+  .moveFields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field .select,
+.field .input {
+  width: 100%;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mg-night-muted);
+}
+
+.moveBody > .primary {
+  min-height: 48px;
+}

@@ -1,10 +1,10 @@
 import Link from "next/link";
 
+import { KickoffTime, LateTag } from "@/components/delays";
 import { StarIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
 import type { Fixture } from "@/lib/fixtures";
-import { formatTime } from "@/lib/format";
 import { winningSide } from "@/lib/matchday";
 import type { FixtureStage } from "@/lib/supabase/types";
 
@@ -57,7 +57,10 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
         ) : fixture.status === "finished" ? (
           <span className={styles.ft}>FT</span>
         ) : (
-          <span className={styles.time}>{formatTime(fixture.scheduledTime)}</span>
+          <>
+            <KickoffTime fixture={fixture} className={styles.time} />
+            <LateTag fixture={fixture} />
+          </>
         )}
         {tag ? <span className={styles.tag}>{tag}</span> : null}
       </span>

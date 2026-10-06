@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 
 import { BottomNav } from "@/components/bottom-nav";
+import { DelaysProvider } from "@/components/delays";
 import { Pwa } from "@/components/pwa";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -72,11 +73,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <ClockProvider offset={clockOffsetMs()}>
           <LiveFeedProvider>
-            <SiteHeader />
-            <main id="main">{children}</main>
-            <SiteFooter />
-            <BottomNav />
-            <Pwa />
+            <DelaysProvider>
+              <SiteHeader />
+              <main id="main">{children}</main>
+              <SiteFooter />
+              <BottomNav />
+              <Pwa />
+            </DelaysProvider>
           </LiveFeedProvider>
         </ClockProvider>
       </body>

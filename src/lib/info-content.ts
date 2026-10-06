@@ -65,7 +65,7 @@ export const FAQ = [
   {
     question: "What if my game is delayed or moved?",
     answer:
-      "Every timing or court change is posted under Updates the moment it is decided, and appears at the top of whatever page you have open. Turn on notifications to get it on your lock screen.",
+      "The site keeps up for you. If a court falls behind, every game after it there shows its new expected time in orange, worked out from when games really start and finish. Follow your team and turn on notifications to be told when your game slips 10 minutes or more, or moves. Bigger changes are posted under Updates too.",
   },
   {
     question: "How do I keep track of my own team?",
@@ -75,7 +75,7 @@ export const FAQ = [
   {
     question: "Will my phone tell me when we're on?",
     answer:
-      "Yes, if you follow your team and tap Notify me. You'll get a notification when your game starts and when the result is in. On an iPhone, add the site to your home screen first — that's when Apple allows notifications.",
+      "Yes, if you follow your team and tap Notify me. You'll get a notification if your game is running late or moves, when it starts, and when the result is in. On an iPhone, add the site to your home screen first (Share, then Add to Home Screen) — that's when Apple allows notifications.",
   },
   {
     question: "How fresh are the scores?",

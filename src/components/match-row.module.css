@@ -54,6 +54,11 @@
   color: var(--mg-ink);
 }
 
+/* The kick-off it is now expected at, when its court is running behind. */
+.time[data-late] {
+  color: var(--mg-late);
+}
+
 .ft {
   font-size: 15px;
   font-weight: 700;

@@ -1,6 +1,8 @@
 import "server-only";
 
+import { courtKey, slotLengths } from "@/lib/delays";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
+import { formatTime } from "@/lib/format";
 import { previewDurationMin } from "@/lib/preview";
 import { resolveSlot } from "@/lib/progression";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
@@ -90,6 +92,23 @@ const DURATION_MIN: Record<string, number> = {
   pickleball: 20,
 };
 
+/**
+ * One game that kicks off late, so a rehearsal has a court running behind:
+ * netball's first semi-final, ten minutes late. At midday it has just
+ * started, and the second semi on the same court shows as late.
+ */
+const LATE_STARTS: { sport: string; stage: Fixture["stage"]; at: string; minutes: number }[] = [
+  { sport: "netball", stage: "semifinal", at: "13:10", minutes: 10 },
+];
+
+function lateStartMin(f: Fixture): number {
+  return (
+    LATE_STARTS.find(
+      (l) => l.sport === f.sportSlug && l.stage === f.stage && l.at === formatTime(f.scheduledTime),
+    )?.minutes ?? 0
+  );
+}
+
 /** FNV-1a: stable per fixture, so a rehearsal shows the same results every time. */
 function hash(text: string): number {
   let h = 2166136261;
@@ -169,6 +188,10 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
 
   const played: Fixture[] = [];
   const ordered = [...fixtures].sort(byKickoff);
+  const slot = slotLengths(fixtures);
+  // When each court is next free: a late start or an overrun pushes the
+  // games after it, the way it would on the day.
+  const courtFree = new Map<string, number>();
 
   for (const original of ordered) {
     let f: Fixture = { ...original };
@@ -186,22 +209,36 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
       if (team && team.id !== f.teamAId) f = { ...f, teamBId: team.id, teamB: team.name };
     }
 
-    const start = Date.parse(f.scheduledTime);
-    const minutes = previewDurationMin(f) ?? DURATION_MIN[f.sportSlug] ?? 30;
-    const end = start + minutes * 60_000;
     const ready = f.teamAId !== null && f.teamBId !== null;
+    const key = courtKey(f);
+    const start = Math.max(
+      Date.parse(f.scheduledTime) + lateStartMin(f) * 60_000,
+      courtFree.get(key) ?? -Infinity,
+    );
+    // No longer than its slot: the mock day's sports have their own lengths,
+    // and an on-time court should stay on time.
+    const length = Math.min(
+      (previewDurationMin(f) ?? DURATION_MIN[f.sportSlug] ?? 30) * 60_000,
+      slot.get(f.id) ?? Infinity,
+    );
+    const end = start + length;
+    const iso = (ms: number) => new Date(ms).toISOString();
 
+    // A rehearsal invents its own day: whatever timings the real database
+    // holds from a dry run do not belong in it.
+    f = { ...f, delayMinutes: 0, startedAt: null, finishedAt: null };
     if (!ready || now < start) {
       f = { ...f, status: "upcoming", scoreA: null, scoreB: null };
     } else if (now >= end) {
       const [a, b] = finalScore(f);
-      f = { ...f, status: "finished", scoreA: a, scoreB: b };
+      f = { ...f, status: "finished", scoreA: a, scoreB: b, startedAt: iso(start), finishedAt: iso(end) };
     } else {
       const [a, b] = liveScore(f, (now - start) / (end - start));
-      f = { ...f, status: "live", scoreA: a, scoreB: b };
+      f = { ...f, status: "live", scoreA: a, scoreB: b, startedAt: iso(start) };
     }
+    if (ready) courtFree.set(key, end);
 
-    f = { ...f, updatedAt: new Date(Math.min(now, end)).toISOString() };
+    f = { ...f, updatedAt: iso(Math.min(now, end)) };
     played.push(f);
   }
 

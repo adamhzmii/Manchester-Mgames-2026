@@ -48,9 +48,28 @@ if (!reset.ok) {
   process.exit(1);
 }
 
+// Timings from the dry run: real kick-offs, "starting late", the slips
+// followers were told about. The reset puts statuses back; these go too, or
+// the first court of the real day would start out "running late".
+const timings = await fetch(`${url}/rest/v1/fixtures?id=not.is.null`, {
+  method: "PATCH",
+  headers: { ...headers, "Content-Type": "application/json" },
+  body: JSON.stringify({
+    started_at: null,
+    finished_at: null,
+    delay_minutes: 0,
+    delay_notified_minutes: 0,
+  }),
+});
+
+if (!timings.ok) {
+  console.error(`Clearing timings failed (HTTP ${timings.status}):`, await timings.text());
+  process.exit(1);
+}
+
 const fixtures = await (
   await fetch(
-    `${url}/rest/v1/fixtures?select=status,score_a,score_b,stage,team_a_id,placeholder_a`,
+    `${url}/rest/v1/fixtures?select=status,score_a,score_b,stage,team_a_id,placeholder_a,started_at,delay_minutes`,
     { headers },
   )
 ).json();
@@ -64,6 +83,7 @@ const byStatus = fixtures.reduce((acc, f) => {
 }, {});
 const scored = fixtures.filter((f) => f.score_a !== null || f.score_b !== null).length;
 const awaiting = fixtures.filter((f) => f.placeholder_a !== null).length;
+const timed = fixtures.filter((f) => f.started_at !== null || f.delay_minutes !== 0).length;
 
 console.log("Reset to pre-event.\n");
 console.log(`  fixtures        ${fixtures.length}`);
@@ -72,9 +92,10 @@ for (const [status, n] of Object.entries(byStatus)) {
 }
 console.log(`  with a score    ${scored}`);
 console.log(`  awaiting a feed ${awaiting}  (knockout slots showing a placeholder)`);
+console.log(`  with timings    ${timed}`);
 console.log(`  announcements   ${announcements.length}`);
 
-if (scored !== 0 || byStatus.upcoming !== fixtures.length) {
+if (scored !== 0 || timed !== 0 || byStatus.upcoming !== fixtures.length) {
   console.error("\nUnexpected state after reset — check the migration.");
   process.exit(1);
 }

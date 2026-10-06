@@ -195,6 +195,11 @@
   text-overflow: ellipsis;
 }
 
+.metaTime[data-late] {
+  font-weight: 700;
+  color: var(--mg-late);
+}
+
 .live {
   display: inline-flex;
   align-items: center;

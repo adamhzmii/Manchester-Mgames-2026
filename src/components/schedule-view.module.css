@@ -268,3 +268,7 @@
 .emptyBody {
   color: var(--mg-ink-2);
 }
+
+.late {
+  margin-top: 12px;
+}

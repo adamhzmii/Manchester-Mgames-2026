@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { signOut } from "@/lib/actions/auth";
-import { getCoordinator, getSports } from "@/lib/queries";
+import { getCoordinator } from "@/lib/queries";
 
 import { LoginForm } from "./login-form";
 import styles from "./login.module.css";
@@ -21,10 +21,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
-  const [coordinator, sports] = await Promise.all([getCoordinator(), getSports()]);
-  const sportName = coordinator?.sportId
-    ? (sports.find((s) => s.id === coordinator.sportId)?.name ?? "your sport")
-    : null;
+  const coordinator = await getCoordinator();
 
   return (
     <div className={styles.wrap}>
@@ -33,9 +30,8 @@ export default async function LoginPage() {
           <div className={styles.signedIn}>
             <h1 className={styles.signedInTitle}>Signed in as {coordinator.name}</h1>
             <p className={styles.intro}>
-              {sportName
-                ? `You can edit ${sportName} fixtures. Edit buttons appear on those games on the Schedule — tap one to push a score or change a game's status.`
-                : "You're a committee admin, so you can edit every sport. Edit buttons appear on every fixture on the Schedule."}
+              You can edit every game, in every sport. Tap a game on the Schedule to score it, mark
+              it running late, or move it.
             </p>
             <form action={signOut}>
               <button type="submit" className={styles.signOut}>
@@ -56,7 +52,7 @@ export default async function LoginPage() {
       </div>
 
       <p className={styles.note}>
-        One account per sport. Don&rsquo;t post the password anywhere public.
+        Don&rsquo;t post the password anywhere public.
       </p>
     </div>
   );

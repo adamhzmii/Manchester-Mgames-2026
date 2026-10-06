@@ -9,20 +9,21 @@
  */
 export type Coordinator = {
   name: string;
-  /** Null means a committee admin, allowed to edit every sport. */
+  /**
+   * The sport the account was set up for, or null for a committee admin.
+   * No longer a limit: every coordinator can edit every game.
+   */
   sportId: string | null;
 };
 
 /**
- * Whether this coordinator may edit fixtures belonging to `sportId`.
+ * Whether this visitor may edit a game: any signed-in coordinator, for any
+ * sport. On the day coordinators cover for each other — a scorer at the next
+ * court, moving a game, marking one late — so nobody is fenced into one sport.
  *
  * Presentation only. The boundary that actually holds is the RLS policy on
  * `fixtures`; this just avoids offering an action that Postgres would refuse.
  */
-export function coordinatorCanEdit(
-  coordinator: Coordinator | null,
-  sportId: string,
-): boolean {
-  if (!coordinator) return false;
-  return coordinator.sportId === null || coordinator.sportId === sportId;
+export function coordinatorCanEdit(coordinator: Coordinator | null): boolean {
+  return coordinator !== null;
 }

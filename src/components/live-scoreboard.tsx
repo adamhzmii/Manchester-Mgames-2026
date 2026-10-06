@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { KickoffTime, LateNote } from "@/components/delays";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
 import type { Fixture } from "@/lib/fixtures";
@@ -28,7 +29,9 @@ export function LiveScoreboard({ fixture }: { fixture: Fixture }) {
           {fixture.sportName} · {fixture.stageLabel}
         </span>
         {upcoming ? (
-          <span className={styles.next}>Starts {formatTime(fixture.scheduledTime)}</span>
+          <span className={styles.next}>
+            Starts <KickoffTime fixture={fixture} className={styles.nextTime} />
+          </span>
         ) : (
           <span className={styles.live}>
             <span className={styles.dot} aria-hidden="true" />
@@ -50,8 +53,13 @@ export function LiveScoreboard({ fixture }: { fixture: Fixture }) {
         <span>
           {fixture.venueShortName} · {fixture.courtName}
         </span>
-        <span>{upcoming ? fixture.stageLabel : `From ${formatTime(fixture.scheduledTime)}`}</span>
+        <span>
+          {upcoming
+            ? fixture.stageLabel
+            : `From ${formatTime(fixture.startedAt ?? fixture.scheduledTime)}`}
+        </span>
       </span>
+      {upcoming ? <LateNote fixture={fixture} onNight className={styles.late} /> : null}
     </Link>
   );
 }
