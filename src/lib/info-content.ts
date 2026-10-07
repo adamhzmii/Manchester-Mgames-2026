@@ -13,7 +13,7 @@
  * Drive, shared so anyone with the link can open it.
  */
 export const HANDBOOK_URL =
-  "https://drive.google.com/file/d/1eOWKeF-mftx91Q_Gtv2siHqC00NjKqVv/view?usp=sharing";
+  "https://drive.google.com/file/d/1KNs4fotwofsR3zFLBL9r1TgQZ4-kE2Q1/view?usp=sharing";
 
 export type Contact = {
   label: string;
