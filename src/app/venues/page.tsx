@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 
 import { VenuesView } from "@/components/venues-view";
-import { googleMapsApiKey } from "@/lib/maps-env";
 import { getFixtures, getVendors, getVenues } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Venues",
   description:
-    "Trinity and Sugden for MGames 2026 — what's on each court, food stalls, first aid, prayer rooms, and getting between the two.",
+    "Trinity, Sugden and Denmark Road for MGames 2026 — what's on each court, food stalls, first aid, prayer rooms, and getting between them.",
 };
 
 /** Live data — never prerendered or cached. */
@@ -32,7 +31,6 @@ export default async function VenuesPage({ searchParams }: PageProps<"/venues">)
       venues={venues}
       vendors={vendors}
       fixtures={fixtures}
-      mapsKey={googleMapsApiKey()}
       initialVenue={initialVenue}
     />
   );

@@ -13,6 +13,7 @@ import type { Coordinator } from "@/lib/coordinator";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatHour, hourKey } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
+import { arrivedByBackOrForward } from "@/lib/navigation";
 import type { PickerTeam, Sport, Venue } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
@@ -131,6 +132,12 @@ export function ScheduleView({
   const scrolled = useRef(false);
   useEffect(() => {
     if (scrolled.current || nowKey === null) return;
+    // Back from a game: the browser puts the list where it was, and jumping
+    // to "now" would lose the visitor's place.
+    if (arrivedByBackOrForward()) {
+      scrolled.current = true;
+      return;
+    }
     const target = listRef.current?.querySelector<HTMLElement>(
       `[data-hour="${CSS.escape(nowKey)}"]`,
     );
@@ -195,7 +202,7 @@ export function ScheduleView({
 
       <div className={`mg-wrap ${styles.secondary}`}>
         <div className={styles.segment} role="radiogroup" aria-label="Venue">
-          {[{ slug: "all", shortName: "All venues" }, ...venues].map((v) => (
+          {[{ slug: "all", shortName: "All" }, ...venues].map((v) => (
             <button
               key={v.slug}
               type="button"

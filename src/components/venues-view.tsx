@@ -5,9 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { KickoffTime, LateTag } from "@/components/delays";
-import { GoogleVenueMap } from "@/components/google-venue-map";
 import {
-  BusIcon,
   ChevronRightIcon,
   ExternalIcon,
   FirstAidIcon,
@@ -24,6 +22,7 @@ import { TRAVEL, VENUE_FACILITIES } from "@/lib/info-content";
 import { useLiveFixtures } from "@/lib/live-feed";
 import type { Vendor, Venue } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
+import { walkMinutes, walkingDirections } from "@/lib/walking";
 
 import styles from "./venues-view.module.css";
 
@@ -31,7 +30,6 @@ type VenuesViewProps = {
   venues: Venue[];
   vendors: Vendor[];
   fixtures: Fixture[];
-  mapsKey: string | null;
   initialVenue: string;
 };
 
@@ -41,7 +39,7 @@ type VenuesViewProps = {
  * are. Organised by place because that is how the question arrives — someone
  * standing in Trinity wants Trinity's answers.
  */
-export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initialVenue }: VenuesViewProps) {
+export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }: VenuesViewProps) {
   const fixtures = useLiveFixtures(initial);
   const favourites = useFavouriteTeams();
   const router = useRouter();
@@ -61,7 +59,9 @@ export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initia
   const courts = courtsAt(here);
   const food = vendors.filter((v) => v.venueSlug === venue.slug);
   const facilities = VENUE_FACILITIES[venue.slug];
-  const other = venues.find((v) => v.slug !== venue.slug);
+  const others = venues.filter((v) => v.slug !== venue.slug);
+  // For a venue with no stalls, the nearest one that has some.
+  const nearestFood = food.length > 0 ? null : nearestWith(venue, venues, vendors);
   const directions =
     venue.latitude !== null && venue.longitude !== null
       ? `https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`
@@ -109,12 +109,6 @@ export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initia
             </a>
           ) : null}
         </section>
-
-        {mapsKey ? (
-          <div className={styles.map}>
-            <GoogleVenueMap apiKey={mapsKey} venues={venues} vendors={vendors} selectedSlug={venue.slug} />
-          </div>
-        ) : null}
 
         {live.length > 0 ? (
           <section className={styles.section}>
@@ -204,6 +198,21 @@ export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initia
               })}
             </ul>
           </section>
+        ) : nearestFood ? (
+          <section className={styles.section}>
+            <h2 className={styles.title}>Food &amp; drink</h2>
+            <Link href={`/food?venue=${nearestFood.venue.slug}`} className={styles.noFood}>
+              <span>
+                <span className={styles.noFoodTitle}>No food stalls at {venue.shortName}</span>
+                <span className={styles.noFoodText}>
+                  The nearest are at {nearestFood.venue.shortName}
+                  {nearestFood.minutes !== null ? `, about ${nearestFood.minutes} min walk` : ""}.
+                  Bring water and a snack for between games.
+                </span>
+              </span>
+              <ChevronRightIcon size={18} />
+            </Link>
+          </section>
         ) : null}
 
         {facilities ? (
@@ -217,23 +226,36 @@ export function VenuesView({ venues, vendors, fixtures: initial, mapsKey, initia
           </section>
         ) : null}
 
-        {other ? (
+        {others.length > 0 ? (
           <section className={styles.section}>
-            <h2 className={styles.title}>Getting to {other.shortName}</h2>
-            <div className={styles.travel}>
-              <div className={styles.travelItem}>
-                <WalkIcon size={22} />
-                <span className={styles.travelBig}>{TRAVEL.walk.minutes} min</span>
-                <span className={styles.travelSmall}>Walk · {TRAVEL.walk.distance}</span>
-              </div>
-              <div className={styles.travelItem}>
-                <BusIcon size={22} />
-                <span className={styles.travelBig}>{TRAVEL.bus.minutes} min</span>
-                <span className={styles.travelSmall}>
-                  Bus {TRAVEL.bus.route} · {TRAVEL.bus.every}
-                </span>
-              </div>
-            </div>
+            <h2 className={styles.title}>Getting to the other venues</h2>
+            <ul className={styles.travel}>
+              {others.map((to) => {
+                const minutes = walkMinutes(venue, to);
+                const route = walkingDirections(venue, to);
+                const bus = TRAVEL.buses.find(
+                  (b) => b.between.includes(venue.slug) && b.between.includes(to.slug),
+                );
+                return (
+                  <li key={to.slug} className={styles.travelItem}>
+                    <WalkIcon size={22} />
+                    <span className={styles.travelText}>
+                      <span className={styles.travelName}>{to.shortName}</span>
+                      <span className={styles.travelSmall}>
+                        {minutes !== null ? `About ${minutes} min walk` : "Walk"}
+                        {bus ? ` · or ${bus.line}` : ""}
+                      </span>
+                    </span>
+                    {route ? (
+                      <a href={route} target="_blank" rel="noreferrer" className={styles.travelLink}>
+                        Route
+                        <ExternalIcon size={14} />
+                      </a>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
             <p className={styles.note}>{TRAVEL.note}</p>
           </section>
         ) : null}
@@ -270,6 +292,21 @@ function Facility({
  * frisbee, and listing it as "Shared space" told a player looking for
  * volleyball nothing.
  */
+/** The closest venue that has food stalls, and how far a walk it is. */
+function nearestWith(
+  from: Venue,
+  venues: Venue[],
+  vendors: Vendor[],
+): { venue: Venue; minutes: number | null } | null {
+  const withFood = venues.filter(
+    (v) => v.slug !== from.slug && vendors.some((s) => s.venueSlug === v.slug),
+  );
+  const ranked = withFood
+    .map((venue) => ({ venue, minutes: walkMinutes(from, venue) }))
+    .sort((a, b) => (a.minutes ?? Infinity) - (b.minutes ?? Infinity));
+  return ranked[0] ?? null;
+}
+
 function courtsAt(fixtures: Fixture[]) {
   const byCourt = new Map<string, Fixture[]>();
   for (const f of fixtures) {

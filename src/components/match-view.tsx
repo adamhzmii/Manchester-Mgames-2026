@@ -35,7 +35,9 @@ import {
   type TeamMeta,
 } from "@/lib/standings";
 import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
+import { canGoBackInSite } from "@/lib/navigation";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
+import { walkMinutes } from "@/lib/walking";
 
 import styles from "./match-view.module.css";
 
@@ -250,9 +252,10 @@ export function MatchView({
         </div>
 
         <FoodNearby
-          venueSlug={fixture.venueSlug}
+          venue={venue}
           venueName={fixture.venueShortName}
-          vendors={vendors.filter((v) => v.venueSlug === fixture.venueSlug)}
+          venues={venues}
+          vendors={vendors}
         />
 
         {canEdit ? (
@@ -350,7 +353,11 @@ function TeamSide({
   );
 }
 
-/** Back to wherever the visitor came from on this site, or the schedule. */
+/**
+ * Back to exactly where the visitor came from on this site — the same page,
+ * filters and scroll — or to the schedule for a game opened from outside,
+ * where "back" would leave the site.
+ */
 function BackLink() {
   const router = useRouter();
   return (
@@ -358,9 +365,7 @@ function BackLink() {
       type="button"
       className={styles.back}
       onClick={() => {
-        const fromHere =
-          typeof document !== "undefined" && document.referrer.startsWith(window.location.origin);
-        if (fromHere && window.history.length > 1) router.back();
+        if (canGoBackInSite()) router.back();
         else router.push("/schedule");
       }}
     >
@@ -457,23 +462,52 @@ function possessive(name: string): string {
  * the stalls' best customer, and is already standing a corridor away.
  */
 function FoodNearby({
-  venueSlug,
+  venue,
   venueName,
+  venues,
   vendors,
 }: {
-  venueSlug: string;
+  venue: Venue | undefined;
   venueName: string;
+  venues: Venue[];
   vendors: Vendor[];
 }) {
-  if (vendors.length === 0) return null;
+  if (!venue) return null;
+  const here = vendors.filter((v) => v.venueSlug === venue.slug);
+
+  // No stalls in this building (Denmark Road): point at the nearest ones,
+  // since a player between games will want to know before they set off.
+  if (here.length === 0) {
+    const nearest = venues
+      .filter((v) => v.slug !== venue.slug && vendors.some((s) => s.venueSlug === v.slug))
+      .map((v) => ({ v, minutes: walkMinutes(venue, v) }))
+      .sort((a, b) => (a.minutes ?? Infinity) - (b.minutes ?? Infinity))[0];
+    if (!nearest) return null;
+    return (
+      <Link href={`/food?venue=${nearest.v.slug}`} className={styles.food}>
+        <span className={styles.foodIcon} aria-hidden="true">
+          <FoodIcon size={20} />
+        </span>
+        <span className={styles.foodText}>
+          <span className={styles.foodTitle}>No food at {venueName}</span>
+          <span className={styles.foodNames}>
+            Nearest stalls at {nearest.v.shortName}
+            {nearest.minutes !== null ? `, about ${nearest.minutes} min walk` : ""}
+          </span>
+        </span>
+        <ChevronRightIcon size={18} className={styles.foodChevron} />
+      </Link>
+    );
+  }
+
   return (
-    <Link href={`/food?venue=${venueSlug}`} className={styles.food}>
+    <Link href={`/food?venue=${venue.slug}`} className={styles.food}>
       <span className={styles.foodIcon} aria-hidden="true">
         <FoodIcon size={20} />
       </span>
       <span className={styles.foodText}>
         <span className={styles.foodTitle}>Hungry? Food at {venueName}</span>
-        <span className={styles.foodNames}>{vendors.map((v) => v.name).join(" · ")}</span>
+        <span className={styles.foodNames}>{here.map((v) => v.name).join(" · ")}</span>
       </span>
       <ChevronRightIcon size={18} className={styles.foodChevron} />
     </Link>

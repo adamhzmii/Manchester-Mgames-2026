@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 
 import { Countdown } from "@/components/countdown";
-import { KickoffCountdown, LateCourts } from "@/components/delays";
+import { LateCourts } from "@/components/delays";
 import { FindTeamButton } from "@/components/find-team-button";
 import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
 import { LiveScoreboard } from "@/components/live-scoreboard";
@@ -78,11 +78,17 @@ export function HomeView({
           chat should see "Manchester MGames 2026" before anything else. */}
       <section className={styles.top}>
         <div className={`mg-wrap ${styles.topInner}`} data-phase={phase}>
-          <Masthead />
+          <Masthead venues={venues} />
           {phase === "before" ? (
             <BeforeHero fixtures={fixtures} teams={teams} sports={sports} venues={venues} />
           ) : phase === "matchday" ? (
-            <MatchdayLive fixtures={fixtures} now={now} />
+            <MatchdayHero
+              fixtures={fixtures}
+              now={now}
+              teams={teams}
+              venues={venues}
+              following={favourites.teamIds.length > 0}
+            />
           ) : (
             <Champions finals={finals} />
           )}
@@ -91,6 +97,8 @@ export function HomeView({
 
       <div className={`mg-wrap ${styles.body}`}>
         <div className={styles.main}>
+          {phase === "matchday" ? <LiveNow fixtures={fixtures} /> : null}
+
           {phase === "after" ? (
             <section className={styles.sMedals}>
               <SectionHead title="Medal table" href="/standings" action="Standings" />
@@ -154,9 +162,10 @@ export function HomeView({
         </div>
 
         <aside className={styles.aside}>
-          {/* Once it is all over, "follow your team to see your next game"
-              has nothing left to offer; a team already followed still shows. */}
-          {phase !== "after" || favourites.teamIds.length > 0 ? (
+          {/* On the day it leads the page, in the band above. Once it is all
+              over, "follow your team to see your next game" has nothing left
+              to offer; a team already followed still shows. */}
+          {phase === "before" || (phase === "after" && favourites.teamIds.length > 0) ? (
             <div className={styles.sTeam}>
               <YourTeam fixtures={fixtures} teams={teams} venues={venues} />
             </div>
@@ -182,7 +191,12 @@ export function HomeView({
 // ----------------------------------------------------------- masthead ----
 
 /** The event's name, as a poster would set it, at the top of every phase. */
-function Masthead() {
+function Masthead({ venues }: { venues: Venue[] }) {
+  // "Trinity, Sugden & Denmark Road", from the venues there are.
+  const names = venues.map((v) => v.shortName);
+  const where =
+    names.length > 1 ? `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}` : names[0];
+
   return (
     <div className={styles.masthead}>
       <p className={styles.mastKicker}>Malaysian Students&rsquo; Society · Manchester</p>
@@ -198,7 +212,7 @@ function Masthead() {
         </span>
         <span className={styles.mastFact}>
           <PinIcon size={15} className={styles.mastIcon} />
-          Trinity &amp; Sugden
+          {where}
         </span>
       </div>
     </div>
@@ -262,53 +276,79 @@ function Stat({ value, label }: { value: number; label: string }) {
 
 // ----------------------------------------------------------- matchday ----
 
-function MatchdayLive({ fixtures, now }: { fixtures: Fixture[]; now: number }) {
+/**
+ * The day itself, from a player's side: the first thing under the event's
+ * name is their own next game — time, court, opponent, whether it is running
+ * late. Somebody else's live semi-final can wait a scroll; it used to take
+ * the whole first screen while the player's own game sat below it.
+ *
+ * Not following a team yet, the same spot asks them to, in one line.
+ */
+function MatchdayHero({
+  fixtures,
+  now,
+  teams,
+  venues,
+  following,
+}: {
+  fixtures: Fixture[];
+  now: number;
+  teams: PickerTeam[];
+  venues: Venue[];
+  following: boolean;
+}) {
   const live = liveFixtures(fixtures);
-  const [next] = upNext(fixtures, 1);
   const first = firstKickoff(fixtures);
   const notStarted = live.length === 0 && fixtures.every((f) => f.status === "upcoming");
 
   return (
-    // "Live" in the header links here, past the masthead to the scores.
-    <div className={styles.phaseBlock} id="live">
+    <div className={styles.phaseBlock}>
       <div className={styles.bandTop}>
         <p className={styles.bandKicker}>
           <span className={styles.bandGold}>Matchday</span>
-          {live.length === 0 && next && !notStarted ? " · between games" : null}
+          {notStarted && first !== null && now < first
+            ? ` · first game ${formatTime(new Date(first).toISOString())}`
+            : null}
         </p>
         {live.length > 0 ? (
-          <p className={styles.bandCount}>
+          <a href="#live" className={styles.bandCount}>
             <span className={styles.bandDot} aria-hidden="true" />
             {live.length} live now
-          </p>
+          </a>
         ) : null}
       </div>
 
-      {live.length > 0 ? (
-        <div className={styles.boards}>
-          {live.map((f) => (
-            <LiveScoreboard key={f.id} fixture={f} />
-          ))}
+      {following ? (
+        <div className={styles.heroCard}>
+          <YourTeam fixtures={fixtures} teams={teams} venues={venues} />
         </div>
-      ) : notStarted && first !== null && now < first ? (
-        <div className={styles.morning}>
-          <p className={styles.morningTitle}>Today&rsquo;s the day</p>
-          <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
-          <p className={styles.clockFoot}>
-            First game {formatTime(new Date(first).toISOString())} · doors 08:30
+      ) : (
+        <div className={styles.followCta}>
+          <p className={styles.followText}>
+            <strong>Playing today?</strong> Follow your team, and this spot shows your next game:
+            time, court, opponent, and whether it&rsquo;s running late.
           </p>
+          <FindTeamButton teams={teams} className={`mg-btn mg-btn-gold ${styles.followButton}`} />
         </div>
-      ) : next ? (
-        <div className={styles.lull}>
-          <p className={styles.lullLabel}>
-            Next up <KickoffCountdown fixture={next} />
-          </p>
-          <div className={styles.boards}>
-            <LiveScoreboard fixture={next} />
-          </div>
-        </div>
-      ) : null}
+      )}
     </div>
+  );
+}
+
+/** Every game being played right now, under the player's own. */
+function LiveNow({ fixtures }: { fixtures: Fixture[] }) {
+  const live = liveFixtures(fixtures);
+  if (live.length === 0) return null;
+  return (
+    // "Live" in the header links here.
+    <section className={styles.sLive} id="live">
+      <SectionHead title="Live now" count={live.length} href="/schedule?live=1" action="All live" />
+      <div className={styles.boards}>
+        {live.map((f) => (
+          <LiveScoreboard key={f.id} fixture={f} />
+        ))}
+      </div>
+    </section>
   );
 }
 

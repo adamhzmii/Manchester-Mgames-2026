@@ -45,22 +45,27 @@ export const VENUE_FACILITIES: Record<string, VenueFacilities> = {
   },
 };
 
+/**
+ * Getting between venues. Walking times are worked out from where the venues
+ * are (see walking.ts); this is what a map cannot tell you.
+ */
 export const TRAVEL = {
-  walk: { minutes: 12, distance: "0.6 mi" },
-  bus: { route: "142", minutes: 6, every: "every 10 min" },
-  note: "Your wristband gets you into both venues all day. Stewards in gold hi-vis are at each reception.",
+  /** Buses worth knowing, by pair of venue slugs in either order. */
+  buses: [{ between: ["trinity", "sugden"], line: "Bus 142, every 10 min — 6 minutes" }],
+  note: "Your wristband gets you into every venue all day. Stewards in gold hi-vis are at each reception.",
 };
 
 export const GETTING_THERE = [
   "Manchester Piccadilly station is a 12-minute walk from Sugden.",
-  "Parking nearby is limited — use the NCP car parks.",
+  "Football is at Denmark Road, a short walk from Manchester Oxford Road station.",
+  "Parking nearby is limited — use the NCP car parks. Denmark Road has a small free car park.",
 ];
 
 export const FAQ = [
   {
-    question: "Can I move between the two venues?",
+    question: "Can I move between the venues?",
     answer:
-      "Yes. Your wristband gets you into Trinity and Sugden all day. It's a 12-minute walk, or 6 minutes on bus 142.",
+      "Yes. Your wristband gets you into every venue all day. Trinity to Sugden is a 12-minute walk, or 6 minutes on bus 142. The football is at Denmark Road, about 8 minutes' walk from Trinity. There's no food at Denmark Road — the stalls are at Trinity and Sugden.",
   },
   {
     question: "What if my game is delayed or moved?",

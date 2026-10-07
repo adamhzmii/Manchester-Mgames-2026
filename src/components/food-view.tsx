@@ -38,6 +38,12 @@ export function FoodView({
 
   const visible = venue === "all" ? vendors : vendors.filter((v) => v.venueSlug === venue);
   const count = (slug: string) => vendors.filter((v) => v.venueSlug === slug).length;
+  // Only venues with stalls: Denmark Road has none, and a filter that shows
+  // nothing is a dead end.
+  const withFood = venues.filter((v) => count(v.slug) > 0);
+  const where = new Intl.ListFormat("en-GB", { type: "conjunction" }).format(
+    withFood.map((v) => v.shortName),
+  );
 
   return (
     <div className={styles.page}>
@@ -46,12 +52,11 @@ export function FoodView({
           <p className={styles.eyebrow}>Eat at MGames</p>
           <h1 className={styles.title}>Food &amp; drink</h1>
           <p className={styles.lede}>
-            {vendors.length} stalls across {venues.map((v) => v.shortName).join(" and ")}, serving all
-            day. Find one near your next game.
+            {vendors.length} stalls at {where}, serving all day. Find one near your next game.
           </p>
 
           <div className={styles.filter} role="radiogroup" aria-label="Venue">
-            {[{ slug: "all", shortName: "All" }, ...venues].map((v) => {
+            {[{ slug: "all", shortName: "All" }, ...withFood].map((v) => {
               const on = venue === v.slug;
               return (
                 <button

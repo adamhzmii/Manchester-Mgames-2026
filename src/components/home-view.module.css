@@ -49,6 +49,17 @@
   .topInner[data-phase="before"] .beforeClock {
     grid-area: clock;
   }
+
+  /* On the day, on a laptop: the name on the left, your game beside it. */
+  .topInner[data-phase="matchday"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+    align-items: end;
+  }
+
+  .topInner[data-phase="matchday"] .phaseBlock {
+    padding-top: 0;
+    border-top: 0;
+  }
 }
 
 /* ---------------------------------------------------------- masthead ---- */
@@ -215,6 +226,7 @@
 }
 
 .bandCount {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -263,6 +275,11 @@
   scroll-snap-align: start;
 }
 
+/* The running-late strip over Up next. */
+.late {
+  margin-bottom: 10px;
+}
+
 @media (min-width: 760px) {
   .boards {
     grid-auto-flow: row;
@@ -274,32 +291,37 @@
   }
 }
 
-.morning {
-  display: grid;
-  gap: 14px;
+/* Your game, as a card on the photo: the page's own colours, so it reads as
+   the one thing that is yours. */
+.heroCard {
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-paper);
+  color: var(--mg-ink);
+  box-shadow: var(--mg-shadow-pop);
 }
 
-.morningTitle {
+.followCta {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.followText {
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--mg-night-text);
+}
+
+.followText strong {
   color: #fff;
-  font-family: var(--mg-display);
-  font-size: clamp(30px, 9vw, 52px);
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.95;
 }
 
-.lull {
-  display: grid;
-  gap: 10px;
-}
-
-.late {
-  margin-bottom: 10px;
-}
-
-.lullLabel {
-  font-size: 14px;
-  color: var(--mg-night-muted);
+.followButton {
+  width: 100%;
 }
 
 /* ============================================================= AFTER ==== */
@@ -401,6 +423,10 @@
 
 .sTeam {
   order: 1;
+}
+.sLive {
+  order: 2;
+  scroll-margin-top: calc(var(--mg-header-height) + 8px);
 }
 .sMedals {
   order: 2;

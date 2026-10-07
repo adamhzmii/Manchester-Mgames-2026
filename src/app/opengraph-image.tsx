@@ -93,7 +93,7 @@ export default async function OpengraphImage() {
               Sat 24 October
             </div>
             <div style={{ display: "flex", width: 10, height: 10, borderRadius: 5, background: GOLD }} />
-            <div style={{ display: "flex", color: MUTED }}>Trinity &amp; Sugden · 8 sports</div>
+            <div style={{ display: "flex", color: MUTED }}>Trinity, Sugden &amp; Denmark Road · 8 sports</div>
           </div>
         </div>
 

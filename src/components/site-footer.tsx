@@ -23,7 +23,9 @@ export function SiteFooter() {
             <p className={styles.host}>
               Hosted by the Malaysian Students&rsquo; Society of Manchester
             </p>
-            <p className={styles.when}>Sat 24 October 2026 · Trinity &amp; Sugden Sports Centres</p>
+            <p className={styles.when}>
+              Sat 24 October 2026 · Trinity, Sugden &amp; Denmark Road Sports Centres
+            </p>
           </div>
         </div>
 

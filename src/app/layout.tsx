@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
+import { Suspense } from "react";
 
 import { BottomNav } from "@/components/bottom-nav";
 import { DelaysProvider } from "@/components/delays";
@@ -9,6 +10,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClockProvider } from "@/lib/clock";
 import { clockOffsetMs } from "@/lib/demo";
 import { LiveFeedProvider } from "@/lib/live-feed";
+import { NavigationTracker } from "@/lib/navigation";
 
 import "./globals.css";
 
@@ -79,6 +81,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <SiteFooter />
               <BottomNav />
               <Pwa />
+              {/* Reads the URL's query, which needs a Suspense boundary to keep
+                  static pages static. Renders nothing either way. */}
+              <Suspense fallback={null}>
+                <NavigationTracker />
+              </Suspense>
             </DelaysProvider>
           </LiveFeedProvider>
         </ClockProvider>
