@@ -43,7 +43,7 @@ export default async function LoginPage() {
           <>
             <h1 className={styles.title}>Coordinator sign-in</h1>
             <p className={styles.intro}>
-              For coordinators updating their sport&rsquo;s scores on the day. Attendees
+              For the committee and coordinators running the day. Players and spectators
               don&rsquo;t need an account — everything else on the site is open.
             </p>
             <LoginForm />

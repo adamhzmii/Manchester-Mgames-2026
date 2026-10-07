@@ -43,9 +43,34 @@
   padding: 11px 12px;
   border: 1.5px solid var(--mg-border-strong);
   border-radius: 11px;
-  font-size: 15px;
+  /* 16px: anything smaller and iPhones zoom the page in on focus. */
+  font-size: 16px;
   background: var(--mg-bg);
   color: var(--mg-text);
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+/* Room for the eye button, so the last characters stay visible. */
+.passwordInput {
+  padding-right: 48px;
+}
+
+.reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--mg-text-muted);
+  cursor: pointer;
 }
 
 .submit {
