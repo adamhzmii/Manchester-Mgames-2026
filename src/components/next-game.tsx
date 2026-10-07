@@ -6,7 +6,7 @@ import { PinIcon } from "@/components/icons";
 import { KickoffCountdown, KickoffTime, LateNote } from "@/components/delays";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
-import type { Fixture } from "@/lib/fixtures";
+import { categoryCode, type Fixture } from "@/lib/fixtures";
 import { formatDay } from "@/lib/format";
 
 import styles from "./next-game.module.css";
@@ -56,7 +56,8 @@ export function NextGame({
             slug={fixture.sportSlug}
             size={20}
           />
-          {fixture.sportName} · {fixture.stageLabel}
+          {fixture.sportName}
+          {categoryCode(fixture) ? ` ${categoryCode(fixture)}` : ""} · {fixture.stageLabel}
         </span>
 
         <span className={styles.versus}>

@@ -3,15 +3,26 @@ import Link from "next/link";
 
 import {
   AlertIcon,
+  BookIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ExternalIcon,
   FirstAidIcon,
   PhoneIcon,
   PrayerIcon,
   TrainIcon,
 } from "@/components/icons";
 import { SportBadge } from "@/components/sport-badge";
-import { EVENT_CONTACTS, FAQ, GETTING_THERE, VENUE_FACILITIES } from "@/lib/info-content";
+import {
+  EVENT_CONTACTS,
+  FAQ,
+  FIRST_AID,
+  GETTING_THERE,
+  HANDBOOK_URL,
+  PRAYER_ROOMS,
+  VENUE_FACILITIES,
+  walkingRouteTo,
+} from "@/lib/info-content";
 import { getFixtures, getSports, getStandingsData, getVenues } from "@/lib/queries";
 import { describeFormat } from "@/lib/tournament-format";
 
@@ -44,12 +55,19 @@ export default async function InfoPage() {
       <section className={styles.emergency} aria-labelledby="emergency">
         <h2 id="emergency" className={styles.emergencyTitle}>
           <AlertIcon size={18} />
-          In an emergency
+          Injured or unwell?
         </h2>
-        <a href="tel:999" className={styles.call999}>
-          <PhoneIcon size={20} />
-          Call 999
-        </a>
+        {FIRST_AID.tel ? (
+          <a href={`tel:${FIRST_AID.tel}`} className={styles.callFirstAid}>
+            <PhoneIcon size={20} />
+            Call {FIRST_AID.label.replace(/^First aid — /, "")}, first aid
+          </a>
+        ) : (
+          <p className={styles.firstAidName}>
+            <FirstAidIcon size={18} />
+            {FIRST_AID.label} · {FIRST_AID.note.toLowerCase()}
+          </p>
+        )}
         {contacts.length > 0 ? (
           <ul className={styles.contacts}>
             {contacts.map((contact) => (
@@ -69,9 +87,21 @@ export default async function InfoPage() {
           </ul>
         ) : null}
         <p className={styles.emergencyNote}>
-          For anything else, find a steward in gold hi-vis — there is one at every reception.
+          Or find a steward in gold hi-vis — there is one at every reception. If someone&rsquo;s
+          life is in danger, dial 999.
         </p>
       </section>
+
+      <a href={HANDBOOK_URL} target="_blank" rel="noreferrer" className={styles.handbook}>
+        <span className={styles.handbookIcon}>
+          <BookIcon size={22} />
+        </span>
+        <span className={styles.handbookText}>
+          <span className={styles.handbookTitle}>MGames handbook</span>
+          <span className={styles.handbookSub}>The info pack and every sport&rsquo;s rules, in one PDF</span>
+        </span>
+        <ExternalIcon size={18} />
+      </a>
 
       <section className={styles.section} aria-labelledby="format">
         <h2 id="format" className={styles.title}>
@@ -129,14 +159,42 @@ export default async function InfoPage() {
                   <FirstAidIcon size={15} />
                   First aid · {f.firstAid}
                 </span>
-                <span className={styles.venueLine}>
-                  <PrayerIcon size={15} />
-                  Prayer room · {f.prayer}
-                </span>
               </Link>
             );
           })}
         </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="prayer">
+        <h2 id="prayer" className={styles.title}>
+          Prayer rooms
+        </h2>
+        <ul className={styles.prayerRooms}>
+          {PRAYER_ROOMS.map((room) => (
+            <li key={room.name} className={styles.prayerRoom}>
+              <span className={styles.prayerHead}>
+                <PrayerIcon size={18} />
+                <span className={styles.prayerName}>{room.name}</span>
+              </span>
+              <span className={styles.prayerWhere}>{room.where}</span>
+              <span className={styles.prayerWalks}>
+                {venues
+                  .filter((v) => room.walk[v.slug] !== undefined)
+                  .map((v) => `${room.walk[v.slug]} min from ${v.shortName}`)
+                  .join(" · ")}
+              </span>
+              <span className={styles.prayerNotes}>{room.notes.join(" · ")}</span>
+              <a
+                href={walkingRouteTo(room.address)}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.prayerRoute}
+              >
+                Walking route <ExternalIcon size={14} />
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className={styles.section} aria-labelledby="getting-there">

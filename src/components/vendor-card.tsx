@@ -38,8 +38,9 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
 
         <p className={styles.where}>
           <PinIcon size={14} />
-          {vendor.venueShortName}
-          {vendor.location ? ` · ${vendor.location}` : ""}
+          {vendor.venueShortName
+            ? `${vendor.venueShortName}${vendor.location ? ` · ${vendor.location}` : ""}`
+            : "Stall location to be confirmed"}
         </p>
         {/* A line of its own, so the whole handle shows — squeezed into a
             button beside "Find the stall" it was cut to "@dem…". */}
@@ -59,9 +60,16 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
           <ul className={styles.menu} aria-label={`${vendor.name} menu`}>
             {vendor.menu.map((item) => (
               <li key={item.id} className={styles.item}>
-                <span className={styles.itemName}>{item.name}</span>
-                <span className={styles.leader} aria-hidden="true" />
-                <span className={styles.price}>{formatPrice(item.pricePence)}</span>
+                <span className={styles.itemLine}>
+                  <span className={styles.itemName}>{item.name}</span>
+                  {item.pricePence !== null ? (
+                    <>
+                      <span className={styles.leader} aria-hidden="true" />
+                      <span className={styles.price}>{formatPrice(item.pricePence)}</span>
+                    </>
+                  ) : null}
+                </span>
+                {item.description ? <span className={styles.itemNote}>{item.description}</span> : null}
               </li>
             ))}
           </ul>

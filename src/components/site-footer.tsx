@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { HANDBOOK_URL } from "@/lib/info-content";
+
 import styles from "./site-footer.module.css";
 
 const LINKS = [
@@ -35,6 +37,9 @@ export function SiteFooter() {
               {link.label}
             </Link>
           ))}
+          <a href={HANDBOOK_URL} target="_blank" rel="noreferrer">
+            Handbook
+          </a>
         </nav>
 
         <div className={styles.bottom}>

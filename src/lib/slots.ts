@@ -12,6 +12,7 @@ import type { FixtureStage } from "@/lib/supabase/types";
  *
  *   Group A winner / runner-up / 1st / 2nd / 3rd / 4th
  *   Best 3rd (n)      the nth best of the third-placed teams across the groups
+ *   Best 2nd (n)      the same for runners-up, where five groups feed eight
  *   Winner R16 n      winner or loser of the nth game of a round,
  *   Loser SF n        rounds being R16, QF and SF, with or without the space
  *
@@ -20,7 +21,7 @@ import type { FixtureStage } from "@/lib/supabase/types";
  */
 export type SlotRef =
   | { kind: "group"; group: string; place: number }
-  | { kind: "best-third"; rank: number }
+  | { kind: "best"; place: number; rank: number }
   | { kind: "round"; outcome: "winner" | "loser"; stage: FixtureStage; number: number };
 
 const GROUP_SLOT = /^Group ([A-Z]) (winner|runner-up|1st|2nd|3rd|4th)$/i;
@@ -32,7 +33,7 @@ const PLACE: Record<string, number> = {
   "3rd": 3,
   "4th": 4,
 };
-const BEST_THIRD_SLOT = /^Best 3rd \((\d+)\)$/i;
+const BEST_SLOT = /^Best (2nd|3rd|4th) \((\d+)\)$/i;
 const ROUND_SLOT = /^(Winner|Loser) (R16|QF|SF) ?(\d+)$/i;
 const ROUND_STAGE: Record<string, FixtureStage> = {
   r16: "round_of_16",
@@ -47,8 +48,8 @@ export function parseSlot(label: string | null | undefined): SlotRef | null {
   const group = GROUP_SLOT.exec(text);
   if (group) return { kind: "group", group: group[1].toUpperCase(), place: PLACE[group[2].toLowerCase()] };
 
-  const third = BEST_THIRD_SLOT.exec(text);
-  if (third) return { kind: "best-third", rank: Number(third[1]) };
+  const best = BEST_SLOT.exec(text);
+  if (best) return { kind: "best", place: PLACE[best[1].toLowerCase()], rank: Number(best[2]) };
 
   const round = ROUND_SLOT.exec(text);
   if (round) {
@@ -94,26 +95,40 @@ export function feederGame(
 
 /**
  * How a category's groups send teams on: the top `places` of each group, and
- * the best `bestThirds` of the teams that finish third — read off the
- * knockout slots, so it always matches the bracket the committee set up.
+ * the best `count` of the teams that finish in `best.place` — "the four best
+ * third-placed teams", "the three best runners-up" — read off the knockout
+ * slots, so it always matches the bracket the committee set up.
  *
  * With no labelled slots to go on (knockout teams entered by name) the
  * familiar top two is assumed.
  */
-export type Qualification = { places: number; bestThirds: number };
+export type Qualification = {
+  places: number;
+  best: { place: number; count: number } | null;
+};
 
 export const DEFAULT_PLACES = 2;
 
 export function qualification(categoryId: string, fixtures: readonly Fixture[]): Qualification {
   let places = 0;
-  let bestThirds = 0;
+  let bestPlace = 0;
+  let bestCount = 0;
   for (const f of fixtures) {
     if (f.categoryId !== categoryId || f.stage === "group") continue;
     for (const label of [f.slotA, f.slotB]) {
       const ref = parseSlot(label);
       if (ref?.kind === "group") places = Math.max(places, ref.place);
-      if (ref?.kind === "best-third") bestThirds = Math.max(bestThirds, ref.rank);
+      if (ref?.kind === "best") {
+        bestPlace = ref.place;
+        bestCount = Math.max(bestCount, ref.rank);
+      }
     }
   }
-  return { places: places || DEFAULT_PLACES, bestThirds };
+  if (bestCount === 0) return { places: places || DEFAULT_PLACES, best: null };
+  // The best-of tier sits below the direct places: winners plus the best
+  // runners-up means one direct place per group, not two.
+  return {
+    places: Math.min(places || bestPlace - 1, bestPlace - 1),
+    best: { place: bestPlace, count: bestCount },
+  };
 }

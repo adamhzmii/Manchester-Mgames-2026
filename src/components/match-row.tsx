@@ -4,7 +4,7 @@ import { KickoffTime, LateTag } from "@/components/delays";
 import { StarIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
-import type { Fixture } from "@/lib/fixtures";
+import { categoryCode, type Fixture } from "@/lib/fixtures";
 import { winningSide } from "@/lib/matchday";
 import type { FixtureStage } from "@/lib/supabase/types";
 
@@ -39,6 +39,8 @@ type MatchRowProps = {
 export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRowProps) {
   const winner = winningSide(fixture);
   const tag = STAGE_TAG[fixture.stage];
+  // Which competition, where a sport has several (badminton's MD, XD...).
+  const code = categoryCode(fixture);
   const showScores = fixture.status !== "upcoming";
 
   return (
@@ -62,6 +64,7 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
             <LateTag fixture={fixture} />
           </>
         )}
+        {code ? <span className={styles.cat}>{code}</span> : null}
         {tag ? <span className={styles.tag}>{tag}</span> : null}
       </span>
 

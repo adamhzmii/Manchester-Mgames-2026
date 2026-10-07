@@ -18,10 +18,16 @@ import { MatchList, MatchRow } from "@/components/match-row";
 import { SportBadge } from "@/components/sport-badge";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatPrice } from "@/lib/format";
-import { TRAVEL, VENUE_FACILITIES } from "@/lib/info-content";
+import {
+  prayerRoomsFrom,
+  TRAVEL,
+  VENUE_FACILITIES,
+  walkingRouteTo,
+} from "@/lib/info-content";
 import { useLiveFixtures } from "@/lib/live-feed";
 import type { Vendor, Venue } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
+import { fromPrice } from "@/lib/vendors";
 import { walkMinutes, walkingDirections } from "@/lib/walking";
 
 import styles from "./venues-view.module.css";
@@ -175,10 +181,7 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
             </div>
             <ul className={styles.vendors}>
               {food.map((v) => {
-                const cheapest = v.menu.reduce<number | null>(
-                  (min, item) => (min === null || item.pricePence < min ? item.pricePence : min),
-                  null,
-                );
+                const cheapest = fromPrice(v);
                 return (
                   <li key={v.id}>
                     <Link href={`/food?venue=${venue.slug}#${v.id}`} className={styles.vendor}>
@@ -215,16 +218,48 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
           </section>
         ) : null}
 
-        {facilities ? (
-          <section className={styles.section}>
-            <h2 className={styles.title}>Facilities</h2>
-            <ul className={styles.facilities}>
-              <Facility icon={<FirstAidIcon size={20} />} label="First aid" value={facilities.firstAid} tone="red" />
-              <Facility icon={<PrayerIcon size={20} />} label="Prayer room" value={facilities.prayer} />
+        <section className={styles.section}>
+          <h2 className={styles.title}>Facilities</h2>
+          <ul className={styles.facilities}>
+            {facilities ? (
+              <Facility
+                icon={<FirstAidIcon size={20} />}
+                label="First aid"
+                value={facilities.firstAid}
+                tone="red"
+              />
+            ) : null}
+            {/* No venue has its own prayer room: the two nearby, closest first. */}
+            <li className={styles.facility}>
+              <span className={styles.facilityIcon}>
+                <PrayerIcon size={20} />
+              </span>
+              <span className={styles.prayerList}>
+                <span className={styles.facilityLabel}>Prayer rooms</span>
+                {prayerRoomsFrom(venue.slug).map((room) => (
+                  <span key={room.name} className={styles.prayerRoom}>
+                    <span className={styles.facilityValue}>
+                      {room.name}
+                      {room.walk[venue.slug] !== undefined ? ` · ${room.walk[venue.slug]} min walk` : ""}
+                    </span>
+                    <span className={styles.prayerNotes}>{room.notes.join(" · ")}</span>
+                    <a
+                      href={walkingRouteTo(room.address)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.travelLink}
+                    >
+                      Route <ExternalIcon size={13} />
+                    </a>
+                  </span>
+                ))}
+              </span>
+            </li>
+            {facilities ? (
               <Facility icon={<ToiletIcon size={20} />} label="Toilets" value={facilities.toilets} />
-            </ul>
-          </section>
-        ) : null}
+            ) : null}
+          </ul>
+        </section>
 
         {others.length > 0 ? (
           <section className={styles.section}>

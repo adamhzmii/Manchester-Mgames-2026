@@ -1,6 +1,6 @@
 import type { Fixture } from "@/lib/fixtures";
 import { feederGame, parseSlot, roundGames } from "@/lib/slots";
-import { computeStandings, rankThirds, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import { computeStandings, rankPlace, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import type { FixtureStage } from "@/lib/supabase/types";
 
 /**
@@ -56,13 +56,14 @@ export function resolveSlot(
     return row ? { id: row.teamId, name: row.teamName } : null;
   }
 
-  if (ref.kind === "best-third") {
-    // Every group has to be done: one game anywhere can reorder the thirds.
+  if (ref.kind === "best") {
+    // Every group has to be done: one game anywhere can reorder the ranking.
     if (!finished(categoryGroups.map((g) => g.id))) return null;
-    const thirds = rankThirds(
+    const ranked = rankPlace(
       computeStandings(fixtures, categoryGroups, sportTeams, fixture.sportSlug),
+      ref.place,
     );
-    const row = thirds[ref.rank - 1];
+    const row = ranked[ref.rank - 1];
     return row ? { id: row.teamId, name: row.teamName } : null;
   }
 

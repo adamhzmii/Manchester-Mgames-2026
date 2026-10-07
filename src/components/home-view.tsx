@@ -199,7 +199,7 @@ function Masthead({ venues }: { venues: Venue[] }) {
 
   return (
     <div className={styles.masthead}>
-      <p className={styles.mastKicker}>Malaysian Students&rsquo; Society · Manchester</p>
+      <p className={styles.mastKicker}>Malaysian Students&rsquo; Society Manchester</p>
       <h1 className={styles.mastTitle}>
         Manchester
         <br />
@@ -554,17 +554,21 @@ function FoodRail({ vendors }: { vendors: Vendor[] }) {
         return (
           <Link
             key={v.id}
-            href={`/food?venue=${v.venueSlug}#${v.id}`}
+            href={v.venueSlug ? `/food?venue=${v.venueSlug}#${v.id}` : `/food#${v.id}`}
             className={styles.foodTile}
           >
             <span className={styles.foodCuisine}>{v.cuisine}</span>
             <span className={styles.foodName}>{v.name}</span>
             {v.tagline ? <span className={styles.foodTagline}>{v.tagline}</span> : null}
             <span className={styles.foodFoot}>
-              <span className={styles.foodWhere}>
-                <PinIcon size={13} />
-                {v.venueShortName}
-              </span>
+              {v.venueShortName ? (
+                <span className={styles.foodWhere}>
+                  <PinIcon size={13} />
+                  {v.venueShortName}
+                </span>
+              ) : (
+                <span />
+              )}
               {from !== null ? <span className={styles.foodFrom}>from {formatPrice(from)}</span> : null}
             </span>
           </Link>

@@ -18,7 +18,7 @@ import type { Sport } from "@/lib/queries";
 import {
   computeStandings,
   pointsRule,
-  thirdPlaceTable,
+  bestPlaceTable,
   type GroupMeta,
   type TeamMeta,
 } from "@/lib/standings";
@@ -36,6 +36,8 @@ type StandingsViewProps = {
   standingTeams: (TeamMeta & { sportSlug: string })[];
   initialSport: string;
   initialTab: StandingsTab | null;
+  /** A category slug ("md"), for a sport played in several. */
+  initialCategory: string | null;
 };
 
 /**
@@ -50,6 +52,7 @@ export function StandingsView({
   standingTeams,
   initialSport,
   initialTab,
+  initialCategory,
 }: StandingsViewProps) {
   const fixtures = useLiveFixtures(initial);
   const favourites = useFavouriteTeams();
@@ -58,14 +61,37 @@ export function StandingsView({
 
   const [sport, setSport] = useState(initialSport);
   const [tab, setTab] = useState<StandingsTab | null>(initialTab);
+  const [category, setCategory] = useState<string | null>(initialCategory);
 
-  const go = (nextSport: string, nextTab: StandingsTab | null) => {
+  const go = (nextSport: string, nextTab: StandingsTab | null, nextCategory: string | null) => {
     setSport(nextSport);
     setTab(nextTab);
+    setCategory(nextCategory);
     const params = new URLSearchParams({ sport: nextSport });
+    if (nextCategory) params.set("cat", nextCategory);
     if (nextTab) params.set("view", nextTab);
     router.replace(`${pathname}?${params}`, { scroll: false });
   };
+
+  // Badminton is four competitions — men's doubles, mixed, singles, women's —
+  // each with its own groups and bracket. Mixing them on one page put four
+  // "Group A" tables side by side and joined four brackets into one.
+  const sportFixtures = fixtures.filter((f) => f.sportSlug === sport);
+  const categories = [
+    ...new Map(
+      sportFixtures.map((f) => [
+        f.categorySlug,
+        { slug: f.categorySlug, id: f.categoryId, name: f.categoryName },
+      ]),
+    ).values(),
+  ];
+  // Doubles before singles, men's before women's: the order the sheet lists them.
+  const ORDER = ["md", "xd", "ms", "ws", "wd"];
+  categories.sort((a, b) => (ORDER.indexOf(a.slug) + 1 || 99) - (ORDER.indexOf(b.slug) + 1 || 99));
+  const current =
+    categories.length > 1
+      ? (categories.find((c) => c.slug === category) ?? categories[0])
+      : null;
 
   const options: ChipOption[] = useMemo(
     () => [
@@ -82,22 +108,50 @@ export function StandingsView({
       </div>
 
       <div className={styles.chips}>
-        <FilterChips label="Standings for" options={options} value={sport} onChange={(s) => go(s, null)} />
+        <FilterChips
+          label="Standings for"
+          options={options}
+          value={sport}
+          onChange={(s) => go(s, null, null)}
+        />
       </div>
+
+      {current ? (
+        <div className="mg-wrap">
+          <div className={styles.categories} role="tablist" aria-label="Category">
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                type="button"
+                role="tab"
+                aria-selected={c.slug === current.slug}
+                className={`${styles.category} ${c.slug === current.slug ? styles.categoryOn : ""}`}
+                onClick={() => go(sport, tab, c.slug)}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className={`mg-wrap ${styles.body}`}>
         {sport === "overall" ? (
           <Overall fixtures={fixtures} />
         ) : (
           <SportStandings
-            key={sport}
+            key={`${sport}-${current?.slug ?? ""}`}
             sport={sports.find((s) => s.slug === sport)!}
-            fixtures={fixtures.filter((f) => f.sportSlug === sport)}
-            groups={groups.filter((g) => g.sportSlug === sport)}
+            fixtures={
+              current ? sportFixtures.filter((f) => f.categoryId === current.id) : sportFixtures
+            }
+            groups={groups.filter(
+              (g) => g.sportSlug === sport && (!current || g.categoryId === current.id),
+            )}
             standingTeams={standingTeams.filter((t) => t.sportSlug === sport)}
             followed={favourites.teamIds}
             tab={tab}
-            onTab={(t) => go(sport, t)}
+            onTab={(t) => go(sport, t, current?.slug ?? null)}
           />
         )}
       </div>
@@ -164,7 +218,7 @@ function SportStandings({
   onTab: (tab: StandingsTab) => void;
 }) {
   const tables = computeStandings(fixtures, groups, standingTeams, sport.slug);
-  const thirds = thirdPlaceTable(tables);
+  const thirds = bestPlaceTable(tables);
   const hasKnockout = fixtures.some((f) => f.stage !== "group");
 
   // A sport with no groups has no table to open on.
@@ -207,8 +261,7 @@ function SportStandings({
             <>
               <StandingsTable group={thirds} fixtures={fixtures} highlight={followed} />
               <p className={styles.note}>
-                The {thirds.places} best of the teams finishing third go through too, ranked the
-                same way as a group.
+                The {thirds.places} best of these go through too, ranked the same way as a group.
               </p>
             </>
           ) : null}

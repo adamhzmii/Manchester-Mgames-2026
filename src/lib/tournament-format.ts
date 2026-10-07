@@ -40,6 +40,16 @@ function numberWord(n: number): string {
   return ["no", "one", "two", "three", "four", "five", "six", "seven", "eight"][n] ?? String(n);
 }
 
+/** "Six groups of 4", "Four groups (4, 4, 3 and 3)", "One group of 6". */
+function groupsPhrase(sizes: number[]): string {
+  if (sizes.length === 1) return `One group of ${sizes[0]}`;
+  const count = numberWord(sizes.length);
+  const Count = `${count[0].toUpperCase()}${count.slice(1)}`;
+  if (sizes.every((s) => s === sizes[0])) return `${Count} groups of ${sizes[0]}`;
+  const listed = `${sizes.slice(0, -1).join(", ")} and ${sizes[sizes.length - 1]}`;
+  return `${Count} groups (${listed})`;
+}
+
 export function describeFormat(
   sportSlug: string,
   fixtures: readonly Fixture[],
@@ -52,15 +62,40 @@ export function describeFormat(
   const rounds = ROUND_ORDER.filter((stage) => games.some((f) => f.stage === stage));
   const lines: string[] = [];
 
-  if (sportGroups.length > 0) {
+  // One competition or several (badminton: men's doubles, mixed, singles,
+  // women's doubles), each with its own groups and route through.
+  const categories = [...new Map(games.map((f) => [f.categoryId, f.categoryName])).entries()];
+
+  if (categories.length > 1) {
+    for (const [id, name] of categories) {
+      const own = sportGroups.filter((g) => g.categoryId === id);
+      if (own.length === 0) {
+        lines.push(`${name}: straight knockout.`);
+        continue;
+      }
+      const sizes = own.map((g) => sportTeams.filter((t) => t.groupId === g.id).length);
+      const firstKnockout = ROUND_ORDER.find(
+        (stage) => stage !== "third_place" && games.some((f) => f.categoryId === id && f.stage === stage),
+      );
+      const through = firstKnockout
+        ? ` ${throughLine(qualification(id, games), {
+            groups: own.length,
+            groupSize: Math.max(...sizes),
+            round: firstKnockout,
+          })}`
+        : "";
+      lines.push(`${name}: ${groupsPhrase(sizes).toLowerCase()}.${through}`);
+    }
+    if (sportGroups.length > 0) {
+      const rule = pointsRule(sportSlug);
+      lines.push(`Everyone plays everyone in their group. ${rule.win} points for a win, ${rule.draw} for a draw.`);
+    }
+  } else if (sportGroups.length > 0) {
     const sizes = sportGroups.map((g) => sportTeams.filter((t) => t.groupId === g.id).length);
-    const even = sizes.every((s) => s === sizes[0]);
     lines.push(
       sportGroups.length === 1
         ? `One group of ${sizes[0]}, everyone plays everyone.`
-        : even
-          ? `${numberWord(sportGroups.length)[0].toUpperCase()}${numberWord(sportGroups.length).slice(1)} groups of ${sizes[0]}, everyone plays everyone in their group.`
-          : `${sportGroups.length} groups, everyone plays everyone in their group.`,
+        : `${groupsPhrase(sizes)}, everyone plays everyone in their group.`,
     );
 
     const rule = pointsRule(sportSlug);
@@ -107,19 +142,28 @@ export function throughLine(
 ): string {
   const to = round ? ` to the ${ROUND_LABEL[round].toLowerCase()}` : "";
 
-  if (rule.places >= groupSize && rule.bestThirds === 0) {
+  if (rule.places >= groupSize && !rule.best) {
     return `Everyone goes through${to}; the table decides who plays whom.`;
   }
 
   const where = group ? ` in ${group}` : groups > 1 ? " in each group" : "";
-  if (rule.bestThirds > 0) {
+  const top =
+    rule.places === 1
+      ? group
+        ? `The winner of ${group} goes`
+        : groups > 1
+          ? "Each group's winner goes"
+          : "The winner goes"
+      : `Top ${rule.places}${where} go`;
+  if (rule.best) {
+    const tier = rule.best.place === 2 ? "runners-up" : rule.best.place === 3 ? "third-placed teams" : "teams below them";
+    const position = rule.best.place === 2 ? "Second" : rule.best.place === 3 ? "Third" : "Fourth";
     return group
-      ? `Top ${rule.places}${where} go through${to}. Third might too: the ` +
-          `${rule.bestThirds} best third-placed teams across the groups join them.`
-      : `Top ${rule.places}${where}, and the ${rule.bestThirds} best third-placed teams, ` +
-          `go through${to}.`;
+      ? `${top} through${to}. ${position} might too: the ${rule.best.count} best ${tier} ` +
+          `across the groups join them.`
+      : `${top} through${to}, with the ${rule.best.count} best ${tier}.`;
   }
-  return `Top ${rule.places}${where} go through${to}.`;
+  return `${top} through${to}.`;
 }
 
 /** The first knockout round a category's groups lead into. */

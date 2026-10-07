@@ -4,7 +4,7 @@ import { test } from "node:test";
 import type { Fixture } from "../src/lib/fixtures.ts";
 import { bracketOrder, nextGames, resolveSlot } from "../src/lib/progression.ts";
 import { parseSlot, qualification, roundGames } from "../src/lib/slots.ts";
-import { computeStandings, thirdPlaceTable } from "../src/lib/standings.ts";
+import { bestPlaceTable, computeStandings } from "../src/lib/standings.ts";
 import type { FixtureStage } from "../src/lib/supabase/types.ts";
 import { fixture, played } from "./helpers.ts";
 
@@ -48,7 +48,8 @@ function knockouts2025(): Fixture[] {
 test("slot labels are read the way a coordinator would read them", () => {
   assert.deepEqual(parseSlot("Group A winner"), { kind: "group", group: "A", place: 1 });
   assert.deepEqual(parseSlot("Group D runner-up"), { kind: "group", group: "D", place: 2 });
-  assert.deepEqual(parseSlot("Best 3rd (3)"), { kind: "best-third", rank: 3 });
+  assert.deepEqual(parseSlot("Best 3rd (3)"), { kind: "best", place: 3, rank: 3 });
+  assert.deepEqual(parseSlot("Best 2nd (1)"), { kind: "best", place: 2, rank: 1 });
   assert.deepEqual(parseSlot("Winner R16 6"), {
     kind: "round",
     outcome: "winner",
@@ -85,16 +86,34 @@ test("games kicking off together are numbered by court, Pitch A before Pitch B",
 });
 
 test("who goes through is read off the knockout slots", () => {
-  assert.deepEqual(qualification("c-football", knockouts2025()), { places: 2, bestThirds: 4 });
+  assert.deepEqual(qualification("c-football", knockouts2025()), {
+    places: 2,
+    best: { place: 3, count: 4 },
+  });
 
   const seeded = [
     slot("semifinal", "12:15", "Court 2", "Group A 1st", "Group A 4th"),
     slot("semifinal", "13:00", "Court 2", "Group A 2nd", "Group A 3rd"),
   ];
-  assert.deepEqual(qualification("c-football", seeded), { places: 4, bestThirds: 0 });
+  assert.deepEqual(qualification("c-football", seeded), { places: 4, best: null });
+
+  // Five groups into eight: the winners, and the three best runners-up.
+  const fiveGroups = [
+    slot("quarterfinal", "13:00", "Court 1", "Group A winner", "Best 2nd (3)"),
+    slot("quarterfinal", "13:00", "Court 2", "Group B winner", "Best 2nd (2)"),
+    slot("quarterfinal", "13:15", "Court 1", "Group C winner", "Best 2nd (1)"),
+    slot("quarterfinal", "13:15", "Court 2", "Group D winner", "Group E winner"),
+  ];
+  assert.deepEqual(qualification("c-football", fiveGroups), {
+    places: 1,
+    best: { place: 2, count: 3 },
+  });
 
   // Knockout teams entered by name: nothing to read, so the usual top two.
-  assert.deepEqual(qualification("c-football", [fixture({ stage: "final" })]), { places: 2, bestThirds: 0 });
+  assert.deepEqual(qualification("c-football", [fixture({ stage: "final" })]), {
+    places: 2,
+    best: null,
+  });
 });
 
 test("the bracket pairs each game with the two that feed it, not by kick-off", () => {
@@ -160,7 +179,7 @@ test("third-placed teams are ranked against each other, and the best go through"
     ...group("gC", 2),
     slot("round_of_16", "12:00", "Pitch A", "Group A winner", "Best 3rd (2)"),
   ];
-  const thirds = thirdPlaceTable(computeStandings(games, groups, teams, "football"));
+  const thirds = bestPlaceTable(computeStandings(games, groups, teams, "football"));
   assert.ok(thirds);
   assert.deepEqual(
     thirds.rows.map((r) => [r.teamId, r.group, r.qualifying]),
@@ -207,4 +226,14 @@ test("where everyone goes through, every team is marked through from the start",
   const [table] = computeStandings(seeded, [groups[0]], teams, "football");
   assert.equal(table.places, 3);
   assert.deepEqual(table.rows.map((r) => r.qualifying), [true, true, true]);
+});
+
+test("a best-runner-up slot ranks the second-placed teams across the groups", () => {
+  // Runners-up finish level on points; Group B's has the best difference.
+  const done = [...group("gA", 1), ...group("gB", 3), ...group("gC", 2)];
+  const qf = slot("quarterfinal", "13:00", "Court 1", "Group A winner", "Best 2nd (1)");
+  assert.deepEqual(resolveSlot("Best 2nd (1)", qf, done, groups, teams), {
+    id: "gB2",
+    name: "Group B team 2",
+  });
 });

@@ -43,6 +43,7 @@ export default async function StandingsPage({ searchParams }: PageProps<"/standi
       standingTeams={standings.teams}
       initialSport={sport}
       initialTab={view && (TABS as readonly string[]).includes(view) ? (view as StandingsTab) : null}
+      initialCategory={one(params.cat) ?? null}
     />
   );
 }

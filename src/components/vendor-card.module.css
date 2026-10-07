@@ -102,10 +102,22 @@
 }
 
 .item {
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+}
+
+.itemLine {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 15px;
+}
+
+/* A line under a dish, where the stall wrote one. */
+.itemNote {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--mg-ink-3);
 }
 
 .itemName {

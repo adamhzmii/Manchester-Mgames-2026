@@ -5,8 +5,15 @@
  * editor would be machinery with nothing to do. If it ever needs day-of edits,
  * it moves to Supabase the way announcements did.
  *
- * COMMITTEE — before the event, fill in the two event phone numbers below.
+ * COMMITTEE — before the event, fill in the first aider's phone number below.
  */
+
+/**
+ * The MGames handbook: the info pack and the rulebook in one PDF, on Google
+ * Drive, shared so anyone with the link can open it.
+ */
+export const HANDBOOK_URL =
+  "https://drive.google.com/file/d/1eOWKeF-mftx91Q_Gtv2siHqC00NjKqVv/view?usp=sharing";
 
 export type Contact = {
   label: string;
@@ -22,12 +29,21 @@ export type Contact = {
  */
 export const EVENT_CONTACTS: Contact[] = [
   { label: "Event control", tel: null, note: "Committee duty phone, all day" },
-  { label: "First aid lead", tel: null, note: "Qualified first aider on site" },
 ];
+
+/**
+ * The first aider, called straight from the top of the Info page. In place
+ * of a "Call 999" button there: a one-tap 999 on a page every visitor opens
+ * invites prank calls, and first aid is who should come running first.
+ */
+export const FIRST_AID: Contact = {
+  label: "First aid — Yuan",
+  tel: null,
+  note: "Our first aider, on site all day",
+};
 
 export type VenueFacilities = {
   firstAid: string;
-  prayer: string;
   toilets: string;
 };
 
@@ -35,15 +51,52 @@ export type VenueFacilities = {
 export const VENUE_FACILITIES: Record<string, VenueFacilities> = {
   trinity: {
     firstAid: "Main Hall entrance",
-    prayer: "Studio 2, first floor",
     toilets: "Signposted throughout · accessible WC at reception",
   },
   sugden: {
     firstAid: "Ground-floor reception",
-    prayer: "Room 1B · wudhu facilities nearby",
     toilets: "Signposted throughout · accessible WC at reception",
   },
 };
+
+export type PrayerRoom = {
+  name: string;
+  where: string;
+  /** For a walking route: an address Google Maps can find. */
+  address: string;
+  notes: string[];
+  /** Walking minutes from each venue, as the committee timed them. */
+  walk: Partial<Record<string, number>>;
+};
+
+/** Neither venue has its own; these are the two closest. */
+export const PRAYER_ROOMS: PrayerRoom[] = [
+  {
+    name: "McDougall Prayer Hall",
+    where: "McDougall Centre, Burlington Street",
+    address: "McDougall Centre, Burlington Street, Manchester M15 6HQ",
+    notes: ["Student ID required", "Prayer mats and an ablution room"],
+    walk: { trinity: 3, sugden: 17 },
+  },
+  {
+    name: "Students' Union Faith Space",
+    where: "University of Manchester Students' Union, Faith Space Room, 2nd floor",
+    address: "University of Manchester Students' Union, Oxford Road, Manchester M13 9PR",
+    notes: ["No student ID required"],
+    walk: { trinity: 11, sugden: 12 },
+  },
+];
+
+/** Prayer rooms closest first from a venue; untimed ones last, in list order. */
+export function prayerRoomsFrom(venueSlug: string): PrayerRoom[] {
+  return [...PRAYER_ROOMS].sort(
+    (a, b) => (a.walk[venueSlug] ?? Infinity) - (b.walk[venueSlug] ?? Infinity),
+  );
+}
+
+export function walkingRouteTo(address: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}&travelmode=walking`;
+}
 
 /**
  * Getting between venues. Walking times are worked out from where the venues
@@ -58,19 +111,28 @@ export const TRAVEL = {
 export const GETTING_THERE = [
   "Manchester Piccadilly station is a 12-minute walk from Sugden.",
   "Football is at Denmark Road, a short walk from Manchester Oxford Road station.",
-  "Parking nearby is limited — use the NCP car parks. Denmark Road has a small free car park.",
 ];
 
 export const FAQ = [
   {
     question: "Can I move between the venues?",
     answer:
-      "Yes. Your wristband gets you into every venue all day. Trinity to Sugden is a 12-minute walk, or 6 minutes on bus 142. The football is at Denmark Road, about 8 minutes' walk from Trinity. There's no food at Denmark Road — the stalls are at Trinity and Sugden.",
+      "Yes. Your wristband gets you into every venue all day. Trinity to Sugden is a 12-minute walk, or 6 minutes on bus 142. The football is at Denmark Road, about 8 minutes' walk from Trinity. There's no food at Denmark Road — the Food page shows where the stalls are.",
   },
   {
     question: "What if my game is delayed or moved?",
     answer:
       "The site keeps up for you. If a court falls behind, every game after it there shows its new expected time in orange, worked out from when games really start and finish. Follow your team and turn on notifications to be told when your game slips 10 minutes or more, or moves. Bigger changes are posted under Updates too.",
+  },
+  {
+    question: "Where are the rules?",
+    answer:
+      "In the MGames handbook — the info pack and the rulebook for every sport in one PDF. It's linked at the top of the Info page.",
+  },
+  {
+    question: "Is there somewhere to pray?",
+    answer:
+      "Yes, two prayer spaces nearby. McDougall Prayer Hall is 3 minutes' walk from Trinity (student ID required; prayer mats and an ablution room). The Students' Union Faith Space, 2nd floor, needs no student ID — 11 minutes from Trinity, 12 from Sugden.",
   },
   {
     question: "How do I keep track of my own team?",

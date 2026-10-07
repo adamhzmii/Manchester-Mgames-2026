@@ -3,7 +3,7 @@ import Link from "next/link";
 import { KickoffTime, LateNote } from "@/components/delays";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
-import type { Fixture } from "@/lib/fixtures";
+import { categoryCode, type Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 
 import styles from "./live-scoreboard.module.css";
@@ -26,7 +26,8 @@ export function LiveScoreboard({ fixture }: { fixture: Fixture }) {
             slug={fixture.sportSlug}
             size={22}
           />
-          {fixture.sportName} · {fixture.stageLabel}
+          {fixture.sportName}
+          {categoryCode(fixture) ? ` ${categoryCode(fixture)}` : ""} · {fixture.stageLabel}
         </span>
         {upcoming ? (
           <span className={styles.next}>

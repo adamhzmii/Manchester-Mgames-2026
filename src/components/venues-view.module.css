@@ -424,3 +424,22 @@
   font-size: 14px;
   color: var(--mg-ink-2);
 }
+
+/* --------------------------------------------------------- prayer ---- */
+
+.prayerList {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.prayerRoom {
+  display: grid;
+  gap: 1px;
+  justify-items: start;
+}
+
+.prayerNotes {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}

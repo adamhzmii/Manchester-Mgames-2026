@@ -482,7 +482,22 @@ function FoodNearby({
       .filter((v) => v.slug !== venue.slug && vendors.some((s) => s.venueSlug === v.slug))
       .map((v) => ({ v, minutes: walkMinutes(venue, v) }))
       .sort((a, b) => (a.minutes ?? Infinity) - (b.minutes ?? Infinity))[0];
-    if (!nearest) return null;
+    // Stalls not placed at any venue yet: still worth a pointer to them.
+    if (!nearest) {
+      if (vendors.length === 0) return null;
+      return (
+        <Link href="/food" className={styles.food}>
+          <span className={styles.foodIcon} aria-hidden="true">
+            <FoodIcon size={20} />
+          </span>
+          <span className={styles.foodText}>
+            <span className={styles.foodTitle}>Hungry? {vendors.length} food stalls today</span>
+            <span className={styles.foodNames}>{vendors.map((v) => v.name).join(" · ")}</span>
+          </span>
+          <ChevronRightIcon size={18} className={styles.foodChevron} />
+        </Link>
+      );
+    }
     return (
       <Link href={`/food?venue=${nearest.v.slug}`} className={styles.food}>
         <span className={styles.foodIcon} aria-hidden="true">

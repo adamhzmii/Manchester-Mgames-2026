@@ -5,10 +5,14 @@ import type { Vendor } from "@/lib/queries";
  * and where its buttons go.
  */
 
-/** The cheapest thing on the menu, in pence — "from £2.50" sells. */
+/**
+ * The cheapest thing on the menu, in pence — "from £2.50" sells. Items without
+ * a price do not count; a menu with none has no "from".
+ */
 export function fromPrice(vendor: Pick<Vendor, "menu">): number | null {
   let min: number | null = null;
   for (const item of vendor.menu) {
+    if (item.pricePence === null) continue;
     if (min === null || item.pricePence < min) min = item.pricePence;
   }
   return min;

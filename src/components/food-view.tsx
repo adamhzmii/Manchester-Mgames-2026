@@ -52,9 +52,11 @@ export function FoodView({
           <p className={styles.eyebrow}>Eat at MGames</p>
           <h1 className={styles.title}>Food &amp; drink</h1>
           <p className={styles.lede}>
-            {vendors.length} stalls at {where}, serving all day. Find one near your next game.
+            {vendors.length} stalls{where ? ` at ${where}` : ""}, serving all day.
+            {where ? " Find one near your next game." : " Where each one stands is coming soon."}
           </p>
 
+          {withFood.length === 0 ? null : (
           <div className={styles.filter} role="radiogroup" aria-label="Venue">
             {[{ slug: "all", shortName: "All" }, ...withFood].map((v) => {
               const on = venue === v.slug;
@@ -75,6 +77,7 @@ export function FoodView({
               );
             })}
           </div>
+          )}
         </div>
       </section>
 

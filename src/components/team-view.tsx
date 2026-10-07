@@ -15,7 +15,7 @@ import { nextGames } from "@/lib/progression";
 import type { PickerTeam, Venue } from "@/lib/queries";
 import {
   computeStandings,
-  thirdPlaceTable,
+  bestPlaceTable,
   type GroupMeta,
   type StandingsGroup,
   type TeamMeta,
@@ -64,8 +64,8 @@ export function TeamView({
     : undefined;
   // Only where the format sends some third-placed teams through.
   const thirds =
-    table && table.bestThirds > 0
-      ? thirdPlaceTable(computeStandings(fixtures, categoryGroups, sportTeams, team.sportSlug))
+    table?.best
+      ? bestPlaceTable(computeStandings(fixtures, categoryGroups, sportTeams, team.sportSlug))
       : null;
   const groupsDone = fixtures
     .filter((f) => f.categoryId === team.categoryId && f.stage === "group")
@@ -251,15 +251,16 @@ function statusLine(
       const place = `${ordinal(row.position)} in ${table.groupName}`;
       if (groupDone && row.played > 0) {
         if (row.position <= table.places) return `${place} · through`;
-        // Third can still go through as one of the best thirds, which no
-        // single group decides.
-        if (thirds && row.position === 3) {
+        // The best-of place (third, or runner-up where five groups feed
+        // eight) can still go through, which no single group decides.
+        if (thirds && row.position === table.best?.place) {
+          const tier = row.position === 2 ? "runner-up" : "third";
           if (!groupsDone) return `${place} · waiting on the other groups`;
-          const third = thirds.rows.find((r) => r.teamId === team.id);
-          if (third?.qualifying) return `${place} · through as a best third`;
+          const ranked = thirds.rows.find((r) => r.teamId === team.id);
+          if (ranked?.qualifying) return `${place} · through as a best ${tier}`;
           // Inside the cut but dead level with the first team outside it.
-          if (third && third.position <= thirds.places) {
-            return `${place} · level for a best-third place`;
+          if (ranked && ranked.position <= thirds.places) {
+            return `${place} · level for a best-${tier} place`;
           }
           return `${place} · out`;
         }

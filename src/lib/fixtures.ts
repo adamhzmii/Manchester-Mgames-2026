@@ -242,3 +242,11 @@ export function filterFixtures(
     return true;
   });
 }
+
+/**
+ * A category's short code for tight spaces — "MD", "XD", "WS" — or null for
+ * a sport's single Open category, where it would only be noise.
+ */
+export function categoryCode(f: Pick<Fixture, "categorySlug">): string | null {
+  return f.categorySlug && f.categorySlug !== "open" ? f.categorySlug.toUpperCase() : null;
+}

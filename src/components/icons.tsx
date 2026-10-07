@@ -72,6 +72,11 @@ export const InfoIcon = icon(
   </>,
 );
 
+/** An open book: the handbook. */
+export const BookIcon = icon(
+  <path d="M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-14c-4 0-6.5.5-8 2Zm0 0v14" />,
+);
+
 export const BellIcon = icon(
   <>
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -160,10 +165,6 @@ export const InstagramIcon = icon(
     <circle cx="12" cy="12" r="4" />
     <path d="M17.5 6.5h.01" />
   </>,
-);
-
-export const MegaphoneIcon = icon(
-  <path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1ZM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" />,
 );
 
 export const SwapIcon = icon(<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />);

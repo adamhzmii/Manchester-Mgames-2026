@@ -142,3 +142,39 @@
   font-size: 13px;
   color: var(--mg-ink-3);
 }
+
+/* ------------------------------------------------------- categories ---- */
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.category {
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mg-sunk);
+  box-shadow: inset 0 0 0 1px var(--mg-line);
+  color: var(--mg-ink-2);
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.categoryOn {
+  background: var(--mg-plum);
+  box-shadow: none;
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .categoryOn {
+    color: var(--mg-night);
+  }
+}

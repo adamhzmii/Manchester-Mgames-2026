@@ -11,7 +11,7 @@ import {
   type Fixture,
   type FixtureRow,
 } from "@/lib/fixtures";
-import { applyDemo, applyDemoVendors, demoAnnouncements, demoScenario } from "@/lib/demo";
+import { applyDemo, demoAnnouncements, demoScenario } from "@/lib/demo";
 import { applyPreviewFixtures, applyPreviewStandings, applyPreviewTeams } from "@/lib/preview";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
 import { createClient } from "@/lib/supabase/server";
@@ -71,7 +71,8 @@ export type Vendor = {
   /** Handle without the @, or null. */
   instagram: string | null;
   tags: string[];
-  menu: { id: string; name: string; pricePence: number }[];
+  /** A price is null where the stall has not given one. */
+  menu: { id: string; name: string; pricePence: number | null; description: string | null }[];
 };
 
 /**
@@ -408,7 +409,7 @@ export async function getVendors(): Promise<Vendor[]> {
         `id, name, cuisine, location, photo_url, sort_order, latitude, longitude,
          tagline, instagram, tags,
          venue:venues ( slug, short_name ),
-         menu_items ( id, name, price_pence, sort_order )`,
+         menu_items ( id, name, price_pence, description, sort_order )`,
       )
       .order("sort_order"),
   );
@@ -425,10 +426,16 @@ export async function getVendors(): Promise<Vendor[]> {
     instagram: string | null;
     tags: string[] | null;
     venue: { slug: string; short_name: string } | null;
-    menu_items: { id: string; name: string; price_pence: number; sort_order: number }[];
+    menu_items: {
+      id: string;
+      name: string;
+      price_pence: number | null;
+      description: string | null;
+      sort_order: number;
+    }[];
   };
 
-  return applyDemoVendors((rows as unknown as Row[]).map((v) => ({
+  return (rows as unknown as Row[]).map((v) => ({
     id: v.id,
     name: v.name,
     cuisine: v.cuisine,
@@ -445,8 +452,13 @@ export async function getVendors(): Promise<Vendor[]> {
     // parent — sort the menu here so prices read top to bottom as intended.
     menu: [...v.menu_items]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map((m) => ({ id: m.id, name: m.name, pricePence: m.price_pence })),
-  })));
+      .map((m) => ({
+        id: m.id,
+        name: m.name,
+        pricePence: m.price_pence,
+        description: m.description?.trim() || null,
+      })),
+  }));
 }
 
 export async function getCourts(): Promise<Court[]> {

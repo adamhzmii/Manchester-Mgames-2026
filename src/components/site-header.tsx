@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { CloseIcon, MegaphoneIcon, WifiOffIcon } from "@/components/icons";
+import { BellIcon, CloseIcon, WifiOffIcon } from "@/components/icons";
 import { UPDATE_TYPE_LABEL, UpdateTypeIcon } from "@/components/update-type-icon";
 import { useNow } from "@/lib/clock";
 import { useLiveFeed } from "@/lib/live-feed";
@@ -130,7 +130,8 @@ function UpdatesButton({ active }: { active: boolean }) {
       className={`${styles.updates} ${active ? styles.updatesActive : ""}`}
       aria-label={unseen ? "Updates — new update" : "Updates"}
     >
-      <MegaphoneIcon size={19} />
+      {/* A bell, not the megaphone it used to be, which read as a volume control. */}
+      <BellIcon size={19} />
       <span className={styles.updatesLabel}>Updates</span>
       {unseen ? <span className={styles.badge} aria-hidden="true" /> : null}
     </Link>

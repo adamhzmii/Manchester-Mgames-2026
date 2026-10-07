@@ -48,8 +48,8 @@ export type StandingsGroup = {
   rows: StandingsRow[];
   /** How many go through from this table: the line is drawn under that place. */
   places: number;
-  /** How many of the groups' third-placed teams also go through, across all the groups. */
-  bestThirds: number;
+  /** Teams in this place go through too if they are among the best `count` across the groups. */
+  best: { place: number; count: number } | null;
 };
 
 export type GroupMeta = {
@@ -128,7 +128,7 @@ export function computeStandings(
   return [...groups]
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
     .map((group) => {
-      const { places, bestThirds } = qualification(group.categoryId, fixtures);
+      const { places, best } = qualification(group.categoryId, fixtures);
       const tallies = new Map<string, StandingsRow>();
 
       for (const team of teams) {
@@ -205,36 +205,60 @@ export function computeStandings(
         categoryId: group.categoryId,
         rows,
         places,
-        bestThirds,
+        best,
       };
     })
     .filter((group) => group.rows.length > 0);
 }
 
-/**
- * The teams finishing third in a category's groups, ranked against each
- * other, for a format where the best of them go through ("the four best
- * third-placed teams"). Ranked and ticked exactly like a group table, as
- * things stand. Null when the format has no such rule.
- */
-export function thirdPlaceTable(tables: readonly StandingsGroup[]): StandingsGroup | null {
-  const first = tables[0];
-  if (!first || first.bestThirds === 0) return null;
-  const places = first.bestThirds;
+const PLACE_NAME: Record<number, string> = {
+  2: "Runners-up",
+  3: "Third-placed teams",
+  4: "Fourth-placed teams",
+};
 
-  const rows = rankThirds(tables).map((row, index, sorted) => ({
+/**
+ * The teams finishing in a given place across a category's groups, ranked
+ * against each other, for a format where the best of them go through — "the
+ * four best third-placed teams", "the three best runners-up". Ranked and
+ * ticked exactly like a group table, as things stand. Null when the format
+ * has no such rule.
+ */
+export function bestPlaceTable(tables: readonly StandingsGroup[]): StandingsGroup | null {
+  const first = tables[0];
+  if (!first?.best) return null;
+  const { place, count } = first.best;
+
+  const rows = rankPlace(tables, place).map((row, index, sorted) => ({
     ...row,
-    qualifying: index < places && isAheadOf(row, sorted[places]),
+    qualifying: index < count && isAheadOf(row, sorted[count]),
   }));
 
   return {
-    groupId: `${first.categoryId}-thirds`,
-    groupName: "Third-placed teams",
+    groupId: `${first.categoryId}-best-${place}`,
+    groupName: PLACE_NAME[place] ?? `Teams finishing ${place}th`,
     categoryId: first.categoryId,
     rows,
-    places,
-    bestThirds: 0,
+    places: count,
+    best: null,
   };
+}
+
+/**
+ * Every group's team in a given place, best first, whatever the format says
+ * about them — for reading "Best 3rd (2)" off a bracket that is still being
+ * filled in, before every slot naming one is in place.
+ */
+export function rankPlace(tables: readonly StandingsGroup[], place: number): StandingsRow[] {
+  const first = tables[0];
+  if (!first) return [];
+  return tables
+    .filter((t) => t.categoryId === first.categoryId)
+    .flatMap((t) =>
+      t.rows.filter((r) => r.position === place).map((r) => ({ ...r, group: t.groupName })),
+    )
+    .sort(byRanking)
+    .map((row, index) => ({ ...row, position: index + 1 }));
 }
 
 export type FormResult = "W" | "D" | "L";
@@ -268,18 +292,3 @@ export function pointsRule(sportSlug: string): { win: number; draw: number } {
 
 /** How many places in a group go through when the knockout slots do not say. */
 export const QUALIFYING = DEFAULT_PLACES;
-
-/**
- * Every group's third-placed team, best first, whatever the format says
- * about them — for reading "Best 3rd (2)" off a bracket that is still being
- * filled in, before every slot naming a third is in place.
- */
-export function rankThirds(tables: readonly StandingsGroup[]): StandingsRow[] {
-  const first = tables[0];
-  if (!first) return [];
-  return tables
-    .filter((t) => t.categoryId === first.categoryId)
-    .flatMap((t) => t.rows.filter((r) => r.position === 3).map((r) => ({ ...r, group: t.groupName })))
-    .sort(byRanking)
-    .map((row, index) => ({ ...row, position: index + 1 }));
-}

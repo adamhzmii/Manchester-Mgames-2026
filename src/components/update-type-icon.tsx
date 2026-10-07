@@ -1,4 +1,4 @@
-import { ClockIcon, MegaphoneIcon, SwapIcon, TrophyIcon } from "@/components/icons";
+import { ClockIcon, InfoIcon, SwapIcon, TrophyIcon } from "@/components/icons";
 import type { AnnouncementType } from "@/lib/supabase/types";
 
 /**
@@ -14,7 +14,8 @@ export function UpdateTypeIcon({ type, size = 16 }: { type: AnnouncementType; si
     case "result":
       return <TrophyIcon size={size} />;
     default:
-      return <MegaphoneIcon size={size} />;
+      // An "i", not a megaphone: that read as a volume control.
+      return <InfoIcon size={size} />;
   }
 }
 
