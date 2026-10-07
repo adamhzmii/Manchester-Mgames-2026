@@ -57,17 +57,21 @@ export default async function InfoPage() {
           <AlertIcon size={18} />
           Injured or unwell?
         </h2>
-        {FIRST_AID.tel ? (
-          <a href={`tel:${FIRST_AID.tel}`} className={styles.callFirstAid}>
-            <PhoneIcon size={20} />
-            Call {FIRST_AID.label.replace(/^First aid — /, "")}, first aid
-          </a>
-        ) : (
-          <p className={styles.firstAidName}>
-            <FirstAidIcon size={18} />
-            {FIRST_AID.label} · {FIRST_AID.note.toLowerCase()}
-          </p>
-        )}
+        <a href={`tel:${FIRST_AID.tel}`} className={styles.callFirstAid}>
+          <PhoneIcon size={20} />
+          Call {FIRST_AID.name}
+        </a>
+        <p className={styles.firstAidWho}>
+          <FirstAidIcon size={16} />
+          <span>
+            <strong>
+              {FIRST_AID.name}, {FIRST_AID.role}
+            </strong>{" "}
+            · {FIRST_AID.display}
+            <br />
+            {FIRST_AID.note}
+          </span>
+        </p>
         {contacts.length > 0 ? (
           <ul className={styles.contacts}>
             {contacts.map((contact) => (

@@ -5,7 +5,7 @@
  * editor would be machinery with nothing to do. If it ever needs day-of edits,
  * it moves to Supabase the way announcements did.
  *
- * COMMITTEE — before the event, fill in the first aider's phone number below.
+ * COMMITTEE — fill in the event control number below if there is one.
  */
 
 /**
@@ -32,14 +32,17 @@ export const EVENT_CONTACTS: Contact[] = [
 ];
 
 /**
- * The first aider, called straight from the top of the Info page. In place
- * of a "Call 999" button there: a one-tap 999 on a page every visitor opens
- * invites prank calls, and first aid is who should come running first.
+ * The head of first aid, called straight from the top of the Info page. In
+ * place of a "Call 999" button there: a one-tap 999 on a page every visitor
+ * opens invites prank calls. Yuan runs first aid on the day, the first-aid
+ * teams included, and gets the right person to you.
  */
-export const FIRST_AID: Contact = {
-  label: "First aid — Yuan",
-  tel: null,
-  note: "Our first aider, on site all day",
+export const FIRST_AID = {
+  name: "Yuan",
+  role: "Head of First Aid",
+  tel: "+447785442051",
+  display: "+44 7785 442051",
+  note: "Runs first aid on the day, and sends the nearest first aider to you.",
 };
 
 export type VenueFacilities = {

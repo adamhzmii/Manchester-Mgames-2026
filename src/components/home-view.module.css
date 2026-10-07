@@ -28,34 +28,15 @@
     padding-block: 52px 56px;
   }
 
-  /* Before the day, on a laptop: the name, the numbers and the buttons on
-     the left; the countdown on the right. */
-  .topInner[data-phase="before"] {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    grid-template-areas:
-      "mast clock"
-      "extra clock";
-    align-items: end;
-  }
-
-  .topInner[data-phase="before"] .masthead {
-    grid-area: mast;
-  }
-
-  .topInner[data-phase="before"] .beforeExtra {
-    grid-area: extra;
-  }
-
-  .topInner[data-phase="before"] .beforeClock {
-    grid-area: clock;
-  }
-
-  /* On the day, on a laptop: the name on the left, your game beside it. */
+  /* Before and on the day, on a laptop: the name on the left, your game
+     beside it. */
+  .topInner[data-phase="before"],
   .topInner[data-phase="matchday"] {
     grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
     align-items: end;
   }
 
+  .topInner[data-phase="before"] .phaseBlock,
   .topInner[data-phase="matchday"] .phaseBlock {
     padding-top: 0;
     border-top: 0;
@@ -123,7 +104,6 @@
 }
 
 /* Whatever comes under the name sits below a hairline. */
-.beforeExtra,
 .phaseBlock {
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -132,74 +112,6 @@
 /* "Live" in the header jumps here, clear of the sticky header. */
 .phaseBlock {
   scroll-margin-top: calc(var(--mg-header-height) + 8px);
-}
-
-/* ============================================================ BEFORE ==== */
-
-.beforeExtra {
-  display: grid;
-  gap: 22px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
-  justify-content: start;
-  gap: 4px 22px;
-  margin: 0;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.statValue {
-  margin: 0;
-  font-family: var(--mg-display);
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: #fff;
-}
-
-.statLabel {
-  font-family: var(--mg-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--mg-night-muted);
-}
-
-.ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.ghostLight {
-  color: var(--mg-night-text);
-}
-
-.beforeClock {
-  display: grid;
-  gap: 10px;
-}
-
-.clockLabel {
-  font-family: var(--mg-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--mg-night-muted);
-}
-
-.clockFoot {
-  font-size: 13px;
-  color: var(--mg-night-muted);
 }
 
 /* ========================================================== MATCHDAY ==== */

@@ -3,10 +3,17 @@
 import { useState } from "react";
 
 /**
- * Shares the current page through the phone's own share sheet — straight into
- * WhatsApp, which is where a team actually coordinates — and falls back to
- * copying the link where there is no share sheet (most laptops).
+ * Shares a page through the phone's own share sheet — straight into WhatsApp,
+ * which is where a team actually coordinates.
+ *
+ * Always the site's real address, not whatever the browser is on: shared
+ * from a test copy or a preview, the link should still open for everyone.
+ * Where the browser has no share sheet, the link is copied; where it cannot
+ * copy either (a page opened over plain http, as on a test copy), WhatsApp
+ * opens with the message written.
  */
+const SITE = "https://manchestermgames.com";
+
 export function ShareButton({
   title,
   text,
@@ -21,7 +28,7 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
-    const url = window.location.href;
+    const url = `${SITE}${window.location.pathname}`;
     if (navigator.share) {
       try {
         await navigator.share({ title, text, url });
@@ -31,13 +38,17 @@ export function ShareButton({
         if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // No clipboard either: nothing more to try.
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      } catch {
+        // Fall through to WhatsApp.
+      }
     }
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, "_blank", "noopener");
   };
 
   return (

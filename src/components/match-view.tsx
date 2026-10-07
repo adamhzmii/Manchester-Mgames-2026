@@ -119,7 +119,7 @@ export function MatchView({
             <BackLink />
             <ShareButton
               title={`${fixture.teamA} v ${fixture.teamB}`}
-              text={`${fixture.sportName} ${fixture.stageLabel} · ${formatTime(fixture.scheduledTime)} at ${fixture.venueShortName} ${fixture.courtName}`}
+              text={`${fixture.teamA} v ${fixture.teamB} · ${fixture.sportName} ${fixture.stageLabel}, ${formatTime(fixture.scheduledTime)} at ${fixture.venueShortName} ${fixture.courtName} · MGames 2026`}
               className={styles.iconButton}
             >
               <ShareIcon size={19} />
@@ -243,7 +243,7 @@ export function MatchView({
           </a>
           <ShareButton
             title={`${fixture.teamA} v ${fixture.teamB}`}
-            text={`${fixture.sportName} ${fixture.stageLabel} · ${formatTime(fixture.scheduledTime)} at ${fixture.venueShortName} ${fixture.courtName}`}
+            text={`${fixture.teamA} v ${fixture.teamB} · ${fixture.sportName} ${fixture.stageLabel}, ${formatTime(fixture.scheduledTime)} at ${fixture.venueShortName} ${fixture.courtName} · MGames 2026`}
             className={`mg-btn ${styles.action}`}
           >
             <ShareIcon size={18} />

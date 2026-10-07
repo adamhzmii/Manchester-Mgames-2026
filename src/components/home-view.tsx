@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { Countdown } from "@/components/countdown";
 import { LateCourts } from "@/components/delays";
 import { FindTeamButton } from "@/components/find-team-button";
 import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
@@ -19,12 +18,13 @@ import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatPrice, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import {
+  daysUntil,
   firstKickoff,
   latestResults,
   liveFixtures,
+  type Phase,
   phaseOf,
   upNext,
-  type Phase,
 } from "@/lib/matchday";
 import { medalTable, podiums, type Podium } from "@/lib/medals";
 import type { Announcement, PickerTeam, Sport, Vendor, Venue } from "@/lib/queries";
@@ -79,15 +79,14 @@ export function HomeView({
       <section className={styles.top}>
         <div className={`mg-wrap ${styles.topInner}`} data-phase={phase}>
           <Masthead venues={venues} />
-          {phase === "before" ? (
-            <BeforeHero fixtures={fixtures} teams={teams} sports={sports} venues={venues} />
-          ) : phase === "matchday" ? (
-            <MatchdayHero
+          {phase === "before" || phase === "matchday" ? (
+            <DayHero
+              phase={phase}
               fixtures={fixtures}
               now={now}
               teams={teams}
               venues={venues}
-              following={favourites.teamIds.length > 0}
+              following={favourites.teamIds.some((id) => teams.some((t) => t.id === id))}
             />
           ) : (
             <Champions finals={finals} />
@@ -165,7 +164,7 @@ export function HomeView({
           {/* On the day it leads the page, in the band above. Once it is all
               over, "follow your team to see your next game" has nothing left
               to offer; a team already followed still shows. */}
-          {phase === "before" || (phase === "after" && favourites.teamIds.length > 0) ? (
+          {phase === "after" && favourites.teamIds.length > 0 ? (
             <div className={styles.sTeam}>
               <YourTeam fixtures={fixtures} teams={teams} venues={venues} />
             </div>
@@ -219,78 +218,25 @@ function Masthead({ venues }: { venues: Venue[] }) {
   );
 }
 
-// ------------------------------------------------------------- before ----
-
-function BeforeHero({
-  fixtures,
-  teams,
-  sports,
-  venues,
-}: {
-  fixtures: Fixture[];
-  teams: PickerTeam[];
-  sports: Sport[];
-  venues: Venue[];
-}) {
-  const first = firstKickoff(fixtures);
-
-  return (
-    <>
-      <div className={styles.beforeExtra}>
-        <dl className={styles.stats}>
-          <Stat value={sports.length} label="Sports" />
-          <Stat value={teams.length} label="Teams" />
-          <Stat value={fixtures.length} label="Matches" />
-          <Stat value={venues.length} label="Venues" />
-        </dl>
-
-        <div className={styles.ctas}>
-          <FindTeamButton teams={teams} className="mg-btn mg-btn-gold" />
-          <Link href="/schedule" className={`mg-btn mg-btn-ghost ${styles.ghostLight}`}>
-            The schedule
-          </Link>
-        </div>
-      </div>
-
-      {first !== null ? (
-        <div className={styles.beforeClock}>
-          <p className={styles.clockLabel}>Until the first whistle</p>
-          <Countdown target={new Date(first).toISOString()} label="Time until the first game" />
-          <p className={styles.clockFoot}>
-            First game {formatTime(new Date(first).toISOString())} · doors 08:30
-          </p>
-        </div>
-      ) : null}
-    </>
-  );
-}
-
-function Stat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className={styles.stat}>
-      <dt className={styles.statLabel}>{label}</dt>
-      <dd className={styles.statValue}>{value}</dd>
-    </div>
-  );
-}
-
 // ----------------------------------------------------------- matchday ----
 
 /**
- * The day itself, from a player's side: the first thing under the event's
- * name is their own next game — time, court, opponent, whether it is running
- * late. Somebody else's live semi-final can wait a scroll; it used to take
- * the whole first screen while the player's own game sat below it.
- *
- * Not following a team yet, the same spot asks them to, in one line.
+ * Under the event's name, from a player's side: their own next game — time,
+ * court, opponent, whether it is running late — before the day and on it.
+ * Somebody else's live semi-final can wait a scroll; so can the counts of
+ * sports and teams and a ticking countdown, which used to fill the first
+ * screen before the day. Not following a team yet, the same spot asks them
+ * to, in one line.
  */
-function MatchdayHero({
+function DayHero({
+  phase,
   fixtures,
   now,
   teams,
   venues,
   following,
 }: {
+  phase: "before" | "matchday";
   fixtures: Fixture[];
   now: number;
   teams: PickerTeam[];
@@ -305,10 +251,19 @@ function MatchdayHero({
     <div className={styles.phaseBlock}>
       <div className={styles.bandTop}>
         <p className={styles.bandKicker}>
-          <span className={styles.bandGold}>Matchday</span>
-          {notStarted && first !== null && now < first
-            ? ` · first game ${formatTime(new Date(first).toISOString())}`
-            : null}
+          {phase === "before" && first !== null ? (
+            <>
+              <span className={styles.bandGold}>{daysToGo(now, first)}</span> · first game{" "}
+              {formatTime(new Date(first).toISOString())}
+            </>
+          ) : (
+            <>
+              <span className={styles.bandGold}>Matchday</span>
+              {notStarted && first !== null && now < first
+                ? ` · first game ${formatTime(new Date(first).toISOString())}`
+                : null}
+            </>
+          )}
         </p>
         {live.length > 0 ? (
           <a href="#live" className={styles.bandCount}>
@@ -325,14 +280,21 @@ function MatchdayHero({
       ) : (
         <div className={styles.followCta}>
           <p className={styles.followText}>
-            <strong>Playing today?</strong> Follow your team, and this spot shows your next game:
-            time, court, opponent, and whether it&rsquo;s running late.
+            <strong>{phase === "before" ? "Playing?" : "Playing today?"}</strong> Follow your team,
+            and this spot shows your next game: time, court, opponent, and whether it&rsquo;s
+            running late.
           </p>
           <FindTeamButton teams={teams} className={`mg-btn mg-btn-gold ${styles.followButton}`} />
         </div>
       )}
     </div>
   );
+}
+
+/** "17 days to go", "Tomorrow", "Today". */
+function daysToGo(now: number, first: number): string {
+  const days = daysUntil(now, first);
+  return days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `${days} days to go`;
 }
 
 /** Every game being played right now, under the player's own. */

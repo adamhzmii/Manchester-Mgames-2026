@@ -33,7 +33,9 @@ export function YourTeam({
   venues: { slug: string; latitude: number | null; longitude: number | null }[];
 }) {
   const favourites = useFavouriteTeams();
-  const followed = favourites.teamIds;
+  // Only teams that still exist: a team followed before the draw was redone
+  // would otherwise leave an empty card instead of the prompt to pick again.
+  const followed = favourites.teamIds.filter((id) => teams.some((t) => t.id === id));
 
   const mine = useMemo(
     () =>

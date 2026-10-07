@@ -57,19 +57,22 @@
   text-transform: uppercase;
 }
 
-.firstAidName {
+.firstAidWho {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  font-family: var(--mg-display);
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--mg-ink);
+  font-size: 14px;
+  color: var(--mg-ink-2);
 }
 
-.firstAidName svg {
+.firstAidWho svg {
   flex: 0 0 auto;
+  margin-top: 2px;
   color: var(--mg-live);
+}
+
+.firstAidWho strong {
+  color: var(--mg-ink);
 }
 
 /* -------------------------------------------------------- handbook ---- */

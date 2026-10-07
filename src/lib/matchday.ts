@@ -87,7 +87,9 @@ export function relative(target: number, now: number): string {
   const hours = Math.floor(abs / 60);
   const minutes = abs % 60;
   // Weeks out, "in 493 hr 25 min" is noise; whole days say it.
-  const days = Math.floor(hours / 24);
+  // Rounded, so 16 days 21 hours reads "17 days", agreeing with the header's
+  // "17 days to go".
+  const days = hours >= 24 ? Math.round(hours / 24) : 0;
   const text =
     days > 0
       ? `${days} ${days === 1 ? "day" : "days"}`

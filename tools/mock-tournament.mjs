@@ -78,32 +78,36 @@ const KNOCKOUTS = {
 
 const OPEN = { slug: "open", name: "Open" };
 
-// Group sizes from the committee's planning sheet. Courts and slot lengths
-// are the mock's own.
+// Group sizes from the committee's planning sheet, in the halls and pitches
+// the committee has: Denmark Road's Pitches A–C; Sugden's Hall A
+// (basketball), Hall B (volleyball), Halls C and D (badminton, and pickleball
+// in Hall D); Trinity's Outdoor Netball, Sports Hall (frisbee) and Temple Gym
+// (table tennis). How many courts each hall fits is the mock's guess.
 const SPORTS = [
-  { slug: "football", venue: "denmark-road", courts: ["Pitch 1", "Pitch 2", "Pitch 3"], slot: 15,
+  { slug: "football", venue: "denmark-road", courts: ["Pitch A", "Pitch B", "Pitch C"], slot: 15,
     categories: [{ ...OPEN, groups: [4, 4, 4, 4, 4, 4], ko: "r16-6" }] },
-  { slug: "badminton", venue: "sugden", courts: ["Court 1", "Court 2", "Court 3", "Court 4", "Court 5", "Court 6"], slot: 15,
+  // Sugden's Halls C and D; Hall D shares its floor with pickleball.
+  { slug: "badminton", venue: "sugden", courts: ["Hall C1", "Hall C2", "Hall C3", "Hall C4", "Hall D1", "Hall D2"], slot: 15,
     categories: [
       { slug: "md", name: "Men's Doubles", groups: [4, 4, 4, 4, 4, 4], ko: "r16-6" },
       { slug: "xd", name: "Mixed Doubles", groups: [4, 4, 4, 4, 4], ko: "qf-5" },
       { slug: "ms", name: "Men's Singles", groups: [4, 4, 4, 4], ko: "qf-4" },
       { slug: "wd", name: "Women's Doubles", groups: [5, 5], ko: "qf-2x4" },
     ] },
-  { slug: "netball", venue: "trinity", courts: ["Court 3", "Court 4"], slot: 15,
+  { slug: "netball", venue: "trinity", courts: ["Outdoor Netball 1", "Outdoor Netball 2"], slot: 15,
     categories: [{ ...OPEN, groups: [4, 4, 4, 4], ko: "qf-4" }] },
-  { slug: "frisbee", venue: "trinity", courts: ["Court 5", "Court 6"], slot: 20,
+  { slug: "frisbee", venue: "trinity", courts: ["Sports Hall 1", "Sports Hall 2"], slot: 20,
     categories: [{ ...OPEN, groups: [4, 4, 3, 3], ko: "qf-4" }] },
-  { slug: "volleyball", venue: "trinity", courts: ["Main Hall"], slot: 20,
+  { slug: "volleyball", venue: "sugden", courts: ["Hall B"], slot: 20,
     categories: [{ ...OPEN, groups: [4, 3, 3, 3], ko: "qf-4" }] },
-  { slug: "basketball", venue: "trinity", courts: ["Court 2"], slot: 15,
+  { slug: "basketball", venue: "sugden", courts: ["Hall A"], slot: 15,
     categories: [{ ...OPEN, groups: [3, 3, 3, 3], ko: "qf-4" }] },
-  { slug: "pickleball", venue: "sugden", courts: ["Court 7", "Court 8"], slot: 15,
+  { slug: "pickleball", venue: "sugden", courts: ["Hall D3", "Hall D4"], slot: 15,
     categories: [
       { slug: "md", name: "Men's Doubles", groups: [4, 4], ko: "sf-2" },
       { slug: "xd", name: "Mixed Doubles", groups: [4, 4], ko: "sf-2" },
     ] },
-  { slug: "table-tennis", venue: "sugden", courts: ["TT Room"], slot: 15,
+  { slug: "table-tennis", venue: "trinity", courts: ["Temple Gym"], slot: 15,
     categories: [{ ...OPEN, groups: [6], ko: "sf-1" }] },
 ];
 
