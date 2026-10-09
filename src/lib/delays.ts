@@ -160,14 +160,20 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
     const key = courtKey(f);
     let end: number;
 
+    // A started game began no earlier than its court came free: the game
+    // before it on the court had to end first. Without this, a Start tapped
+    // early (by mistake, or while trying the sheet out days before) put the
+    // court back on its printed times and wiped out a delay already shown.
+    const courtWasFree = courtFree.get(key) ?? -Infinity;
+
     if (f.status === "finished") {
-      const start = effectiveStart(f);
+      const start = Math.max(effectiveStart(f), courtWasFree);
       const finished = f.finishedAt ? Date.parse(f.finishedAt) : -Infinity;
       // A whistle before the game could have begun (an early test tap) says
       // nothing about when the court is free: assume it took its slot.
       end = finished > start ? finished : start + length;
     } else if (f.status === "live") {
-      const start = effectiveStart(f);
+      const start = Math.max(effectiveStart(f), courtWasFree);
       // Past its slot it is overrunning: it ends no sooner than now. Unless
       // the court has already moved on to a later game.
       end = Math.min(Math.max(start + length, now), startedAfter.get(f.id) ?? Infinity);

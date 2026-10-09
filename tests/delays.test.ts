@@ -243,3 +243,42 @@ test("a game played after later ones on its court is still the one live", () => 
   assert.equal(court.live?.id, day[0].id);
   assert.deepEqual(court.alerts, []);
 });
+
+test("a delay carries down the court however early each Start is tapped", () => {
+  // The 09:00 game was set to 09:10 and played; the next was started at once,
+  // before the court could really have been free. Every later game stays +10.
+  const tapped = "2026-10-09T12:00:00+01:00";
+  const day = [
+    game("09:00", {
+      status: "finished",
+      plannedStart: at("09:10"),
+      startedAt: tapped,
+      finishedAt: "2026-10-09T12:05:00+01:00",
+      scoreA: 3,
+      scoreB: 0,
+    }),
+    game("09:15", { status: "live", startedAt: "2026-10-09T12:06:00+01:00" }),
+    game("09:30"),
+    game("09:45"),
+  ];
+  assert.deepEqual(late(day, "07:00"), [null, null, 10, 10]);
+});
+
+test("on the day, a game that really starts early pulls the court back", () => {
+  // Set to start at 09:10 but the 09:00 game finished at 09:20, and the next
+  // began at 09:21 — earlier than the 09:25 the site had guessed, so the
+  // 09:30 game is 5 behind, not 10.
+  const day = [
+    game("09:00", {
+      status: "finished",
+      plannedStart: at("09:10"),
+      startedAt: at("09:10"),
+      finishedAt: at("09:20"),
+      scoreA: 1,
+      scoreB: 0,
+    }),
+    game("09:15", { status: "live", startedAt: at("09:21") }),
+    game("09:30"),
+  ];
+  assert.deepEqual(late(day, "09:20"), [null, null, 5]);
+});
