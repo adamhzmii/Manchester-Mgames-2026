@@ -4,6 +4,7 @@ import { KickoffTime, LateTag } from "@/components/delays";
 import { StarIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
+import { formatTime } from "@/lib/format";
 import { categoryCode, type Fixture } from "@/lib/fixtures";
 import { winningSide } from "@/lib/matchday";
 import type { FixtureStage } from "@/lib/supabase/types";
@@ -57,7 +58,16 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
             Live
           </span>
         ) : fixture.status === "finished" ? (
-          <span className={styles.ft}>FT</span>
+          <>
+            <span className={styles.ft}>FT</span>
+            {/* When it really ended: how far behind the court is, at a glance. */}
+            {fixture.finishedAt ? (
+              <span className={styles.ended}>
+                <span className="mg-sr-only">ended </span>
+                {formatTime(fixture.finishedAt)}
+              </span>
+            ) : null}
+          </>
         ) : (
           <>
             <KickoffTime fixture={fixture} className={styles.time} />

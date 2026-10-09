@@ -66,6 +66,13 @@
   color: var(--mg-ink-3);
 }
 
+.ended {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--mg-ink-3);
+}
+
 .live {
   display: inline-flex;
   align-items: center;
