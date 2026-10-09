@@ -322,8 +322,8 @@ export async function setPlannedStart(fixtureId: string, time: string | null): P
         message: `It can't start before its printed time, ${formatTime(game.scheduledTime)}.`,
       };
     }
-    // The printed time itself means "on time": nothing to store.
-    if (Date.parse(iso) === Date.parse(game.scheduledTime)) iso = null;
+    // The printed time is stored too, not treated as "nothing set": "it starts
+    // at 10:00 after all" has to win over a court the site thinks is behind.
   }
 
   const { data, error } = await supabase
@@ -340,7 +340,11 @@ export async function setPlannedStart(fixtureId: string, time: string | null): P
   await notifyLateGames(supabase);
   return {
     ok: true,
-    message: iso ? `Starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.` : "Back to the site's estimate.",
+    message: iso
+      ? Date.parse(iso) === Date.parse(game.scheduledTime)
+        ? `Back on time: starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.`
+        : `Starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.`
+      : "Back to the site's estimate.",
   };
 }
 

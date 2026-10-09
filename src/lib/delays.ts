@@ -164,7 +164,10 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
     // before it on the court had to end first. Without this, a Start tapped
     // early (by mistake, or while trying the sheet out days before) put the
     // court back on its printed times and wiped out a delay already shown.
-    const courtWasFree = courtFree.get(key) ?? -Infinity;
+    // Unless a coordinator said when it starts: they are at the court, and
+    // "it goes at 10:00 after all" beats the site's guess about the game
+    // before.
+    const courtWasFree = f.plannedStart ? -Infinity : (courtFree.get(key) ?? -Infinity);
 
     if (f.status === "finished") {
       const start = Math.max(effectiveStart(f), courtWasFree);

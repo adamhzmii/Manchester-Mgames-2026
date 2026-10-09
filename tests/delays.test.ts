@@ -282,3 +282,18 @@ test("on the day, a game that really starts early pulls the court back", () => {
   ];
   assert.deepEqual(late(day, "09:20"), [null, null, 5]);
 });
+
+test("a court set back to its printed time is on time, before and after Start", () => {
+  // Pitch A was 20 behind; the coordinator says the 10:00 game goes at 10:00.
+  const before = [
+    game("09:30", { plannedStart: at("09:50"), status: "finished", startedAt: at("09:50"), finishedAt: at("09:58"), scoreA: 1, scoreB: 0 }),
+    game("09:45", { status: "finished", startedAt: at("09:58"), finishedAt: at("09:59"), scoreA: 1, scoreB: 0 }),
+    game("10:00", { plannedStart: at("10:00") }),
+    game("10:15"),
+  ];
+  assert.deepEqual(late(before, "07:00"), [null, null, 0, 0]);
+
+  // Then started — early, as a test on another day would.
+  const started = [...before.slice(0, 2), { ...before[2], status: "live" as const, startedAt: "2026-10-09T12:00:00+01:00" }, before[3]];
+  assert.deepEqual(late(started, "07:00"), [null, null, null, 0]);
+});

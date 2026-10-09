@@ -483,6 +483,17 @@ export function ChangeTime({
     <div className={styles.tool}>
       <p className={styles.toolTitle}>Change start time</p>
       <p className={styles.toolNote}>{summary}</p>
+      {lateMin > 0 ? (
+        // The common correction: the court caught up, this one goes on time.
+        <button
+          type="button"
+          className={`mg-btn ${styles.secondary}`}
+          disabled={pending}
+          onClick={() => set(printed)}
+        >
+          Starting on time after all — {printed}
+        </button>
+      ) : null}
       <div className={styles.chips}>
         {[5, 10, 15].map((minutes) => (
           <button
