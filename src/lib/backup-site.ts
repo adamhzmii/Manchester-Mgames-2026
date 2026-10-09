@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
  * public/sw.js keeps its own copy of these two constants — a service worker
  * cannot import from here.
  */
-export const BACKUP_ORIGIN = "https://manchester-mgames-2026.vercel.app";
+export const BACKUP_ORIGIN = "https://manchestermgames.vercel.app";
 const PRIMARY_HOSTS = ["manchestermgames.com", "www.manchestermgames.com"];
 
 /** Carries followed teams across: localStorage does not cross origins. */

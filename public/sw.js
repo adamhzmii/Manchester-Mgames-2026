@@ -7,7 +7,7 @@
  * cache at all.
  */
 
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL_CACHE = `mgames-shell-${VERSION}`;
 const DATA_CACHE = `mgames-data-${VERSION}`;
 
@@ -120,7 +120,7 @@ self.addEventListener("fetch", (event) => {
  * Copies of the constants in src/lib/backup-site.ts; a worker cannot import
  * them.
  */
-const BACKUP_ORIGIN = "https://manchester-mgames-2026.vercel.app";
+const BACKUP_ORIGIN = "https://manchestermgames.vercel.app";
 const PRIMARY_HOSTS = ["manchestermgames.com", "www.manchestermgames.com"];
 // Written by src/lib/use-favourite-teams.ts.
 const PREFS_CACHE = "mgames26-prefs";
