@@ -184,7 +184,7 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       courtId: null,
       startedAt: null,
       finishedAt: null,
-      delayMinutes: 0,
+      plannedStart: null,
     };
   };
 

@@ -37,7 +37,8 @@ export async function signIn(_prevState: LoginState, formData: FormData): Promis
 
   // Every page that renders edit affordances reads the session server-side.
   revalidatePath("/", "layout");
-  redirect("/schedule");
+  // Straight to the court sheet: on the day that is the coordinator's screen.
+  redirect("/coordinate");
 }
 
 export async function signOut(): Promise<void> {

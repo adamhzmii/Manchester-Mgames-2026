@@ -43,8 +43,8 @@ export function SiteFooter() {
         </nav>
 
         <div className={styles.bottom}>
-          <Link href="/login" className={styles.staff}>
-            Coordinator sign-in
+          <Link href="/coordinate" className={styles.staff}>
+            Coordinators
           </Link>
         </div>
       </div>

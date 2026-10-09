@@ -190,6 +190,7 @@ export interface Database {
           finished_at: Timestamptz | null;
           delay_minutes: number;
           delay_notified_minutes: number;
+          planned_start: Timestamptz | null;
           created_at: Timestamptz;
           updated_at: Timestamptz;
         };
@@ -202,6 +203,7 @@ export interface Database {
           | "finished_at"
           | "delay_minutes"
           | "delay_notified_minutes"
+          | "planned_start"
         > & {
           id?: string;
           created_at?: Timestamptz;
@@ -210,6 +212,7 @@ export interface Database {
           finished_at?: Timestamptz | null;
           delay_minutes?: number;
           delay_notified_minutes?: number;
+          planned_start?: Timestamptz | null;
         };
         Update: Partial<Database["public"]["Tables"]["fixtures"]["Insert"]>;
         Relationships: [
@@ -249,6 +252,12 @@ export interface Database {
             referencedColumns: ["id"];
           },
         ];
+      };
+      job_claims: {
+        Row: { name: string; ran_at: Timestamptz };
+        Insert: { name: string; ran_at?: Timestamptz };
+        Update: Partial<Database["public"]["Tables"]["job_claims"]["Insert"]>;
+        Relationships: [];
       };
       vendors: {
         Row: {

@@ -275,10 +275,10 @@
   color: var(--mg-night-muted);
 }
 
-/* "On time" gets the room a two-word label needs on a 360px phone. */
+/* Three quick "+5 → 10:05" buttons, each wide enough for its new time. */
 .chips {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -294,18 +294,57 @@
   cursor: pointer;
 }
 
-.chip:first-child {
+.chip:disabled {
+  opacity: 0.6;
+}
+
+/* The collapsed "Change time" line on the court sheet. */
+.timeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.timeRow .secondary {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+.sheetLink {
+  margin-top: -6px;
   font-size: 14px;
-  white-space: nowrap;
+  font-weight: 600;
 }
 
-.chipOn {
-  background: var(--mg-late-night);
-  color: var(--mg-night);
+.sheetLink a {
+  color: var(--mg-gold);
 }
 
-.chip:first-child.chipOn {
-  background: var(--mg-gold);
+/* "Another game is still live here — finished?" before Start. */
+.guard {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--mg-r);
+  background: color-mix(in srgb, var(--mg-late-night) 14%, var(--mg-night-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-late-night) 55%, transparent);
+}
+
+.guardText {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.guardActions {
+  display: grid;
+  gap: 8px;
+}
+
+.guardActions .linkish {
+  justify-self: start;
+  padding: 4px 0;
 }
 
 .toolNote {

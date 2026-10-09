@@ -36,7 +36,7 @@ export function fixture(overrides: Partial<Fixture> = {}): Fixture {
     venueShortName: "Sugden",
     startedAt: null,
     finishedAt: null,
-    delayMinutes: 0,
+    plannedStart: null,
     ...overrides,
   };
 }

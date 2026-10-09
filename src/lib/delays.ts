@@ -8,27 +8,38 @@ import { feederGame } from "@/lib/slots";
  * A late start does not stay on one game: everything after it on the same
  * court slides too, until a gap in the schedule absorbs it. Nobody has time
  * to retype a dozen kick-offs mid-tournament, so the site reads the real
- * start and finish times coordinators already create by tapping Start game
- * and Final whistle, and carries any slip down the court:
+ * start and finish times coordinators already create by tapping Start and
+ * Finish, and carries any slip down the court:
  *
- *   - a game kicks off when its scheduled time comes, but not before the
- *     game before it on the court is done, any game it waits on (the
- *     semi-final whose winner it needs) is done, and any "starting late" a
- *     coordinator set has passed;
+ *   - a game is due when its printed time comes, but not before the game
+ *     before it on the court is done, and not before any game it waits on
+ *     (the semi-final whose winner it needs) is done;
+ *   - unless a coordinator has said when it starts ("starts at 10:05"): they
+ *     are standing at the court, so that time stands — never before the
+ *     printed one — and the games after it follow on from it;
  *   - a game takes its slot: the time until the next game on its court, at
  *     most the court's usual slot, so a lunch break counts as slack;
  *   - a live game that runs past its slot pushes everything after it, minute
- *     by minute;
- *   - a game whose time has come and gone without starting is late by
- *     however long it has been.
+ *     by minute — until a later game on the court starts, which means it is
+ *     over whatever its button says;
+ *   - a game that is due and has not started is late by however long it has
+ *     been.
  *
- * The official kick-off never changes. This is an estimate shown beside it.
+ * The printed kick-off never changes. This is shown beside it.
  */
 export type Expected = {
   /** When the game should now kick off, in ms. */
   at: number;
-  /** How far behind its scheduled time, in minutes, rounded to 5. 0 when on time. */
+  /** How far behind its printed time, in minutes, rounded to 5. 0 when on time. */
   lateMin: number;
+  /** When it became due: its time, a coordinator's, or the court coming free. */
+  due: number;
+  /** Due and not started yet — waiting on teams, or on someone tapping Start. */
+  overdue: boolean;
+  /** A coordinator set the time, rather than the site working it out. */
+  planned: boolean;
+  /** Games still to finish before this one on its court: 0 means it is next. */
+  ahead: number;
 };
 
 /** Less than this behind is just a normal day: nobody needs telling. */
@@ -47,21 +58,24 @@ export function roundLate(minutes: number): number {
   return minutes < LATE_MIN ? 0 : Math.round(minutes / 5) * 5;
 }
 
+/** Each court's games in the order they are played: printed time, then id. */
+export function gamesByCourt(fixtures: readonly Fixture[]): Map<string, Fixture[]> {
+  const byCourt = new Map<string, Fixture[]>();
+  for (const f of [...fixtures].sort(byKickoff)) {
+    const list = byCourt.get(courtKey(f)) ?? [];
+    list.push(f);
+    byCourt.set(courtKey(f), list);
+  }
+  return byCourt;
+}
+
 /**
  * Each game's slot, in ms: the time until the next game on its court, capped
  * at the court's usual gap so a long break is slack rather than a long game.
  */
 export function slotLengths(fixtures: readonly Fixture[]): Map<string, number> {
-  const byCourt = new Map<string, Fixture[]>();
-  for (const f of fixtures) {
-    const list = byCourt.get(courtKey(f)) ?? [];
-    list.push(f);
-    byCourt.set(courtKey(f), list);
-  }
-
   const result = new Map<string, number>();
-  for (const games of byCourt.values()) {
-    const sorted = [...games].sort(byKickoff);
+  for (const sorted of gamesByCourt(fixtures).values()) {
     const gaps = sorted
       .slice(1)
       .map((f, i) => Date.parse(f.scheduledTime) - Date.parse(sorted[i].scheduledTime))
@@ -77,11 +91,44 @@ export function slotLengths(fixtures: readonly Fixture[]): Map<string, number> {
   return result;
 }
 
+/**
+ * The earliest real kick-off of any later game on the same court. A game
+ * still showing live after that has been left running by mistake: it ended
+ * when the next one began.
+ */
+function nextKickoffs(byCourt: Map<string, Fixture[]>): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const games of byCourt.values()) {
+    let earliest = Infinity;
+    for (let i = games.length - 1; i >= 0; i -= 1) {
+      if (earliest < Infinity) result.set(games[i].id, earliest);
+      const g = games[i];
+      if (g.status !== "upcoming") {
+        earliest = Math.min(earliest, Date.parse(g.startedAt ?? g.scheduledTime));
+      }
+    }
+  }
+  return result;
+}
+
 export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<string, Expected> {
   const slot = slotLengths(fixtures);
+  const byCourt = gamesByCourt(fixtures);
+  const startedAfter = nextKickoffs(byCourt);
   const courtFree = new Map<string, number>();
   const endOf = new Map<string, number>();
   const expected = new Map<string, Expected>();
+
+  const ahead = new Map<string, number>();
+  for (const games of byCourt.values()) {
+    let unfinished = 0;
+    for (const g of games) {
+      ahead.set(g.id, unfinished);
+      // A game still marked live after the next one began is over.
+      const over = g.status === "finished" || (g.status === "live" && startedAfter.has(g.id));
+      if (!over) unfinished += 1;
+    }
+  }
 
   // Kick-off order across every court, so a game's feeders — earlier games,
   // possibly elsewhere — are always worked out before it.
@@ -96,18 +143,32 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
       end = f.finishedAt ? Date.parse(f.finishedAt) : start + length;
     } else if (f.status === "live") {
       const start = f.startedAt ? Date.parse(f.startedAt) : scheduled;
-      // Past its slot it is overrunning: it ends no sooner than now.
-      end = Math.max(start + length, now);
+      // Past its slot it is overrunning: it ends no sooner than now. Unless
+      // the court has already moved on to a later game.
+      end = Math.min(Math.max(start + length, now), startedAfter.get(f.id) ?? Infinity);
     } else {
-      let start = Math.max(scheduled + f.delayMinutes * MINUTE, courtFree.get(key) ?? -Infinity);
-      for (const label of [f.slotA, f.slotB]) {
-        const feeder = feederGame(label, f.categoryId, fixtures);
-        const ready = feeder ? endOf.get(feeder.game.id) : undefined;
-        if (ready !== undefined) start = Math.max(start, ready);
+      let due: number;
+      const planned = f.plannedStart !== null;
+      if (planned) {
+        due = Math.max(scheduled, Date.parse(f.plannedStart!));
+      } else {
+        due = Math.max(scheduled, courtFree.get(key) ?? -Infinity);
+        for (const label of [f.slotA, f.slotB]) {
+          const feeder = feederGame(label, f.categoryId, fixtures);
+          const ready = feeder ? endOf.get(feeder.game.id) : undefined;
+          if (ready !== undefined) due = Math.max(due, ready);
+        }
       }
-      // Its time has come and it has not started: it is at least this late.
-      if (now >= scheduled) start = Math.max(start, now);
-      expected.set(f.id, { at: start, lateMin: roundLate((start - scheduled) / MINUTE) });
+      const overdue = now >= due;
+      const start = overdue ? now : due;
+      expected.set(f.id, {
+        at: start,
+        lateMin: roundLate((start - scheduled) / MINUTE),
+        due,
+        overdue,
+        planned,
+        ahead: ahead.get(f.id) ?? 0,
+      });
       end = start + length;
     }
 
@@ -138,4 +199,103 @@ export function lateCourts(
     }))
     .filter((c) => c.lateMin > 0)
     .sort((a, b) => b.lateMin - a.lateMin);
+}
+
+// ------------------------------------------------------------ courts ----
+
+/** Something on a court that a person should look at. */
+export type CourtAlert =
+  /** Live far longer than a game there takes: Finish probably not tapped. */
+  | { kind: "long-live"; minutes: number; fixtureId: string }
+  /** Marked live, but a later game on the court has started. */
+  | { kind: "left-live"; fixtureId: string }
+  /** Due a while ago and not started: teams missing, or Start not tapped. */
+  | { kind: "not-started"; minutes: number; fixtureId: string };
+
+export type CourtState = {
+  key: string;
+  courtId: string | null;
+  courtName: string;
+  venueShortName: string;
+  /** The court's games in order, played or not. */
+  games: Fixture[];
+  /** The game being played, if any. */
+  live: Fixture | null;
+  /** The next game to start, if any. */
+  next: Fixture | null;
+  /** How far behind the court is, as its next game shows it. */
+  lateMin: number;
+  /** The last time anyone tapped Start or Finish here, in ms. */
+  lastTap: number | null;
+  alerts: CourtAlert[];
+};
+
+/** A live game this far past its slot is probably finished. */
+const LONG_LIVE_FACTOR = 2;
+/** Due this long without starting is worth a phone call. */
+const NOT_STARTED_ALERT_MIN = 15;
+
+/**
+ * Each court as a coordinator needs it: what is on, what is next, how far
+ * behind it is, and anything that looks wrong. Courts in the order their
+ * first game is played.
+ */
+export function courtStates(
+  fixtures: readonly Fixture[],
+  expected: ReadonlyMap<string, Expected>,
+  now: number,
+): CourtState[] {
+  const slot = slotLengths(fixtures);
+  const byCourt = gamesByCourt(fixtures);
+  const startedAfter = nextKickoffs(byCourt);
+  const states: CourtState[] = [];
+
+  for (const [key, games] of byCourt) {
+    if (key.startsWith("game:")) continue;
+    const alerts: CourtAlert[] = [];
+    let live: Fixture | null = null;
+    let lastTap: number | null = null;
+
+    for (const g of games) {
+      for (const stamp of [g.startedAt, g.finishedAt]) {
+        if (stamp) lastTap = Math.max(lastTap ?? -Infinity, Date.parse(stamp));
+      }
+      if (g.status !== "live") continue;
+      if (startedAfter.has(g.id)) {
+        alerts.push({ kind: "left-live", fixtureId: g.id });
+        continue;
+      }
+      live ??= g;
+      const started = Date.parse(g.startedAt ?? g.scheduledTime);
+      const length = slot.get(g.id) ?? FALLBACK_SLOT_MIN * MINUTE;
+      const minutes = Math.floor((now - started) / MINUTE);
+      if (now - started > length * LONG_LIVE_FACTOR) {
+        alerts.push({ kind: "long-live", minutes, fixtureId: g.id });
+      }
+    }
+
+    const next = games.find((g) => g.status === "upcoming") ?? null;
+    const nextExpected = next ? expected.get(next.id) : undefined;
+    if (next && nextExpected && live === null) {
+      const waiting = Math.floor((now - nextExpected.due) / MINUTE);
+      if (waiting >= NOT_STARTED_ALERT_MIN) {
+        alerts.push({ kind: "not-started", minutes: waiting, fixtureId: next.id });
+      }
+    }
+
+    states.push({
+      key,
+      courtId: games[0].courtId,
+      courtName: games[0].courtName,
+      venueShortName: games[0].venueShortName,
+      games,
+      live,
+      next,
+      lateMin: nextExpected?.lateMin ?? 0,
+      lastTap,
+      alerts,
+    });
+  }
+
+  return states;
 }

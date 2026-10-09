@@ -92,6 +92,9 @@ const DURATION_MIN: Record<string, number> = {
   pickleball: 20,
 };
 
+/** The most a rehearsed game runs over its slot, in minutes. */
+const OVERRUN_MAX_MIN = 6;
+
 /**
  * One game that kicks off late, so a rehearsal has a court running behind:
  * netball's 3rd-place game, ten minutes late. At midday it has just started,
@@ -215,18 +218,22 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
       Date.parse(f.scheduledTime) + lateStartMin(f) * 60_000,
       courtFree.get(key) ?? -Infinity,
     );
-    // No longer than its slot: the mock day's sports have their own lengths,
-    // and an on-time court should stay on time.
-    const length = Math.min(
-      (previewDurationMin(f) ?? DURATION_MIN[f.sportSlug] ?? 30) * 60_000,
-      slot.get(f.id) ?? Infinity,
-    );
+    // Its slot, plus the few minutes real games run over — warm-ups, a long
+    // final set, swapping teams. Last year's volleyball sheet slipped 3–10
+    // minutes a game and finished an hour late; a rehearsal that ran to the
+    // minute would hide everything the delay screens are for.
+    const length =
+      Math.min(
+        (previewDurationMin(f) ?? DURATION_MIN[f.sportSlug] ?? 30) * 60_000,
+        slot.get(f.id) ?? Infinity,
+      ) +
+      pick(`${f.id}o`, 0, OVERRUN_MAX_MIN) * 60_000;
     const end = start + length;
     const iso = (ms: number) => new Date(ms).toISOString();
 
     // A rehearsal invents its own day: whatever timings the real database
     // holds from a dry run do not belong in it.
-    f = { ...f, delayMinutes: 0, startedAt: null, finishedAt: null };
+    f = { ...f, plannedStart: null, startedAt: null, finishedAt: null };
     if (!ready || now < start) {
       f = { ...f, status: "upcoming", scoreA: null, scoreB: null };
     } else if (now >= end) {

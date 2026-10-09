@@ -1,0 +1,619 @@
+/* The coordinators' screen. Committee chrome, like the scorer console: night
+   cards, gold actions — never mistaken for what spectators see. */
+
+.page {
+  padding-bottom: 40px;
+}
+
+.top {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+  padding-bottom: 14px;
+}
+
+.title {
+  font-family: var(--mg-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--mg-ink);
+}
+
+.lede {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--mg-ink-2);
+}
+
+.loading,
+.empty {
+  padding: 24px 0;
+  color: var(--mg-ink-3);
+}
+
+/* --------------------------------------------------------- sport tabs ---- */
+
+.sports {
+  display: flex;
+  gap: 6px;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding: 2px var(--mg-gutter) 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sports::-webkit-scrollbar {
+  display: none;
+}
+
+.sportTab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  color: var(--mg-ink);
+  font-family: var(--mg-display);
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sportTabOn {
+  background: var(--mg-night);
+  color: var(--mg-gold);
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------- court filter --- */
+
+.filter {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.filterLabel {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+.filterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.courtChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-card);
+  box-shadow: inset 0 0 0 1px var(--mg-line-2);
+  color: var(--mg-ink);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.courtChip svg {
+  color: var(--mg-late);
+}
+
+.courtChipOn {
+  background: var(--mg-plum);
+  box-shadow: none;
+  color: #fff;
+}
+
+.courtChipOn svg {
+  color: var(--mg-late-night);
+}
+
+.chipLate {
+  font-family: var(--mg-display);
+  font-weight: 800;
+  color: var(--mg-late);
+}
+
+.courtChipOn .chipLate {
+  color: var(--mg-late-night);
+}
+
+.chipOk {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mg-up);
+}
+
+/* ---------------------------------------------------------------- court --- */
+
+.courts {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .courts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.court {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-night);
+  color: var(--mg-night-text);
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.3);
+}
+
+.courtHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.courtName {
+  font-family: var(--mg-display);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.courtVenue {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-night-muted);
+}
+
+.statusLate,
+.statusOk,
+.statusDone {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statusLate {
+  background: var(--mg-late-night);
+  color: var(--mg-night);
+}
+
+.statusOk {
+  background: color-mix(in srgb, #6ee7a8 18%, transparent);
+  color: #6ee7a8;
+}
+
+.statusDone {
+  background: var(--mg-night-2);
+  color: var(--mg-night-muted);
+}
+
+.block {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--mg-night-line);
+}
+
+.blockLabel {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-gold);
+}
+
+.free {
+  font-size: 15px;
+  color: var(--mg-night-muted);
+}
+
+.game {
+  display: grid;
+  gap: 10px;
+}
+
+.gameMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-night-muted);
+}
+
+.liveDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mg-live);
+  animation: mg-pulse 1.6s ease-in-out infinite;
+}
+
+.teams {
+  font-family: var(--mg-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.vs {
+  font-size: 15px;
+  color: var(--mg-night-muted);
+}
+
+.when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--mg-display);
+  font-weight: 800;
+}
+
+.was {
+  font-size: 17px;
+  color: var(--mg-night-muted);
+  text-decoration-thickness: 2px;
+}
+
+.nowTime {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--mg-late-night);
+}
+
+.lateTag {
+  font-size: 15px;
+  color: var(--mg-late-night);
+}
+
+.onTimeTime {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.onTimeTag {
+  font-size: 15px;
+  color: #6ee7a8;
+}
+
+.due {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mg-late-night);
+}
+
+.big {
+  min-height: 56px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.gameFoot:empty {
+  display: none;
+}
+
+/* ------------------------------------------------------------ undo/alert --- */
+
+.undo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--mg-r);
+  background: color-mix(in srgb, #6ee7a8 12%, var(--mg-night-2));
+  color: #c8f5dc;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.undoText {
+  flex: 1;
+  min-width: 0;
+}
+
+.undoButton {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-night-3);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--mg-r);
+  background: color-mix(in srgb, var(--mg-late-night) 16%, var(--mg-night-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-late-night) 55%, transparent);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.alert > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--mg-late-night);
+}
+
+.alertBody {
+  display: grid;
+  gap: 8px;
+}
+
+.alertAction {
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-gold);
+  color: var(--mg-night);
+  font: inherit;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* -------------------------------------------------------------- full day --- */
+
+.day {
+  padding-top: 12px;
+  border-top: 1px solid var(--mg-night-line);
+}
+
+.daySummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 36px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dayCount {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-night-muted);
+}
+
+.dayList {
+  display: grid;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto 16px;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: var(--mg-r-sm);
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.row svg {
+  color: var(--mg-night-muted);
+}
+
+.rowCurrent {
+  background: var(--mg-night-2);
+}
+
+.rowTime {
+  display: grid;
+  font-family: var(--mg-display);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.05;
+}
+
+.rowTime s {
+  font-size: 12px;
+  color: var(--mg-night-muted);
+}
+
+.rowLate {
+  font-family: var(--mg-display);
+  font-weight: 800;
+  color: var(--mg-late-night);
+}
+
+.rowTeams {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowState {
+  font-family: var(--mg-display);
+  font-weight: 800;
+}
+
+/* -------------------------------------------------------------- overview --- */
+
+.overview {
+  display: grid;
+  gap: 18px;
+}
+
+.sectionTitle {
+  margin-bottom: 8px;
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+.allGood {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--mg-r);
+  background: var(--mg-up-wash);
+  color: var(--mg-up);
+  font-weight: 700;
+}
+
+.attentionList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attentionItem {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 16px;
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-late-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-late) 35%, transparent);
+  color: var(--mg-ink);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attentionItem svg {
+  margin-top: 2px;
+  color: var(--mg-late);
+}
+
+.sportBlock {
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+  overflow: hidden;
+}
+
+.sportHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: var(--mg-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sportHead > svg {
+  margin-left: auto;
+  color: var(--mg-ink-3);
+}
+
+.sportName {
+  font-family: var(--mg-display);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.overviewCourts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.overviewCourt {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 2px 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--mg-line);
+  font-size: 14px;
+}
+
+.ocName {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  grid-row: span 2;
+  font-weight: 800;
+}
+
+.ocName svg {
+  color: var(--mg-late);
+}
+
+.ocNow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocMeta {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.ocMeta .rowLate {
+  color: var(--mg-late);
+  margin-right: 4px;
+}

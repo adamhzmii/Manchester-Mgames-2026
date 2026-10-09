@@ -261,7 +261,7 @@ begin
   update fixtures
   set status = 'upcoming', score_a = null, score_b = null,
       started_at = null, finished_at = null,
-      delay_minutes = 0, delay_notified_minutes = 0
+      delay_minutes = 0, delay_notified_minutes = 0, planned_start = null
   where id is not null;
 
   -- A slot with a label is decided by an earlier game: until then, no team.

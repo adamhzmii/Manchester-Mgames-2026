@@ -1,3 +1,5 @@
+import { after } from "next/server";
+
 import {
   byRelevance,
   FIXTURE_SELECT,
@@ -5,6 +7,7 @@ import {
   type FixtureRow,
 } from "@/lib/fixtures";
 import { demoAnnouncements } from "@/lib/demo";
+import { checkLateInBackground } from "@/lib/late-notify";
 import type { LatestUpdate } from "@/lib/live-feed";
 import { withDemo } from "@/lib/queries";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -39,6 +42,10 @@ const CDN_CACHE =
   "public, max-age=5, stale-while-revalidate=30, stale-if-error=86400";
 
 export async function GET() {
+  // After the response: tell followers about games that have slipped with
+  // nobody saving anything. At most once a minute however busy this is.
+  after(checkLateInBackground);
+
   const supabase = createPublicClient();
   const [{ data, error }, latest] = await Promise.all([
     supabase.from("fixtures").select(FIXTURE_SELECT).order("scheduled_time"),

@@ -15,7 +15,7 @@ export const FIXTURE_SELECT = `
   updated_at,
   started_at,
   finished_at,
-  delay_minutes,
+  planned_start,
   placeholder_a,
   placeholder_b,
   group_id,
@@ -36,7 +36,7 @@ export type FixtureRow = {
   updated_at: string;
   started_at: string | null;
   finished_at: string | null;
-  delay_minutes: number;
+  planned_start: string | null;
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
@@ -110,8 +110,11 @@ export type Fixture = {
    */
   startedAt: string | null;
   finishedAt: string | null;
-  /** "Starting late": the minutes a coordinator expects kick-off to slip. */
-  delayMinutes: number;
+  /**
+   * "Starts at": when a coordinator says the game will now begin — never
+   * before the printed time. Null leaves it to the site's estimate.
+   */
+  plannedStart: string | null;
 };
 
 const STAGE_LABELS: Record<FixtureStage, string> = {
@@ -183,7 +186,7 @@ export function toFixture(row: FixtureRow): Fixture {
     venueShortName: row.court?.venue?.short_name ?? "TBC",
     startedAt: row.started_at,
     finishedAt: row.finished_at,
-    delayMinutes: row.delay_minutes ?? 0,
+    plannedStart: row.planned_start ?? null,
   };
 }
 

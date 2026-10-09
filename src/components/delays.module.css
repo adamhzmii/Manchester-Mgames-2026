@@ -24,6 +24,47 @@
   color: var(--mg-late-night);
 }
 
+.timing {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.onTime {
+  color: var(--mg-up);
+}
+
+.onTimeNight {
+  color: #6ee7a8;
+}
+
+.queue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-ink-2);
+}
+
+.queueNight {
+  color: var(--mg-night-muted);
+}
+
+/* The printed time, struck through, beside the time it has moved to. */
+.moved {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 2px;
+}
+
+.was {
+  font-family: var(--mg-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.65;
+  text-decoration-thickness: 2px;
+}
+
 /* ------------------------------------------------------------ strip ---- */
 
 .strip {

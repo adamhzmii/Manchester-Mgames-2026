@@ -23,7 +23,7 @@ function row(overrides: Partial<FixtureRow> = {}): FixtureRow {
     updated_at: "2026-10-24T08:00:00Z",
     started_at: null,
     finished_at: null,
-    delay_minutes: 0,
+    planned_start: null,
     placeholder_a: null,
     placeholder_b: null,
     group_id: "g1",

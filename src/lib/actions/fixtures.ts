@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import { expectedStarts } from "@/lib/delays";
 import { FIXTURE_SELECT, toFixture, type Fixture, type FixtureRow } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import { londonDate, londonToIso } from "@/lib/london-time";
+import { notifyLateGames } from "@/lib/late-notify";
 import { sendPush } from "@/lib/push/server";
 import { getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -257,11 +257,6 @@ const SIGNED_OUT: ActionResult = {
   message: "Not saved. Your coordinator session may have expired — sign in again.",
 };
 
-/** A slip has to reach this before followers are told about it... */
-const NOTIFY_FROM_MIN = 10;
-/** ...and grow by this much again before they are told a second time. */
-const NOTIFY_STEP_MIN = 10;
-
 type Client = Awaited<ReturnType<typeof createClient>>;
 
 async function readGame(supabase: Client, fixtureId: string): Promise<Fixture | null> {
@@ -270,33 +265,51 @@ async function readGame(supabase: Client, fixtureId: string): Promise<Fixture | 
 }
 
 /**
- * "Starting late": how many minutes a coordinator expects kick-off to slip,
- * before the game starts — a team not here yet, a court not clear. Feeds the
- * same estimate as a late kick-off, so the games after it on the court move
- * too. Zero puts it back on time.
+ * "Starts at": when a coordinator says a game that has not started will now
+ * begin — a team not here yet, the court not clear. Never before the printed
+ * time (players may not be there yet). Later games on the court follow on
+ * from it in the estimate. A null time hands the game back to the estimate.
  */
-export async function setFixtureDelay(fixtureId: string, minutes: number): Promise<ActionResult> {
-  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 120) {
-    return { ok: false, message: "Pick a delay between 0 and 120 minutes." };
-  }
+export async function setPlannedStart(fixtureId: string, time: string | null): Promise<ActionResult> {
   if (!(await getCoordinator())) return SIGNED_OUT;
 
   const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status !== "upcoming") {
+    return { ok: false, message: "Not saved — this game has already started." };
+  }
+
+  let iso: string | null = null;
+  if (time !== null) {
+    iso = londonToIso(londonDate(game.scheduledTime), time);
+    if (!iso) return { ok: false, message: "Pick a time." };
+    if (Date.parse(iso) < Date.parse(game.scheduledTime)) {
+      return {
+        ok: false,
+        message: `It can't start before its printed time, ${formatTime(game.scheduledTime)}.`,
+      };
+    }
+    // The printed time itself means "on time": nothing to store.
+    if (Date.parse(iso) === Date.parse(game.scheduledTime)) iso = null;
+  }
+
   const { data, error } = await supabase
     .from("fixtures")
-    .update({ delay_minutes: minutes })
+    .update({ planned_start: iso })
     .eq("id", fixtureId)
     .eq("status", "upcoming")
     .select("id");
 
   if (error) return { ok: false, message: `Could not save: ${error.message}` };
-  if (!data || data.length === 0) {
-    return { ok: false, message: "Not saved — the game may have started already." };
-  }
+  if (!data || data.length === 0) return SIGNED_OUT;
 
   revalidateGames();
   await notifyLateGames(supabase);
-  return { ok: true, message: minutes === 0 ? "Back on time." : `Marked ${minutes} min late.` };
+  return {
+    ok: true,
+    message: iso ? `Starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.` : "Back to the site's estimate.",
+  };
 }
 
 /**
@@ -335,8 +348,8 @@ export async function correctKickoff(fixtureId: string, time: string): Promise<A
 
 /**
  * Moves a game that has not started: a new official time, a new court, or
- * both. Unlike running late this changes the schedule itself, so it clears
- * any delay on the game, and the two teams' followers are told.
+ * both. Unlike "starts at" this changes the schedule itself, so it clears
+ * any start time set on the game, and the two teams' followers are told.
  */
 export async function moveFixture(
   fixtureId: string,
@@ -361,7 +374,13 @@ export async function moveFixture(
 
   const { data, error } = await supabase
     .from("fixtures")
-    .update({ scheduled_time: iso, court_id: court, delay_minutes: 0, delay_notified_minutes: 0 })
+    .update({
+      scheduled_time: iso,
+      court_id: court,
+      planned_start: null,
+      delay_minutes: 0,
+      delay_notified_minutes: 0,
+    })
     .eq("id", fixtureId)
     .select(FIXTURE_SELECT);
   if (error) return { ok: false, message: `Could not move: ${error.message}` };
@@ -390,55 +409,4 @@ export async function moveFixture(
 
   await notifyLateGames(supabase);
   return { ok: true, message: `Moved to ${formatTime(moved.scheduledTime)}, ${where}.` };
-}
-
-/**
- * Tells a game's followers when it is running late — once it has slipped 10
- * minutes, and again each further 10 — using the same estimate every page
- * shows. Runs after anything that can move a court's timetable.
- *
- * Each slip is claimed in the database before it is sent, so two
- * coordinators saving at the same moment cannot both announce it. Best
- * effort throughout: a failure here never undoes the save that caused it.
- */
-async function notifyLateGames(supabase: Client): Promise<void> {
-  try {
-    const { data } = await supabase
-      .from("fixtures")
-      .select(`${FIXTURE_SELECT}, delay_notified_minutes`)
-      .order("scheduled_time");
-    if (!data) return;
-
-    const rows = data as unknown as (FixtureRow & { delay_notified_minutes: number })[];
-    const fixtures = rows.map(toFixture);
-    const expected = expectedStarts(fixtures, Date.now());
-
-    for (const [i, game] of fixtures.entries()) {
-      const lateMin = expected.get(game.id)?.lateMin ?? 0;
-      const told = rows[i].delay_notified_minutes;
-      if (game.status !== "upcoming" || game.teamAId === null || game.teamBId === null) continue;
-      if (lateMin < NOTIFY_FROM_MIN || lateMin < told + NOTIFY_STEP_MIN) continue;
-
-      const { data: claimed } = await supabase
-        .from("fixtures")
-        .update({ delay_notified_minutes: lateMin })
-        .eq("id", game.id)
-        .lte("delay_notified_minutes", lateMin - NOTIFY_STEP_MIN)
-        .select("id");
-      if (!claimed || claimed.length === 0) continue;
-
-      const now = new Date(Date.parse(game.scheduledTime) + lateMin * 60_000).toISOString();
-      await sendPush(
-        {
-          title: "Running late",
-          body: `${game.teamA} v ${game.teamB} is now expected about ${formatTime(now)} (was ${formatTime(game.scheduledTime)}), ${game.venueShortName} ${game.courtName}.`,
-          url: `/match/${game.id}`,
-          tag: `late-${game.id}`,
-        },
-        { teamIds: [game.teamAId, game.teamBId] },
-      );
-    }
-  } catch {
-    // Best effort by design — see the docblock.
-  }
 }
