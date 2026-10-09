@@ -520,7 +520,7 @@ function NextGame({
       <div className={styles.gameFoot}>
         <SaveState keeper={keeper} />
       </div>
-      <ChangeTime fixture={fixture} compact />
+      <ChangeTime fixture={fixture} compact kickoff={{ iso: shown, lateMin }} />
     </div>
   );
 }

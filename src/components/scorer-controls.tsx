@@ -421,8 +421,22 @@ function later(iso: string, minutes: number): string {
  * a number of minutes to add to something. Quick buttons count on from the
  * time phones show now; later games on the court follow on by themselves.
  */
-export function ChangeTime({ fixture, compact = false }: { fixture: Fixture; compact?: boolean }) {
-  const { iso, lateMin } = useKickoff(fixture);
+export function ChangeTime({
+  fixture,
+  compact = false,
+  kickoff,
+}: {
+  fixture: Fixture;
+  compact?: boolean;
+  /**
+   * The time the screen around it already shows. The court sheet works its
+   * times out from its own saves straight away; without this the box would
+   * disagree with the card it sits in until the next poll.
+   */
+  kickoff?: { iso: string; lateMin: number };
+}) {
+  const fromFeed = useKickoff(fixture);
+  const { iso, lateMin } = kickoff ?? fromFeed;
   const [open, setOpen] = useState(!compact);
   const [time, setTime] = useState(formatTime(iso));
   const [result, setResult] = useState<ActionResult | null>(null);

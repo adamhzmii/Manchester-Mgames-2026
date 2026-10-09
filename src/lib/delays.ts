@@ -58,6 +58,21 @@ export function roundLate(minutes: number): number {
   return minutes < LATE_MIN ? 0 : Math.round(minutes / 5) * 5;
 }
 
+/**
+ * When a started game counts as having begun: its real kick-off, but never
+ * before its printed time or the time a coordinator set. A Start tapped
+ * early — by mistake, or a week early while trying the console out — must
+ * not make the court look ahead of itself and wipe out a delay everyone has
+ * already been told about. Games never begin before their time on the day.
+ */
+export function effectiveStart(f: Fixture): number {
+  const floor = Math.max(
+    Date.parse(f.scheduledTime),
+    f.plannedStart ? Date.parse(f.plannedStart) : -Infinity,
+  );
+  return f.startedAt ? Math.max(Date.parse(f.startedAt), floor) : floor;
+}
+
 /** Each court's games in the order they are played: printed time, then id. */
 export function gamesByCourt(fixtures: readonly Fixture[]): Map<string, Fixture[]> {
   const byCourt = new Map<string, Fixture[]>();
@@ -104,7 +119,7 @@ function nextKickoffs(byCourt: Map<string, Fixture[]>): Map<string, number> {
       if (earliest < Infinity) result.set(games[i].id, earliest);
       const g = games[i];
       if (g.status !== "upcoming") {
-        earliest = Math.min(earliest, Date.parse(g.startedAt ?? g.scheduledTime));
+        earliest = Math.min(earliest, effectiveStart(g));
       }
     }
   }
@@ -139,10 +154,13 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
     let end: number;
 
     if (f.status === "finished") {
-      const start = f.startedAt ? Date.parse(f.startedAt) : scheduled;
-      end = f.finishedAt ? Date.parse(f.finishedAt) : start + length;
+      const start = effectiveStart(f);
+      const finished = f.finishedAt ? Date.parse(f.finishedAt) : -Infinity;
+      // A whistle before the game could have begun (an early test tap) says
+      // nothing about when the court is free: assume it took its slot.
+      end = finished > start ? finished : start + length;
     } else if (f.status === "live") {
-      const start = f.startedAt ? Date.parse(f.startedAt) : scheduled;
+      const start = effectiveStart(f);
       // Past its slot it is overrunning: it ends no sooner than now. Unless
       // the court has already moved on to a later game.
       end = Math.min(Math.max(start + length, now), startedAfter.get(f.id) ?? Infinity);
@@ -273,7 +291,7 @@ export function courtStates(
         continue;
       }
       live ??= g;
-      const started = Date.parse(g.startedAt ?? g.scheduledTime);
+      const started = effectiveStart(g);
       const length = slot.get(g.id) ?? FALLBACK_SLOT_MIN * MINUTE;
       const minutes = Math.floor((now - started) / MINUTE);
       if (now - started > length * LONG_LIVE_FACTOR) {

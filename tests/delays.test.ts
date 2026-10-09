@@ -199,3 +199,29 @@ test("a court with a game left live behind a later one says so", () => {
   assert.deepEqual(court.alerts, [{ kind: "left-live", fixtureId: day[0].id }]);
   assert.equal(court.live?.id, day[1].id);
 });
+
+test("a start time set by a coordinator survives the game being started early", () => {
+  // Marked to start at 08:45, then Start tapped at 08:20 — by mistake, or days
+  // early while trying the console out. The court is still 15 behind.
+  const day = [
+    game("08:30", { status: "live", startedAt: at("08:20"), plannedStart: at("08:45") }),
+    game("08:45"),
+    game("09:00"),
+  ];
+  assert.deepEqual(late(day, "08:25"), [null, 15, 15]);
+});
+
+test("a game finished before it could have begun takes its slot", () => {
+  const day = [
+    game("08:30", {
+      status: "finished",
+      startedAt: "2026-10-09T10:00:00+01:00",
+      finishedAt: "2026-10-09T10:05:00+01:00",
+      plannedStart: at("08:45"),
+      scoreA: 21,
+      scoreB: 0,
+    }),
+    game("08:45"),
+  ];
+  assert.deepEqual(late(day, "07:00"), [null, 15]);
+});
