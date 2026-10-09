@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { AlertIcon, CheckIcon, ChevronRightIcon, ClockIcon } from "@/components/icons";
 import {
@@ -84,6 +84,16 @@ export function CourtSheet({
 
   const sport = picked ?? askedSport ?? storedSport ?? "all";
 
+  // The chosen sport in view: Pickleball, last of nine, otherwise sits off
+  // the edge of a phone and the sheet looks like the wrong sport.
+  const tabs = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const row = tabs.current;
+    const tab = row?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!row || !tab) return;
+    row.scrollTo({ left: Math.max(0, tab.offsetLeft - (row.clientWidth - tab.offsetWidth) / 2) });
+  }, [sport]);
+
   const fixtures = useMemo(() => applyOverrides(feed, overrides, now), [feed, overrides, now]);
   const expected = useMemo(
     () => (now === null ? new Map<string, Expected>() : expectedStarts(fixtures, now)),
@@ -157,7 +167,7 @@ export function CourtSheet({
           it ends. Times for every later game work themselves out.
         </p>
 
-        <div className={styles.sports} role="tablist" aria-label="Sport">
+        <div ref={tabs} className={styles.sports} role="tablist" aria-label="Sport">
           <button
             type="button"
             role="tab"
@@ -192,7 +202,9 @@ export function CourtSheet({
           <SportCourts
             key={sport}
             sport={sports.find((s) => s.slug === sport) ?? null}
-            states={states.filter((c) => c.games.some((g) => g.sportSlug === sport))}
+            states={states
+              .filter((c) => c.games.some((g) => g.sportSlug === sport))
+              .map((c) => scopeToSport(c, sport, expected))}
             fixtures={fixtures}
             expected={expected}
             recent={recent}
@@ -233,6 +245,32 @@ function applyOverrides(
 }
 
 // ------------------------------------------------------------ one sport ----
+
+/**
+ * A shared court seen by one sport's coordinators. Hall D is badminton's in
+ * the morning and pickleball's from 14:00: the pickleball sheet shows only
+ * pickleball's games there — a badminton game left unplayed is not their
+ * "up next". Times still come from the whole court, so a badminton overrun
+ * moves pickleball's first game. A game of the other sport still live on the
+ * court is caught by Start's own check.
+ */
+function scopeToSport(
+  court: CourtState,
+  sport: string,
+  expected: ReadonlyMap<string, Expected>,
+): CourtState {
+  const games = court.games.filter((g) => g.sportSlug === sport);
+  if (games.length === court.games.length) return court;
+  const next = games.find((g) => g.status === "upcoming") ?? null;
+  return {
+    ...court,
+    games,
+    live: court.live && court.live.sportSlug === sport ? court.live : null,
+    next,
+    lateMin: next ? (expected.get(next.id)?.lateMin ?? 0) : 0,
+    alerts: court.alerts.filter((a) => games.some((g) => g.id === a.fixtureId)),
+  };
+}
 
 function SportCourts({
   sport,
