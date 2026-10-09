@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { FIXTURE_SELECT, toFixture, type Fixture, type FixtureRow } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
@@ -8,7 +8,7 @@ import { londonDate, londonToIso } from "@/lib/london-time";
 import { notifyLateGames } from "@/lib/late-notify";
 import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "@/lib/reschedule";
 import { sendPush } from "@/lib/push/server";
-import { getCoordinator } from "@/lib/queries";
+import { TAG, getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { FixtureStatus } from "@/lib/supabase/types";
 
@@ -129,6 +129,9 @@ export async function updateFixtureScore(
  * server-rendered versions of the same pages honest.
  */
 function revalidateGames() {
+  // The shared fixture list first: without this a coordinator's own save
+  // could take a few seconds to show on the page they are looking at.
+  updateTag(TAG.fixtures);
   revalidatePath("/");
   revalidatePath("/schedule");
   revalidatePath("/standings");

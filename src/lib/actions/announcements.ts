@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { sendPush } from "@/lib/push/server";
-import { getCoordinator } from "@/lib/queries";
+import { TAG, getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { AnnouncementType } from "@/lib/supabase/types";
 
@@ -56,6 +56,7 @@ export async function postAnnouncement(
     };
   }
 
+  updateTag(TAG.announcements);
   revalidatePath("/");
   revalidatePath("/updates");
 

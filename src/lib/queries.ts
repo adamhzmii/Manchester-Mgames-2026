@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { PostgrestError } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 import {
@@ -14,6 +15,7 @@ import {
 import { applyDemo, demoAnnouncements, demoScenario } from "@/lib/demo";
 import { applyPreviewFixtures, applyPreviewStandings, applyPreviewTeams } from "@/lib/preview";
 import type { GroupMeta, TeamMeta } from "@/lib/standings";
+import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import type { Coordinator } from "@/lib/coordinator";
 import type { AnnouncementType } from "@/lib/supabase/types";
@@ -21,9 +23,10 @@ import type { AnnouncementType } from "@/lib/supabase/types";
 /**
  * Every read the app does, in one place.
  *
- * None of these are cached across requests. Scores and announcements change
- * during the event and a stale render is worse than an extra query against a
- * dataset this size; the pages that use them render dynamically on purpose.
+ * The public reads are shared across requests for a few seconds (see shared()
+ * below) and cleared the moment a coordinator saves, so a crowd opening pages
+ * costs the database one query every few seconds, not one per page view. The
+ * pages still render per request, so who is signed in is always current.
  *
  * The common reads are wrapped in React's cache(), which only memoises within
  * one request: a match page's generateMetadata and its body both need the
@@ -127,8 +130,41 @@ function unwrap<T>(
   return result.data;
 }
 
-export const getSports = cache(async function getSports(): Promise<Sport[]> {
-  const supabase = await createClient();
+/**
+ * What each shared read is tagged with, so a save can clear just its part.
+ * Coordinators' saves clear "fixtures" at once (see actions/fixtures.ts).
+ */
+export const TAG = {
+  fixtures: "fixtures",
+  announcements: "announcements",
+  teams: "teams",
+  setup: "setup",
+} as const;
+
+/** The fixture list is shared for this long: about the live feed's own lag. */
+const FIXTURES_SECONDS = 5;
+
+/**
+ * One read shared by every visitor for a few seconds, instead of one per page
+ * view. On event day hundreds of phones open pages, and each used to fetch the
+ * whole fixture list from the database itself — the free plan's monthly data
+ * allowance, spent in an afternoon. Shared across requests and servers (Next's
+ * data cache), and cleared the moment a coordinator saves.
+ *
+ * Only public data, read as an anonymous visitor would: whether someone is a
+ * coordinator is never cached (see getCoordinator).
+ */
+function shared<Args extends unknown[], T>(
+  key: string,
+  seconds: number,
+  tag: string,
+  read: (...args: Args) => Promise<T>,
+): (...args: Args) => Promise<T> {
+  return unstable_cache(read, ["mgames", key], { revalidate: seconds, tags: [tag] });
+}
+
+async function readSports(): Promise<Sport[]> {
+  const supabase = createPublicClient();
   const rows = unwrap(
     "sports",
     await supabase
@@ -137,10 +173,11 @@ export const getSports = cache(async function getSports(): Promise<Sport[]> {
       .order("sort_order"),
   );
   return rows;
-});
+}
+export const getSports = cache(shared("sports", 300, TAG.setup, readSports));
 
-export const getVenues = cache(async function getVenues(): Promise<Venue[]> {
-  const supabase = await createClient();
+async function readVenues(): Promise<Venue[]> {
+  const supabase = createPublicClient();
   const rows = unwrap(
     "venues",
     await supabase
@@ -157,16 +194,21 @@ export const getVenues = cache(async function getVenues(): Promise<Venue[]> {
     latitude: v.latitude,
     longitude: v.longitude,
   }));
-});
+}
+export const getVenues = cache(shared("venues", 300, TAG.setup, readVenues));
 
 /** Every fixture in the tournament, sorted live → upcoming → finished. */
-export const getFixtures = cache(async function getFixtures(): Promise<Fixture[]> {
-  const supabase = await createClient();
-  const rows = unwrap(
+const readFixtureRows = shared("fixtures", FIXTURES_SECONDS, TAG.fixtures, async () => {
+  const supabase = createPublicClient();
+  return unwrap(
     "fixtures",
     await supabase.from("fixtures").select(FIXTURE_SELECT).order("scheduled_time"),
-  );
-  return (await withDemo((rows as unknown as FixtureRow[]).map(toFixture))).sort(byRelevance);
+  ) as unknown as FixtureRow[];
+});
+
+export const getFixtures = cache(async function getFixtures(): Promise<Fixture[]> {
+  const rows = await readFixtureRows();
+  return (await withDemo(rows.map(toFixture))).sort(byRelevance);
 });
 
 /**
@@ -183,23 +225,9 @@ export async function withDemo(fixtures: Fixture[]): Promise<Fixture[]> {
 
 /** The "Happening now" rail on the home page. */
 export async function getLiveFixtures(): Promise<Fixture[]> {
-  // A rehearsal decides what is live in memory, so the database's own status
-  // column would disagree with it.
-  if (demoScenario()) {
-    return (await getFixtures())
-      .filter((f) => f.status === "live")
-      .sort(byKickoff);
-  }
-  const supabase = await createClient();
-  const rows = unwrap(
-    "live fixtures",
-    await supabase
-      .from("fixtures")
-      .select(FIXTURE_SELECT)
-      .eq("status", "live")
-      .order("scheduled_time"),
-  );
-  return (rows as unknown as FixtureRow[]).map(toFixture);
+  // From the shared list: no query of its own, and a rehearsal's in-memory
+  // results come along with it.
+  return (await getFixtures()).filter((f) => f.status === "live").sort(byKickoff);
 }
 
 export async function getFixturesForSport(sportSlug: string): Promise<Fixture[]> {
@@ -273,11 +301,11 @@ export async function getGroupsAndTeams(
  * couple of hundred rows, so they are loaded once and the tables are computed
  * in the browser.
  */
-export const getStandingsData = cache(async function getStandingsData(): Promise<{
+async function readStandingsData(): Promise<{
   groups: (GroupMeta & { sportSlug: string })[];
   teams: (TeamMeta & { sportSlug: string })[];
 }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const groupRows = unwrap(
     "groups",
@@ -324,7 +352,8 @@ export const getStandingsData = cache(async function getStandingsData(): Promise
       sportSlug: t.categories?.sports?.slug ?? "",
     })),
   });
-});
+}
+export const getStandingsData = cache(shared("standings", 60, TAG.teams, readStandingsData));
 
 /**
  * Every team, for the "My Games" picker and the coordinator's bracket-slot
@@ -333,8 +362,8 @@ export const getStandingsData = cache(async function getStandingsData(): Promise
  * team pools, and sport alone isn't a fine-grained enough filter to stop a
  * women's doubles team showing up as a candidate for a men's doubles slot.
  */
-export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
-  const supabase = await createClient();
+async function readTeams(): Promise<PickerTeam[]> {
+  const supabase = createPublicClient();
   const rows = unwrap(
     "teams",
     await supabase
@@ -375,19 +404,25 @@ export const getTeams = cache(async function getTeams(): Promise<PickerTeam[]> {
     sportColor: t.category?.sport?.color ?? "#3C2A6E",
     sportOrder: t.category?.sport?.sort_order ?? 0,
   })));
-});
+}
+export const getTeams = cache(shared("teams", 60, TAG.teams, readTeams));
 
 export async function getAnnouncements(limit?: number): Promise<Announcement[]> {
   const rehearsal = demoAnnouncements();
   if (rehearsal) return limit === undefined ? rehearsal : rehearsal.slice(0, limit);
+  return readAnnouncements(limit ?? null);
+}
 
-  const supabase = await createClient();
+const readAnnouncements = shared("announcements", 10, TAG.announcements, async function (
+  limit: number | null,
+): Promise<Announcement[]> {
+  const supabase = createPublicClient();
   let query = supabase
     .from("announcements")
     .select("id, type, title, body, published_at")
     .order("published_at", { ascending: false });
 
-  if (limit !== undefined) query = query.limit(limit);
+  if (limit !== null) query = query.limit(limit);
 
   const rows = unwrap("announcements", await query);
   return rows.map((a) => ({
@@ -397,10 +432,10 @@ export async function getAnnouncements(limit?: number): Promise<Announcement[]> 
     body: a.body,
     publishedAt: a.published_at,
   }));
-}
+});
 
-export async function getVendors(): Promise<Vendor[]> {
-  const supabase = await createClient();
+async function readVendors(): Promise<Vendor[]> {
+  const supabase = createPublicClient();
   const rows = unwrap(
     "vendors",
     await supabase
@@ -460,9 +495,10 @@ export async function getVendors(): Promise<Vendor[]> {
       })),
   }));
 }
+export const getVendors = shared("vendors", 300, TAG.setup, readVendors);
 
-export async function getCourts(): Promise<Court[]> {
-  const supabase = await createClient();
+async function readCourts(): Promise<Court[]> {
+  const supabase = createPublicClient();
   const rows = unwrap(
     "courts",
     await supabase
@@ -488,6 +524,7 @@ export async function getCourts(): Promise<Court[]> {
     sportCode: c.sport?.code ?? null,
   }));
 }
+export const getCourts = shared("courts", 300, TAG.setup, readCourts);
 
 /**
  * Who, if anyone, is signed in as a coordinator on this request.
