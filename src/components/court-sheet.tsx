@@ -122,10 +122,10 @@ export function CourtSheet({
           : change.status === "finished"
             ? `Finished ${before.teamA} ${change.scoreA}–${change.scoreB} ${before.teamB}.`
             : `Reset ${before.teamA} v ${before.teamB} to not started.`;
-      setRecent((list) => [
-        { fixtureId: before.id, from: before.status, to: change.status, at: Date.now(), text },
-        ...list.filter((r) => r.fixtureId !== before.id),
-      ]);
+      // Only the latest tap can be undone here: Undo is for "that was the
+      // wrong button", and a stack of them pushed the courts off screen.
+      // Anything older is put right from the game itself.
+      setRecent([{ fixtureId: before.id, from: before.status, to: change.status, at: Date.now(), text }]);
     } else if (before) {
       setRecent((list) => list.filter((r) => r.fixtureId !== before.id || r.to === change.status));
     }
