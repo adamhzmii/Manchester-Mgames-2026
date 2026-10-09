@@ -14,7 +14,25 @@ import { NextResponse, type NextRequest } from "next/server";
  * every page is public. Login only changes what the UI offers, and the real
  * enforcement is the RLS policy on `fixtures`, not anything decided here.
  */
+/**
+ * The first backup address, before the short one. Phones that last updated
+ * the site's worker before the change still send blocked visitors there —
+ * and on a network that blocks manchestermgames.com they can never fetch
+ * the newer worker — so the old address forwards everyone to the new one,
+ * keeping the page and its query (the followed teams ride along in it).
+ */
+const OLD_BACKUP_HOST = "manchester-mgames-2026.vercel.app";
+const BACKUP_HOST = "manchestermgames.vercel.app";
+
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.hostname === OLD_BACKUP_HOST) {
+    const to = request.nextUrl.clone();
+    to.protocol = "https";
+    to.hostname = BACKUP_HOST;
+    to.port = "";
+    return NextResponse.redirect(to, 308);
+  }
+
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
