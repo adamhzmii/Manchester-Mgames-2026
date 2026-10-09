@@ -198,6 +198,7 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       slotA: null,
       slotB: null,
       groupId: groupId(group),
+      groupName: `Group ${group}`,
     })),
     ...KNOCKOUTS.map(([time, pitch, stage, a, b]) => ({
       ...game(time, pitch, stage),
@@ -208,6 +209,7 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       slotA: a,
       slotB: b,
       groupId: null,
+      groupName: null,
     })),
   ];
 }

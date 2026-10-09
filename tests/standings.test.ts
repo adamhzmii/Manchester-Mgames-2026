@@ -39,6 +39,7 @@ function match(
     slotA: null,
     slotB: null,
     groupId: "g1",
+    groupName: "Group A",
     categoryId: "c1",
     categoryName: "Open",
     categorySlug: "open",

@@ -19,6 +19,7 @@ export const FIXTURE_SELECT = `
   placeholder_a,
   placeholder_b,
   group_id,
+  group:groups ( name ),
   team_a:teams!fixtures_team_a_id_fkey ( id, name ),
   team_b:teams!fixtures_team_b_id_fkey ( id, name ),
   category:categories ( id, name, slug, sport:sports ( id, slug, name, code, color, sort_order ) ),
@@ -40,6 +41,7 @@ export type FixtureRow = {
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
+  group: { name: string } | null;
   team_a: { id: string; name: string } | null;
   team_b: { id: string; name: string } | null;
   category: {
@@ -90,6 +92,8 @@ export type Fixture = {
   slotA: string | null;
   slotB: string | null;
   groupId: string | null;
+  /** "Group A", for a group game; null for a knockout. */
+  groupName: string | null;
   categoryId: string;
   categoryName: string;
   categorySlug: string;
@@ -171,6 +175,7 @@ export function toFixture(row: FixtureRow): Fixture {
     slotA: row.placeholder_a?.trim() || null,
     slotB: row.placeholder_b?.trim() || null,
     groupId: row.group_id,
+    groupName: row.group?.name ?? null,
     categoryId: row.category?.id ?? "",
     categoryName: row.category?.name ?? "",
     categorySlug: row.category?.slug ?? "",

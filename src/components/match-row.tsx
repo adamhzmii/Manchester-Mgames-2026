@@ -39,7 +39,13 @@ type MatchRowProps = {
  */
 export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRowProps) {
   const winner = winningSide(fixture);
-  const tag = STAGE_TAG[fixture.stage];
+  // Knockouts by round; group games by their group ("GRP A"), so a group
+  // game is never mistaken for a knockout one.
+  const tag =
+    STAGE_TAG[fixture.stage] ??
+    (fixture.stage === "group" && fixture.groupName
+      ? fixture.groupName.replace(/^Group\s+/i, "GRP ").toUpperCase()
+      : null);
   // Which competition, where a sport has several (badminton's MD, XD...).
   const code = categoryCode(fixture);
   const showScores = fixture.status !== "upcoming";

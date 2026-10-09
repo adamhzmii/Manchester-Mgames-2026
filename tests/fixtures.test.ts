@@ -27,6 +27,7 @@ function row(overrides: Partial<FixtureRow> = {}): FixtureRow {
     placeholder_a: null,
     placeholder_b: null,
     group_id: "g1",
+    group: { name: "Group A" },
     team_a: { id: "t1", name: "KL Tigers" },
     team_b: { id: "t2", name: "Melaka Mariners" },
     category: {
