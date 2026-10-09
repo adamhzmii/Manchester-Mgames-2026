@@ -454,6 +454,16 @@ function LiveGame({ fixture, onChange }: { fixture: Fixture; onChange: (change: 
         <SaveState keeper={keeper} />
       </div>
       <KickoffFix fixture={fixture} />
+      <button
+        type="button"
+        className={consoleStyles.reset}
+        onClick={() => {
+          if (!window.confirm("Reset this game to not started? Its score will be cleared.")) return;
+          keeper.reset();
+        }}
+      >
+        Started by mistake? Reset to not started
+      </button>
     </div>
   );
 }

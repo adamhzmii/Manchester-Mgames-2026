@@ -225,3 +225,21 @@ test("a game finished before it could have begun takes its slot", () => {
   ];
   assert.deepEqual(late(day, "07:00"), [null, 15]);
 });
+
+test("a game played after later ones on its court is still the one live", () => {
+  // The 12:20 game was played (and finished) first; the 09:00 one began after.
+  const day = [
+    game("09:00", { status: "live", startedAt: at("12:45") }),
+    game("12:20", {
+      status: "finished",
+      startedAt: at("12:20"),
+      finishedAt: at("12:40"),
+      scoreA: 1,
+      scoreB: 0,
+    }),
+  ];
+  const now = clock("12:50");
+  const [court] = courtStates(day, expectedStarts(day, now), now);
+  assert.equal(court.live?.id, day[0].id);
+  assert.deepEqual(court.alerts, []);
+});

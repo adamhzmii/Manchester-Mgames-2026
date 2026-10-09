@@ -107,21 +107,28 @@ export function slotLengths(fixtures: readonly Fixture[]): Map<string, number> {
 }
 
 /**
- * The earliest real kick-off of any later game on the same court. A game
- * still showing live after that has been left running by mistake: it ended
- * when the next one began.
+ * For a game still showing live: the start of a later game on the same court
+ * that was begun after it — which means the court has moved on and this one
+ * was left live by mistake (Finish never tapped).
+ *
+ * "After it" by when Start was really tapped, not by printed time: games
+ * played out of order (a test run, a court swap on the day) must not make
+ * the one actually being played look abandoned.
  */
 function nextKickoffs(byCourt: Map<string, Fixture[]>): Map<string, number> {
   const result = new Map<string, number>();
   for (const games of byCourt.values()) {
-    let earliest = Infinity;
-    for (let i = games.length - 1; i >= 0; i -= 1) {
-      if (earliest < Infinity) result.set(games[i].id, earliest);
-      const g = games[i];
-      if (g.status !== "upcoming") {
-        earliest = Math.min(earliest, effectiveStart(g));
+    games.forEach((g, i) => {
+      if (g.status !== "live") return;
+      const tapped = g.startedAt ? Date.parse(g.startedAt) : -Infinity;
+      let earliest = Infinity;
+      for (const later of games.slice(i + 1)) {
+        if (later.status === "upcoming" || !later.startedAt) continue;
+        if (Date.parse(later.startedAt) <= tapped) continue;
+        earliest = Math.min(earliest, effectiveStart(later));
       }
-    }
+      if (earliest < Infinity) result.set(g.id, earliest);
+    });
   }
   return result;
 }
@@ -262,8 +269,7 @@ const NOT_STARTED_ALERT_MIN = 15;
 
 /**
  * Each court as a coordinator needs it: what is on, what is next, how far
- * behind it is, and anything that looks wrong. Courts in the order their
- * first game is played.
+ * behind it is, and anything that looks wrong. Courts in name order.
  */
 export function courtStates(
   fixtures: readonly Fixture[],
@@ -322,5 +328,11 @@ export function courtStates(
     });
   }
 
-  return states;
+  // Fixed, natural order — Hall C1, C2 … C4, D1 — so the courts never
+  // shuffle as games start and finish.
+  return states.sort(
+    (a, b) =>
+      a.venueShortName.localeCompare(b.venueShortName) ||
+      a.courtName.localeCompare(b.courtName, undefined, { numeric: true }),
+  );
 }
