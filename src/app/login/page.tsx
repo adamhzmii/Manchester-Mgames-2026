@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { signOut } from "@/lib/actions/auth";
 import { getCoordinator } from "@/lib/queries";
@@ -30,8 +31,8 @@ export default async function LoginPage() {
           <div className={styles.signedIn}>
             <h1 className={styles.signedInTitle}>Signed in as {coordinator.name}</h1>
             <p className={styles.intro}>
-              You can edit every game, in every sport. Tap a game on the Schedule to score it, mark
-              it running late, or move it.
+              You can edit every game, in every sport. Start, score and finish games on the{" "}
+              <Link href="/coordinate">court sheet</Link>.
             </p>
             <form action={signOut}>
               <button type="submit" className={styles.signOut}>

@@ -202,9 +202,12 @@ export function KickoffCountdown({ fixture, className }: { fixture: Fixture; cla
   return <RelTime iso={iso} className={className} />;
 }
 
-/** Courts behind schedule right now, worst first — for the top of a list of games. */
-export function LateCourts({ className }: { className?: string }) {
-  const courts = useLateCourts();
+/**
+ * Courts behind schedule right now, worst first — for the top of a list of
+ * games. Narrowed to one sport where the list is one sport's.
+ */
+export function LateCourts({ className, sport }: { className?: string; sport?: string }) {
+  const courts = useLateCourts().filter((c) => !sport || c.sportSlug === sport);
   if (courts.length === 0) return null;
   return (
     <div className={`${styles.strip} ${className ?? ""}`} role="status">

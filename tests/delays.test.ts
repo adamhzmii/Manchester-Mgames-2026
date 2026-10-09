@@ -165,8 +165,8 @@ test("the courts running behind are listed worst first", () => {
   ];
   const expected = expectedStarts(day, clock("09:00"));
   assert.deepEqual(lateCourts(day, expected), [
-    { venueShortName: "Sugden", courtName: "Court 2", lateMin: 25 },
-    { venueShortName: "Trinity", courtName: "Pitch A", lateMin: 15 },
+    { venueShortName: "Sugden", courtName: "Court 2", lateMin: 25, sportSlug: "football" },
+    { venueShortName: "Trinity", courtName: "Pitch A", lateMin: 15, sportSlug: "football" },
   ]);
 });
 

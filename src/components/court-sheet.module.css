@@ -21,6 +21,41 @@
   color: var(--mg-ink);
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.accountName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mg-ink-3);
+}
+
+.signOut {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-card);
+  box-shadow: inset 0 0 0 1px var(--mg-line-2);
+  color: var(--mg-ink);
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .lede {
   font-size: 15px;
   line-height: 1.45;

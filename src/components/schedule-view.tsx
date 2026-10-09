@@ -9,19 +9,23 @@ import { FilterChips, type ChipOption } from "@/components/filter-chips";
 import { EditIcon, StarIcon } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
 import { TeamPicker } from "@/components/team-picker";
+import { signOut } from "@/lib/actions/auth";
 import type { Coordinator } from "@/lib/coordinator";
-import { byKickoff, type Fixture } from "@/lib/fixtures";
+import { SPORT_KEY, byKickoff, categoriesOf, type Fixture } from "@/lib/fixtures";
 import { formatHour, hourKey } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { arrivedByBackOrForward } from "@/lib/navigation";
-import type { PickerTeam, Sport, Venue } from "@/lib/queries";
+import type { PickerTeam, Sport } from "@/lib/queries";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
+import { useStored } from "@/lib/use-stored";
 
 import styles from "./schedule-view.module.css";
 
 export type ScheduleFilters = {
-  sport: string;
-  venue: string;
+  /** The sport asked for in the link, or null to open on the one last looked at. */
+  sport: string | null;
+  /** A category slug ("md"), for a sport played in several. */
+  category: string | null;
   mine: boolean;
   live: boolean;
 };
@@ -29,24 +33,28 @@ export type ScheduleFilters = {
 type ScheduleViewProps = {
   fixtures: Fixture[];
   sports: Sport[];
-  venues: Venue[];
   teams: PickerTeam[];
   coordinator: Coordinator | null;
   initialFilters: ScheduleFilters;
 };
 
 /**
- * The schedule: every game of the day, grouped by the hour it starts.
+ * The schedule: one sport's games, grouped by the hour they start.
  *
- * Filters live in the URL, so "football at Sugden" is a link someone can send
- * and the back button undoes a tap. Filtering is client-side over the whole
- * list — the tournament is a few dozen rows, and a round trip per chip on a
+ * One sport at a time, never all of them: every sport is its own day in its
+ * own venue, and three hundred games from eight of them in one list was
+ * noise to everyone. Badminton and pickleball narrow again to a category.
+ * "My games" is the one view across sports — the teams you follow, wherever
+ * they play.
+ *
+ * Filters live in the URL, so "badminton mixed doubles" is a link someone
+ * can send, and the sport is remembered on the phone for next time.
+ * Filtering is client-side over the whole list: a round trip per chip on a
  * crowded sports hall's wifi would make every tap feel broken.
  */
 export function ScheduleView({
   fixtures: initial,
   sports,
-  venues,
   teams,
   coordinator,
   initialFilters,
@@ -58,44 +66,62 @@ export function ScheduleView({
 
   const [filters, setFilters] = useState(initialFilters);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [storedSport, setStoredSport] = useStored(SPORT_KEY);
+
+  const known = (slug: string | null) => (slug && sports.some((s) => s.slug === slug) ? slug : null);
+  const sport = known(filters.sport) ?? known(storedSport) ?? sports[0]?.slug ?? "";
+
+  const sportFixtures = useMemo(() => fixtures.filter((f) => f.sportSlug === sport), [fixtures, sport]);
+  const categories = useMemo(() => categoriesOf(sportFixtures), [sportFixtures]);
+  const category =
+    categories.length > 1
+      ? (categories.find((c) => c.slug === filters.category) ?? categories[0])
+      : null;
 
   const update = (patch: Partial<ScheduleFilters>) => {
-    const next = { ...filters, ...patch };
+    const next = { ...filters, sport, ...patch };
+    if (patch.sport) {
+      setStoredSport(patch.sport);
+      if (patch.sport !== sport) next.category = null;
+    }
     setFilters(next);
     const params = new URLSearchParams();
-    if (next.sport !== "all") params.set("sport", next.sport);
-    if (next.venue !== "all") params.set("venue", next.venue);
-    if (next.mine) params.set("mine", "1");
+    if (next.mine) {
+      params.set("mine", "1");
+    } else {
+      if (next.sport) params.set("sport", next.sport);
+      if (next.category) params.set("cat", next.category);
+    }
     if (next.live) params.set("live", "1");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
   const sportOptions: ChipOption[] = useMemo(
-    () => [
-      { value: "all", label: "All sports" },
-      ...sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
-    ],
+    () => sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
     [sports],
   );
 
-  const liveCount = fixtures.filter((f) => f.status === "live").length;
+  // "My games" crosses sports; everything else is the sport (and category) chosen.
+  const scope = useMemo(
+    () =>
+      filters.mine
+        ? fixtures.filter(
+            (f) =>
+              (f.teamAId !== null && favourites.teamIds.includes(f.teamAId)) ||
+              (f.teamBId !== null && favourites.teamIds.includes(f.teamBId)),
+          )
+        : category
+          ? sportFixtures.filter((f) => f.categoryId === category.id)
+          : sportFixtures,
+    [filters.mine, fixtures, favourites.teamIds, category, sportFixtures],
+  );
+
+  const liveCount = scope.filter((f) => f.status === "live").length;
 
   const visible = useMemo(
-    () =>
-      fixtures.filter((f) => {
-        if (filters.sport !== "all" && f.sportSlug !== filters.sport) return false;
-        if (filters.venue !== "all" && f.venueSlug !== filters.venue) return false;
-        if (filters.live && f.status !== "live") return false;
-        if (filters.mine) {
-          const mine =
-            (f.teamAId !== null && favourites.teamIds.includes(f.teamAId)) ||
-            (f.teamBId !== null && favourites.teamIds.includes(f.teamBId));
-          if (!mine) return false;
-        }
-        return true;
-      }),
-    [fixtures, filters, favourites.teamIds],
+    () => (filters.live ? scope.filter((f) => f.status === "live") : scope),
+    [scope, filters.live],
   );
 
   /**
@@ -150,16 +176,13 @@ export function ScheduleView({
     }
   }, [nowKey]);
 
-  const filtered =
-    filters.sport !== "all" || filters.venue !== "all" || filters.mine || filters.live;
-
   return (
     <div className={styles.page}>
       <div className={`mg-wrap ${styles.head}`}>
         <div>
           <h1 className="mg-page-title">Schedule</h1>
           <p className={styles.sub}>
-            Saturday 24 October · {visible.length} of {fixtures.length} games
+            Saturday 24 October · {visible.length} {visible.length === 1 ? "game" : "games"}
           </p>
         </div>
         <button
@@ -181,12 +204,17 @@ export function ScheduleView({
           <p className={styles.coordinator}>
             <EditIcon size={16} />
             <span className={styles.coordinatorText}>
-              Signed in as {coordinator.name}. Tap a game to update its score.
+              Signed in as {coordinator.name}.{" "}
+              <Link href="/coordinate" className={styles.coordinatorLink}>
+                Court sheet
+              </Link>
             </span>
             {/* The way out on a borrowed or shared phone. */}
-            <Link href="/login" className={styles.coordinatorLink}>
-              Sign out
-            </Link>
+            <form action={signOut}>
+              <button type="submit" className={styles.coordinatorLink}>
+                Sign out
+              </button>
+            </form>
           </p>
         </div>
       ) : null}
@@ -195,26 +223,29 @@ export function ScheduleView({
         <FilterChips
           label="Sport"
           options={sportOptions}
-          value={filters.sport}
-          onChange={(sport) => update({ sport })}
+          // Nothing picked while "My games" shows every sport; a tap goes back to one.
+          value={filters.mine ? "" : sport}
+          onChange={(next) => update({ sport: next, mine: false })}
         />
       </div>
 
       <div className={`mg-wrap ${styles.secondary}`}>
-        <div className={styles.segment} role="radiogroup" aria-label="Venue">
-          {[{ slug: "all", shortName: "All" }, ...venues].map((v) => (
-            <button
-              key={v.slug}
-              type="button"
-              role="radio"
-              aria-checked={filters.venue === v.slug}
-              className={`${styles.segmentItem} ${filters.venue === v.slug ? styles.segmentOn : ""}`}
-              onClick={() => update({ venue: v.slug })}
-            >
-              {v.shortName}
-            </button>
-          ))}
-        </div>
+        {category && !filters.mine ? (
+          <div className={styles.categories} role="radiogroup" aria-label="Category">
+            {categories.map((c) => (
+              <button
+                key={c.slug}
+                type="button"
+                role="radio"
+                aria-checked={c.slug === category.slug}
+                className={`${styles.category} ${c.slug === category.slug ? styles.categoryOn : ""}`}
+                onClick={() => update({ category: c.slug })}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         {liveCount > 0 || filters.live ? (
           <button
@@ -228,19 +259,10 @@ export function ScheduleView({
           </button>
         ) : null}
 
-        {filtered ? (
-          <button
-            type="button"
-            className={styles.clear}
-            onClick={() => update({ sport: "all", venue: "all", mine: false, live: false })}
-          >
-            Clear
-          </button>
-        ) : null}
       </div>
 
       <div className="mg-wrap">
-        <LateCourts className={styles.late} />
+        <LateCourts className={styles.late} sport={filters.mine ? undefined : sport} />
       </div>
 
       <div className={`mg-wrap ${styles.blocks}`} ref={listRef}>
@@ -279,7 +301,7 @@ export function ScheduleView({
                 ? "You aren't following a team yet."
                 : filters.live
                   ? "Nothing is live with these filters right now."
-                  : "Try a different sport or venue."}
+                  : "No games here yet."}
             </p>
             {filters.mine && favourites.teamIds.length === 0 ? (
               <button type="button" className="mg-btn mg-btn-plum" onClick={() => setPickerOpen(true)}>

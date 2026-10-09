@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { ScheduleView, type ScheduleFilters } from "@/components/schedule-view";
-import { getCoordinator, getFixtures, getSports, getTeams, getVenues } from "@/lib/queries";
+import { getCoordinator, getFixtures, getSports, getTeams } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Schedule",
@@ -19,22 +19,22 @@ function one(value: string | string[] | undefined): string | undefined {
 export default async function SchedulePage({ searchParams }: PageProps<"/schedule">) {
   // One await for all of them: they are independent, and serialising them
   // would stack round trips before anything renders.
-  const [params, fixtures, sports, venues, teams, coordinator] = await Promise.all([
+  const [params, fixtures, sports, teams, coordinator] = await Promise.all([
     searchParams,
     getFixtures(),
     getSports(),
-    getVenues(),
     getTeams(),
     getCoordinator(),
   ]);
 
   // Read here rather than from useSearchParams in the browser, so the server
   // renders the filtered list a shared link asked for and hydration agrees.
+  // No sport in the link: the view opens on the one this phone last chose,
+  // or the first sport.
   const sport = one(params.sport);
-  const venue = one(params.venue);
   const initialFilters: ScheduleFilters = {
-    sport: sport && sports.some((s) => s.slug === sport) ? sport : "all",
-    venue: venue && venues.some((v) => v.slug === venue) ? venue : "all",
+    sport: sport && sports.some((s) => s.slug === sport) ? sport : null,
+    category: one(params.cat) ?? null,
     mine: one(params.mine) === "1",
     live: one(params.live) === "1",
   };
@@ -43,7 +43,6 @@ export default async function SchedulePage({ searchParams }: PageProps<"/schedul
     <ScheduleView
       fixtures={fixtures}
       sports={sports}
-      venues={venues}
       teams={teams}
       coordinator={coordinator}
       initialFilters={initialFilters}

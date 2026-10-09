@@ -1,19 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { Bracket } from "@/components/bracket";
 import { FilterChips, type ChipOption } from "@/components/filter-chips";
-import { TrophyIcon } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
-import { MedalTable } from "@/components/medal-table";
-import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
-import { byKickoff, type Fixture } from "@/lib/fixtures";
+import { SPORT_KEY, byKickoff, categoriesOf, type Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
-import { medalTable, podiums } from "@/lib/medals";
 import type { Sport } from "@/lib/queries";
 import {
   computeStandings,
@@ -24,6 +19,7 @@ import {
 } from "@/lib/standings";
 import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
+import { useStored } from "@/lib/use-stored";
 
 import styles from "./standings-view.module.css";
 
@@ -34,16 +30,19 @@ type StandingsViewProps = {
   sports: Sport[];
   groups: (GroupMeta & { sportSlug: string })[];
   standingTeams: (TeamMeta & { sportSlug: string })[];
-  initialSport: string;
+  /** The sport asked for in the link, or null to open on the one last looked at. */
+  initialSport: string | null;
   initialTab: StandingsTab | null;
   /** A category slug ("md"), for a sport played in several. */
   initialCategory: string | null;
 };
 
 /**
- * Who is winning: the overall medal table, and for each sport its group
- * tables, knockout bracket and every game. Selections live in the URL, so
- * "the netball bracket" is a link.
+ * Who is winning, one sport at a time: its group tables, knockout bracket
+ * and every game. No "all sports" view — each sport is its own competition,
+ * and the champions across them are on the home page once finals are
+ * played. Selections live in the URL, so "the netball bracket" is a link,
+ * and the sport is remembered on the phone for next time.
  */
 export function StandingsView({
   fixtures: initial,
@@ -59,12 +58,17 @@ export function StandingsView({
   const router = useRouter();
   const pathname = usePathname();
 
-  const [sport, setSport] = useState(initialSport);
+  const [asked, setAsked] = useState(initialSport);
   const [tab, setTab] = useState<StandingsTab | null>(initialTab);
   const [category, setCategory] = useState<string | null>(initialCategory);
+  const [storedSport, setStoredSport] = useStored(SPORT_KEY);
+
+  const known = (slug: string | null) => (slug && sports.some((s) => s.slug === slug) ? slug : null);
+  const sport = known(asked) ?? known(storedSport) ?? sports[0]?.slug ?? "";
 
   const go = (nextSport: string, nextTab: StandingsTab | null, nextCategory: string | null) => {
-    setSport(nextSport);
+    setAsked(nextSport);
+    setStoredSport(nextSport);
     setTab(nextTab);
     setCategory(nextCategory);
     const params = new URLSearchParams({ sport: nextSport });
@@ -77,27 +81,14 @@ export function StandingsView({
   // each with its own groups and bracket. Mixing them on one page put four
   // "Group A" tables side by side and joined four brackets into one.
   const sportFixtures = fixtures.filter((f) => f.sportSlug === sport);
-  const categories = [
-    ...new Map(
-      sportFixtures.map((f) => [
-        f.categorySlug,
-        { slug: f.categorySlug, id: f.categoryId, name: f.categoryName },
-      ]),
-    ).values(),
-  ];
-  // Doubles before singles, men's before women's: the order the sheet lists them.
-  const ORDER = ["md", "xd", "ms", "ws", "wd"];
-  categories.sort((a, b) => (ORDER.indexOf(a.slug) + 1 || 99) - (ORDER.indexOf(b.slug) + 1 || 99));
+  const categories = categoriesOf(sportFixtures);
   const current =
     categories.length > 1
       ? (categories.find((c) => c.slug === category) ?? categories[0])
       : null;
 
   const options: ChipOption[] = useMemo(
-    () => [
-      { value: "overall", label: "Overall" },
-      ...sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
-    ],
+    () => sports.map((s) => ({ value: s.slug, label: s.name, slug: s.slug })),
     [sports],
   );
 
@@ -136,9 +127,7 @@ export function StandingsView({
       ) : null}
 
       <div className={`mg-wrap ${styles.body}`}>
-        {sport === "overall" ? (
-          <Overall fixtures={fixtures} />
-        ) : (
+        {sports.some((s) => s.slug === sport) ? (
           <SportStandings
             key={`${sport}-${current?.slug ?? ""}`}
             sport={sports.find((s) => s.slug === sport)!}
@@ -153,50 +142,9 @@ export function StandingsView({
             tab={tab}
             onTab={(t) => go(sport, t, current?.slug ?? null)}
           />
-        )}
+        ) : null}
       </div>
     </div>
-  );
-}
-
-function Overall({ fixtures }: { fixtures: Fixture[] }) {
-  const list = podiums(fixtures);
-
-  return (
-    <>
-      <section className={styles.section}>
-        <h2 className={styles.title}>Medal table</h2>
-        <MedalTable rows={medalTable(list)} />
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles.title}>Champions</h2>
-        {list.length === 0 ? (
-          <p className={styles.empty}>Each sport&rsquo;s champion appears here as its final finishes.</p>
-        ) : (
-          <ul className={styles.champions}>
-            {list.map((p) => (
-              <li key={p.categoryId}>
-                <Link href={`/match/${p.final.id}`} className={styles.champion}>
-                  <SportBadge code={p.sportCode} color={p.sportColor} slug={p.sportSlug} size={30} />
-                  <span className={styles.championText}>
-                    <span className={styles.championSport}>{p.title}</span>
-                    <span className={styles.championName}>
-                      <TrophyIcon size={15} className={styles.cup} />
-                      {p.gold.name}
-                    </span>
-                    <span className={styles.championRest}>
-                      Runner-up {p.silver.name}
-                      {p.bronze ? ` · Bronze ${p.bronze.name}` : ""}
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </>
   );
 }
 

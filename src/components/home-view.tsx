@@ -304,7 +304,7 @@ function LiveNow({ fixtures }: { fixtures: Fixture[] }) {
   return (
     // "Live" in the header links here.
     <section className={styles.sLive} id="live">
-      <SectionHead title="Live now" count={live.length} href="/schedule?live=1" action="All live" />
+      <SectionHead title="Live now" count={live.length} href="/schedule" action="Schedule" />
       <div className={styles.boards}>
         {live.map((f) => (
           <LiveScoreboard key={f.id} fixture={f} />

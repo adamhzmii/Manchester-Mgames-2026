@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { StandingsView, type StandingsTab } from "@/components/standings-view";
-import { podiums } from "@/lib/medals";
 import { getFixtures, getSports, getStandingsData } from "@/lib/queries";
 
 export const metadata: Metadata = {
@@ -27,12 +26,10 @@ export default async function StandingsPage({ searchParams }: PageProps<"/standi
     getStandingsData(),
   ]);
 
-  // Opens on the medal table once there is one to show; before that, on the
-  // first sport, which is what people come here to look at.
+  // No sport in the link: the view opens on the one this phone last chose,
+  // or the first sport.
   const asked = one(params.sport);
-  const fallback = podiums(fixtures).length > 0 ? "overall" : (sports[0]?.slug ?? "overall");
-  const sport =
-    asked === "overall" || (asked && sports.some((s) => s.slug === asked)) ? asked : fallback;
+  const sport = asked && sports.some((s) => s.slug === asked) ? asked : null;
   const view = one(params.view);
 
   return (

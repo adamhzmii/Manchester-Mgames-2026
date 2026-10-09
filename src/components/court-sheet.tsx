@@ -17,6 +17,7 @@ import {
   type GameChange,
 } from "@/components/scorer-controls";
 import { SportBadge } from "@/components/sport-badge";
+import { signOut } from "@/lib/actions/auth";
 import type { ActionResult } from "@/lib/actions/fixtures";
 import { useMinute } from "@/lib/clock";
 import {
@@ -66,10 +67,13 @@ export function CourtSheet({
   initial,
   sports,
   askedSport,
+  signedInAs,
 }: {
   initial: Fixture[];
   sports: Sport[];
   askedSport: string | null;
+  /** The coordinator account's name; null in a local rehearsal. */
+  signedInAs: string | null;
 }) {
   const feed = useLiveFixtures(initial);
   const now = useMinute();
@@ -136,7 +140,18 @@ export function CourtSheet({
   return (
     <div className={styles.page}>
       <div className={`mg-wrap ${styles.top}`}>
-        <h1 className={styles.title}>Court sheet</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>Court sheet</h1>
+          {signedInAs ? (
+            // The way out on a borrowed or shared phone.
+            <form action={signOut} className={styles.account}>
+              <span className={styles.accountName}>{signedInAs}</span>
+              <button type="submit" className={styles.signOut}>
+                Sign out
+              </button>
+            </form>
+          ) : null}
+        </div>
         <p className={styles.lede}>
           Tap <strong>Start game</strong> when a game begins and <strong>Finish game</strong> when
           it ends. Times for every later game work themselves out.

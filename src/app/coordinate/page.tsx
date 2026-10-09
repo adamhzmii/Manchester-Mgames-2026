@@ -35,5 +35,12 @@ export default async function CoordinatePage({
   const asked = typeof params.sport === "string" ? params.sport : null;
   const sport = asked === "all" || sports.some((s) => s.slug === asked) ? asked : null;
 
-  return <CourtSheet initial={fixtures} sports={sports} askedSport={sport} />;
+  return (
+    <CourtSheet
+      initial={fixtures}
+      sports={sports}
+      askedSport={sport}
+      signedInAs={coordinator?.name ?? null}
+    />
+  );
 }

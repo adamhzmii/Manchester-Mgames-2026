@@ -180,7 +180,13 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
 }
 
 /** A court running behind, as the next game there shows it. */
-export type CourtDelay = { venueShortName: string; courtName: string; lateMin: number };
+export type CourtDelay = {
+  venueShortName: string;
+  courtName: string;
+  lateMin: number;
+  /** The sport of that next game. */
+  sportSlug: string;
+};
 
 export function lateCourts(
   fixtures: readonly Fixture[],
@@ -196,6 +202,7 @@ export function lateCourts(
       venueShortName: f.venueShortName,
       courtName: f.courtName,
       lateMin: expected.get(f.id)?.lateMin ?? 0,
+      sportSlug: f.sportSlug,
     }))
     .filter((c) => c.lateMin > 0)
     .sort((a, b) => b.lateMin - a.lateMin);

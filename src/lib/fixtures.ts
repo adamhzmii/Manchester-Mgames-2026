@@ -253,3 +253,29 @@ export function filterFixtures(
 export function categoryCode(f: Pick<Fixture, "categorySlug">): string | null {
   return f.categorySlug && f.categorySlug !== "open" ? f.categorySlug.toUpperCase() : null;
 }
+
+export type CategoryOption = { slug: string; id: string; name: string };
+
+/** Doubles before singles, men's before women's: the order the sheet lists them. */
+const CATEGORY_ORDER = ["md", "xd", "ms", "ws", "wd"];
+
+/**
+ * The categories among some fixtures — one sport's, usually. Badminton is
+ * four competitions (men's doubles, mixed, singles, women's) and pickleball
+ * two, each with its own groups and bracket; every other sport is one.
+ */
+export function categoriesOf(fixtures: readonly Fixture[]): CategoryOption[] {
+  const found = new Map<string, CategoryOption>();
+  for (const f of fixtures) {
+    if (!found.has(f.categorySlug)) {
+      found.set(f.categorySlug, { slug: f.categorySlug, id: f.categoryId, name: f.categoryName });
+    }
+  }
+  return [...found.values()].sort(
+    (a, b) =>
+      (CATEGORY_ORDER.indexOf(a.slug) + 1 || 99) - (CATEGORY_ORDER.indexOf(b.slug) + 1 || 99),
+  );
+}
+
+/** Where the schedule and standings remember the sport someone last looked at. */
+export const SPORT_KEY = "mgames26:sport";
