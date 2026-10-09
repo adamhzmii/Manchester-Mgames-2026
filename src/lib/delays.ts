@@ -30,7 +30,10 @@ import { feederGame } from "@/lib/slots";
 export type Expected = {
   /** When the game should now kick off, in ms. */
   at: number;
-  /** How far behind its printed time, in minutes, rounded to 5. 0 when on time. */
+  /**
+   * How far behind its printed time, in minutes: rounded to 5 for the site's
+   * estimates, exact for a time a coordinator set. 0 when on time.
+   */
   lateMin: number;
   /** When it became due: its time, a coordinator's, or the court coming free. */
   due: number;
@@ -197,7 +200,13 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
       const start = overdue ? now : due;
       expected.set(f.id, {
         at: start,
-        lateMin: roundLate((start - scheduled) / MINUTE),
+        // A time a coordinator typed is shown as typed — "11:54", not the
+        // nearest five. The site's own guesses are rounded: "+25" claims no
+        // more precision than an estimate has.
+        lateMin:
+          planned && !overdue
+            ? Math.max(0, Math.round((start - scheduled) / MINUTE))
+            : roundLate((start - scheduled) / MINUTE),
         due,
         overdue,
         planned,

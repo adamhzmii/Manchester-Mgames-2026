@@ -297,3 +297,9 @@ test("a court set back to its printed time is on time, before and after Start", 
   const started = [...before.slice(0, 2), { ...before[2], status: "live" as const, startedAt: "2026-10-09T12:00:00+01:00" }, before[3]];
   assert.deepEqual(late(started, "07:00"), [null, null, null, 0]);
 });
+
+test("a start time a coordinator types shows exactly, not rounded", () => {
+  const day = [game("11:30", { plannedStart: at("11:54") }), game("11:45")];
+  // 24 minutes, as set; the game after is the site's estimate, to the nearest 5.
+  assert.deepEqual(late(day, "07:00"), [24, 25]);
+});
