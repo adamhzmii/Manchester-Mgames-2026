@@ -232,8 +232,18 @@ export default async function InfoPage() {
         </div>
       </section>
 
+      <Link href="/committee" className={styles.handbook}>
+        <span className={styles.handbookIcon}>
+          <ChevronRightIcon size={22} />
+        </span>
+        <span className={styles.handbookText}>
+          <span className={styles.handbookTitle}>Meet the committee</span>
+          <span className={styles.handbookSub}>The MSSM team behind MGames 2026</span>
+        </span>
+      </Link>
+
       <p className={styles.staff}>
-        On the committee? <Link href="/login">Coordinator sign-in</Link>
+        On the committee? <Link href="/coordinate">Coordinator sign-in</Link>
       </p>
     </div>
   );

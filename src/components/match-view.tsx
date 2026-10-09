@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   CalendarPlusIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
   ClockIcon,
-  FoodIcon,
   PinIcon,
   ShareIcon,
   StarIcon,
@@ -27,7 +25,7 @@ import { useLiveFixtures } from "@/lib/live-feed";
 import { winningSide } from "@/lib/matchday";
 import { nextGames } from "@/lib/progression";
 import { roundGames } from "@/lib/slots";
-import type { Court, PickerTeam, Vendor, Venue } from "@/lib/queries";
+import type { Court, PickerTeam, Venue } from "@/lib/queries";
 import {
   computeStandings,
   type GroupMeta,
@@ -37,7 +35,6 @@ import {
 import { firstKnockoutRound, throughLine } from "@/lib/tournament-format";
 import { canGoBackInSite } from "@/lib/navigation";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
-import { walkMinutes } from "@/lib/walking";
 
 import styles from "./match-view.module.css";
 
@@ -48,7 +45,6 @@ type MatchViewProps = {
   groups: (GroupMeta & { sportSlug: string })[];
   standingTeams: (TeamMeta & { sportSlug: string })[];
   venues: Venue[];
-  vendors: Vendor[];
   /** Every court, for moving a game — only fetched for coordinators. */
   courts: Court[];
   canEdit: boolean;
@@ -69,7 +65,6 @@ export function MatchView({
   groups,
   standingTeams,
   venues,
-  vendors,
   courts,
   canEdit,
 }: MatchViewProps) {
@@ -238,13 +233,6 @@ export function MatchView({
             Share
           </ShareButton>
         </div>
-
-        <FoodNearby
-          venue={venue}
-          venueName={fixture.venueShortName}
-          venues={venues}
-          vendors={vendors}
-        />
 
         {canEdit ? (
           <ScoreConsole
@@ -443,78 +431,6 @@ function NextRound({
 /** "Johor Warriors' day", "KL Tigers' day", "Penang's day". */
 function possessive(name: string): string {
   return /s$/i.test(name) ? `${name}\u2019` : `${name}\u2019s`;
-}
-
-/**
- * The stalls in the building this game is in. Someone waiting for kick-off is
- * the stalls' best customer, and is already standing a corridor away.
- */
-function FoodNearby({
-  venue,
-  venueName,
-  venues,
-  vendors,
-}: {
-  venue: Venue | undefined;
-  venueName: string;
-  venues: Venue[];
-  vendors: Vendor[];
-}) {
-  if (!venue) return null;
-  const here = vendors.filter((v) => v.venueSlug === venue.slug);
-
-  // No stalls in this building (Denmark Road): point at the nearest ones,
-  // since a player between games will want to know before they set off.
-  if (here.length === 0) {
-    const nearest = venues
-      .filter((v) => v.slug !== venue.slug && vendors.some((s) => s.venueSlug === v.slug))
-      .map((v) => ({ v, minutes: walkMinutes(venue, v) }))
-      .sort((a, b) => (a.minutes ?? Infinity) - (b.minutes ?? Infinity))[0];
-    // Stalls not placed at any venue yet: still worth a pointer to them.
-    if (!nearest) {
-      if (vendors.length === 0) return null;
-      return (
-        <Link href="/food" className={styles.food}>
-          <span className={styles.foodIcon} aria-hidden="true">
-            <FoodIcon size={20} />
-          </span>
-          <span className={styles.foodText}>
-            <span className={styles.foodTitle}>Hungry? {vendors.length} food stalls today</span>
-            <span className={styles.foodNames}>{vendors.map((v) => v.name).join(" · ")}</span>
-          </span>
-          <ChevronRightIcon size={18} className={styles.foodChevron} />
-        </Link>
-      );
-    }
-    return (
-      <Link href={`/food?venue=${nearest.v.slug}`} className={styles.food}>
-        <span className={styles.foodIcon} aria-hidden="true">
-          <FoodIcon size={20} />
-        </span>
-        <span className={styles.foodText}>
-          <span className={styles.foodTitle}>No food at {venueName}</span>
-          <span className={styles.foodNames}>
-            Nearest stalls at {nearest.v.shortName}
-            {nearest.minutes !== null ? `, about ${nearest.minutes} min walk` : ""}
-          </span>
-        </span>
-        <ChevronRightIcon size={18} className={styles.foodChevron} />
-      </Link>
-    );
-  }
-
-  return (
-    <Link href={`/food?venue=${venue.slug}`} className={styles.food}>
-      <span className={styles.foodIcon} aria-hidden="true">
-        <FoodIcon size={20} />
-      </span>
-      <span className={styles.foodText}>
-        <span className={styles.foodTitle}>Hungry? Food at {venueName}</span>
-        <span className={styles.foodNames}>{here.map((v) => v.name).join(" · ")}</span>
-      </span>
-      <ChevronRightIcon size={18} className={styles.foodChevron} />
-    </Link>
-  );
 }
 
 /**

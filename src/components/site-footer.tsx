@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/food", label: "Food & drink" },
   { href: "/updates", label: "Updates" },
   { href: "/info", label: "Info & help" },
+  { href: "/committee", label: "Committee" },
 ] as const;
 
 export function SiteFooter() {

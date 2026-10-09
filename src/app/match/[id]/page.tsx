@@ -11,7 +11,6 @@ import {
   getFixtures,
   getStandingsData,
   getTeams,
-  getVendors,
   getVenues,
 } from "@/lib/queries";
 
@@ -31,13 +30,12 @@ export async function generateMetadata({ params }: PageProps<"/match/[id]">): Pr
 
 export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
   const { id } = await params;
-  const [fixtures, teams, standings, venues, coordinator, vendors] = await Promise.all([
+  const [fixtures, teams, standings, venues, coordinator] = await Promise.all([
     getFixtures(),
     getTeams(),
     getStandingsData(),
     getVenues(),
     getCoordinator(),
-    getVendors(),
   ]);
   const canEdit = coordinatorCanEdit(coordinator) || demoScorer();
   // Only the scorer's "Move this game" needs the courts.
@@ -54,7 +52,6 @@ export default async function MatchPage({ params }: PageProps<"/match/[id]">) {
       groups={standings.groups}
       standingTeams={standings.teams}
       venues={venues}
-      vendors={vendors}
       courts={courts}
       canEdit={canEdit}
     />
