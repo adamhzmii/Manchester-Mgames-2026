@@ -30,7 +30,7 @@ test("a grouped sport explains groups, points, qualifying and knockouts", () => 
   assert.deepEqual(format.rounds, ["Semi-finals", "Final"]);
 });
 
-test("a single group says so, with the court sports' two points for a win", () => {
+test("a single group says so", () => {
   const groups = [{ id: "g", name: "Group A", sortOrder: 1, categoryId: "c", sportSlug: "netball" }];
   const teams = [1, 2, 3, 4].map((n) => ({ id: `n${n}`, name: `n${n}`, groupId: "g", sportSlug: "netball" }));
   const fixtures = [
@@ -41,7 +41,7 @@ test("a single group says so, with the court sports' two points for a win", () =
   const format = describeFormat("netball", fixtures, groups, teams);
   assert.deepEqual(format.lines, [
     "One group of 4, everyone plays everyone.",
-    "2 points for a win, 1 for a draw.",
+    "3 points for a win, 1 for a draw.",
     "Top 2 go through to the semi-finals.",
   ]);
 });

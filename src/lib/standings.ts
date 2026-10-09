@@ -9,17 +9,12 @@ import { DEFAULT_PLACES, qualification } from "@/lib/slots";
  */
 
 /**
- * Points per win differ by sport: football runs 3-1-0, the court sports run
- * 2-1-0. Keyed by sport slug so adding a sport is a one-line change; anything
- * unlisted falls back to 3-1-0.
+ * Points for a win and a draw, by sport. The committee's 2026 fixture sheet
+ * gives every sport 3 for a win, 1 for a draw and none for a loss; a sport
+ * that ever needs its own goes here, keyed by slug. Anything unlisted gets
+ * 3-1-0.
  */
-const POINTS_RULES: Record<string, { win: number; draw: number }> = {
-  football: { win: 3, draw: 1 },
-  basketball: { win: 2, draw: 1 },
-  netball: { win: 2, draw: 1 },
-  volleyball: { win: 2, draw: 1 },
-  frisbee: { win: 2, draw: 1 },
-};
+const POINTS_RULES: Record<string, { win: number; draw: number }> = {};
 
 const DEFAULT_POINTS = { win: 3, draw: 1 };
 

@@ -84,10 +84,10 @@ test("football tables use three points for a win", () => {
   );
 });
 
-test("court sports use two points for a win", () => {
+test("court sports use three points for a win too, as the 2026 sheet has it", () => {
   const [group] = computeStandings(footballGroupA(), [GROUP], TEAMS, "basketball");
   const kl = group.rows.find((r) => r.teamName === "KL Tigers")!;
-  assert.equal(kl.points, 6);
+  assert.equal(kl.points, 9);
 });
 
 test("the top two of a group are flagged as qualifying", () => {
