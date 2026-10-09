@@ -17,6 +17,7 @@ import {
 import {
   assignFixtureTeam,
   moveFixture,
+  unassignFixtureTeam,
   type ActionResult,
   type AssignTeamState,
 } from "@/lib/actions/fixtures";
@@ -164,6 +165,8 @@ export function ScoreConsole({
         </>
       )}
 
+      {fixture.status === "upcoming" ? <ClearSlots fixture={fixture} /> : null}
+
       {/* Timing works whether or not the slots are filled: a semi-final can
           be running late, or move court, before anyone knows who plays. */}
       {fixture.status === "upcoming" ? (
@@ -175,6 +178,51 @@ export function ScoreConsole({
         <KickoffFix fixture={fixture} />
       )}
     </section>
+  );
+}
+
+/**
+ * "Assigned the wrong team?" — takes a team back out of a knockout slot so
+ * it can be filled again. Only before kick-off, and only for sides drawn as
+ * slots; the server checks both again.
+ */
+function ClearSlots({ fixture }: { fixture: Fixture }) {
+  const [result, setResult] = useState<ActionResult | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const sides = (
+    [
+      { slot: "a", label: fixture.slotA, team: fixture.teamAId ? fixture.teamA : null },
+      { slot: "b", label: fixture.slotB, team: fixture.teamBId ? fixture.teamB : null },
+    ] as const
+  ).filter((side) => side.label && side.team);
+  if (sides.length === 0) return null;
+
+  return (
+    <div className={styles.tool}>
+      <p className={styles.toolTitle}>Wrong team?</p>
+      {sides.map((side) => (
+        <div key={side.slot} className={styles.timeRow}>
+          <span className={styles.toolNote}>
+            <strong>{side.team}</strong> is in as {side.label}.
+          </span>
+          <button
+            type="button"
+            className={`mg-btn ${styles.secondary}`}
+            disabled={pending}
+            onClick={() => {
+              if (!window.confirm(`Take ${side.team} out of "${side.label}"? You can then assign the right team.`)) return;
+              startTransition(async () =>
+                setResult(await safely(() => unassignFixtureTeam(fixture.id, side.slot))),
+              );
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      ))}
+      <Result result={result} />
+    </div>
   );
 }
 

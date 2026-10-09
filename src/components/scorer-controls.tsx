@@ -438,7 +438,11 @@ export function ChangeTime({
   const fromFeed = useKickoff(fixture);
   const { iso, lateMin } = kickoff ?? fromFeed;
   const [open, setOpen] = useState(!compact);
-  const [time, setTime] = useState(formatTime(iso));
+  // Null until someone types: the box follows the time phones show, which
+  // moves as the court slips.
+  const [typed, setTyped] = useState<string | null>(null);
+  const time = typed ?? formatTime(iso);
+  const setTime = setTyped;
   const [result, setResult] = useState<ActionResult | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -464,7 +468,7 @@ export function ChangeTime({
           type="button"
           className={`mg-btn ${styles.secondary}`}
           onClick={() => {
-            setTime(shown);
+            setTyped(null);
             setResult(null);
             setOpen(true);
           }}

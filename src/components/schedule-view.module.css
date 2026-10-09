@@ -316,3 +316,23 @@
 .coordinator form {
   display: contents;
 }
+
+/* Courts and pitches: one row that scrolls sideways, however many there are. */
+.courts {
+  display: flex;
+  flex: 1 0 100%;
+  gap: 6px;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding-inline: var(--mg-gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.courts::-webkit-scrollbar {
+  display: none;
+}
+
+.courts .category {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}

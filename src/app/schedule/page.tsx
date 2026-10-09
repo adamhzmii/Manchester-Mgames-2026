@@ -35,6 +35,7 @@ export default async function SchedulePage({ searchParams }: PageProps<"/schedul
   const initialFilters: ScheduleFilters = {
     sport: sport && sports.some((s) => s.slug === sport) ? sport : null,
     category: one(params.cat) ?? null,
+    court: one(params.court) ?? null,
     mine: one(params.mine) === "1",
     live: one(params.live) === "1",
   };

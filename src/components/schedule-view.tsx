@@ -26,6 +26,8 @@ export type ScheduleFilters = {
   sport: string | null;
   /** A category slug ("md"), for a sport played in several. */
   category: string | null;
+  /** One court or pitch, by id; null for all of the sport's. */
+  court: string | null;
   mine: boolean;
   live: boolean;
 };
@@ -82,7 +84,10 @@ export function ScheduleView({
     const next = { ...filters, sport, ...patch };
     if (patch.sport) {
       setStoredSport(patch.sport);
-      if (patch.sport !== sport) next.category = null;
+      if (patch.sport !== sport) {
+        next.category = null;
+        next.court = null;
+      }
     }
     setFilters(next);
     const params = new URLSearchParams();
@@ -91,6 +96,7 @@ export function ScheduleView({
     } else {
       if (next.sport) params.set("sport", next.sport);
       if (next.category) params.set("cat", next.category);
+      if (next.court) params.set("court", next.court);
     }
     if (next.live) params.set("live", "1");
     const query = params.toString();
@@ -102,7 +108,23 @@ export function ScheduleView({
     [sports],
   );
 
-  // "My games" crosses sports; everything else is the sport (and category) chosen.
+  const categoryFixtures = useMemo(
+    () => (category ? sportFixtures.filter((f) => f.categoryId === category.id) : sportFixtures),
+    [category, sportFixtures],
+  );
+
+  // The courts and pitches this sport (and category) is played on, in order:
+  // Pitch A before Pitch B, Hall C2 before Hall C10.
+  const courts = useMemo(() => {
+    const found = new Map<string, string>();
+    for (const f of categoryFixtures) {
+      if (f.courtId && f.courtName !== "TBC") found.set(f.courtId, f.courtName);
+    }
+    return [...found].sort(([, a], [, b]) => a.localeCompare(b, undefined, { numeric: true }));
+  }, [categoryFixtures]);
+  const court = courts.some(([id]) => id === filters.court) ? filters.court : null;
+
+  // "My games" crosses sports; everything else is the sport, category and court chosen.
   const scope = useMemo(
     () =>
       filters.mine
@@ -111,10 +133,10 @@ export function ScheduleView({
               (f.teamAId !== null && favourites.teamIds.includes(f.teamAId)) ||
               (f.teamBId !== null && favourites.teamIds.includes(f.teamBId)),
           )
-        : category
-          ? sportFixtures.filter((f) => f.categoryId === category.id)
-          : sportFixtures,
-    [filters.mine, fixtures, favourites.teamIds, category, sportFixtures],
+        : court
+          ? categoryFixtures.filter((f) => f.courtId === court)
+          : categoryFixtures,
+    [filters.mine, fixtures, favourites.teamIds, court, categoryFixtures],
   );
 
   const liveCount = scope.filter((f) => f.status === "live").length;
@@ -247,6 +269,26 @@ export function ScheduleView({
           </div>
         ) : null}
 
+        {courts.length > 1 && !filters.mine ? (
+          <div className={styles.courts} role="radiogroup" aria-label="Court">
+            {[["", "All courts"] as const, ...courts].map(([id, name]) => {
+              const on = (court ?? "") === id;
+              return (
+                <button
+                  key={id || "all"}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  className={`${styles.category} ${on ? styles.categoryOn : ""}`}
+                  onClick={() => update({ court: id || null })}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
         {liveCount > 0 || filters.live ? (
           <button
             type="button"
@@ -262,7 +304,11 @@ export function ScheduleView({
       </div>
 
       <div className="mg-wrap">
-        <LateCourts className={styles.late} sport={filters.mine ? undefined : sport} />
+        <LateCourts
+          className={styles.late}
+          sport={filters.mine ? undefined : sport}
+          court={filters.mine ? undefined : courts.find(([id]) => id === court)?.[1]}
+        />
       </div>
 
       <div className={`mg-wrap ${styles.blocks}`} ref={listRef}>

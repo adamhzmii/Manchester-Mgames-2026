@@ -248,6 +248,38 @@ export async function assignFixtureTeam(
   return { status: "success", message: "Team assigned." };
 }
 
+/**
+ * Takes a team back out of a knockout slot — for one assigned by mistake.
+ * Only before the game starts (after that the score belongs to those two
+ * teams), and only for a side drawn as a slot ("Winner QF1"), so a game
+ * entered by team name can't be emptied.
+ */
+export async function unassignFixtureTeam(fixtureId: string, slot: "a" | "b"): Promise<ActionResult> {
+  if (slot !== "a" && slot !== "b") return { ok: false, message: "Invalid slot." };
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status !== "upcoming") {
+    return { ok: false, message: "This game has started, so its teams can't change. Reset it to not started first." };
+  }
+  const label = slot === "a" ? game.slotA : game.slotB;
+  if (!label) return { ok: false, message: "This side isn't a knockout slot." };
+
+  const { data, error } = await supabase
+    .from("fixtures")
+    .update(slot === "a" ? { team_a_id: null } : { team_b_id: null })
+    .eq("id", fixtureId)
+    .eq("status", "upcoming")
+    .select("id");
+  if (error) return { ok: false, message: `Could not save: ${error.message}` };
+  if (!data || data.length === 0) return SIGNED_OUT;
+
+  revalidateGames();
+  return { ok: true, message: `Cleared. "${label}" is open to assign again.` };
+}
+
 // ------------------------------------------------------------- running late
 
 export type ActionResult = { ok: boolean; message: string };
