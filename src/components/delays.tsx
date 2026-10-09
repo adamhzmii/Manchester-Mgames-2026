@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 
+import { ClockIcon } from "@/components/icons";
 import { RelTime } from "@/components/rel-time";
 import { useMinute } from "@/lib/clock";
 import { expectedStarts, type Expected } from "@/lib/delays";
@@ -100,8 +101,9 @@ export function queueText(fixture: Fixture, ahead: number, overdue: boolean): st
 
 /**
  * Two quiet lines under a game's time, for the places someone checks before
- * walking over: the printed time, where the game has moved from it (so the
- * time on their schedule from last week still makes sense), and on the day
+ * walking over: "Delayed 30 min · was 10:00" where it has moved (small and
+ * warm — the one place a delay is said, since lists just show the time),
+ * and on the day
  * where it is in its court's queue — "2 games before this one on Hall B".
  * The queue is the line to trust: an estimate can be wrong, the order of
  * games on a court cannot.
@@ -128,8 +130,9 @@ export function LateNote({
   return (
     <span className={`${styles.timing} ${className ?? ""}`}>
       {lateMin > 0 ? (
-        <span className={`${styles.queue} ${onNight ? styles.queueNight : ""}`}>
-          Printed time {formatTime(fixture.scheduledTime)}
+        <span className={`${styles.delayed} ${onNight ? styles.delayedNight : ""}`}>
+          <ClockIcon size={13} />
+          Delayed {lateMin} min · was {formatTime(fixture.scheduledTime)}
         </span>
       ) : null}
       {showQueue ? (

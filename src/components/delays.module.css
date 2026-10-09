@@ -113,3 +113,17 @@
   font-weight: 800;
   color: var(--mg-late);
 }
+
+/* "Delayed 30 min · was 10:00": noticeable, not alarming. */
+.delayed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mg-late);
+}
+
+.delayedNight {
+  color: var(--mg-late-night);
+}

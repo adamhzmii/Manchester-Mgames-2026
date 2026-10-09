@@ -375,3 +375,17 @@
   flex: 0 0 auto;
   color: var(--mg-gold-ink);
 }
+
+/* A moved kick-off, said once and quietly: warm, not alarm-red. */
+.factDelay {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mg-late);
+}
+
+@media (prefers-color-scheme: dark) {
+  .factDelay {
+    color: var(--mg-late-night);
+  }
+}

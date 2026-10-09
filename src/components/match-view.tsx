@@ -15,7 +15,7 @@ import {
   TrophyIcon,
 } from "@/components/icons";
 import { MatchList, MatchRow } from "@/components/match-row";
-import { KickoffCountdown, KickoffTime, LateNote } from "@/components/delays";
+import { KickoffCountdown, KickoffTime, LateNote, useKickoff } from "@/components/delays";
 import { Score } from "@/components/score";
 import { ScoreConsole } from "@/components/score-console";
 import { ShareButton } from "@/components/share-button";
@@ -195,18 +195,7 @@ export function MatchView({
         <div className={styles.facts}>
           <div className={styles.fact}>
             <ClockIcon size={20} className={styles.factIcon} />
-            <div>
-              <p className={styles.factMain}>
-                {formatDay(fixture.scheduledTime)} · {formatTime(fixture.scheduledTime)}
-              </p>
-              <p className={styles.factSub}>
-                {fixture.status === "upcoming"
-                  ? "Be courtside 10 minutes before kick-off."
-                  : fixture.status === "live"
-                    ? `In progress now${fixture.startedAt ? ` · kicked off ${formatTime(fixture.startedAt)}` : ""}.`
-                    : "Played."}
-              </p>
-            </div>
+            <WhenFact fixture={fixture} />
           </div>
 
           <div className={styles.fact}>
@@ -525,5 +514,34 @@ function FoodNearby({
       </span>
       <ChevronRightIcon size={18} className={styles.foodChevron} />
     </Link>
+  );
+}
+
+/**
+ * When the game is: the time it is now expected at, the same as the big one
+ * above — and if that has moved, a plain sentence saying from when and why.
+ * The one place a delay is spelled out; lists just show the time.
+ */
+function WhenFact({ fixture }: { fixture: Fixture }) {
+  const { iso, lateMin } = useKickoff(fixture);
+  const delayed = fixture.status === "upcoming" && lateMin > 0;
+  return (
+    <div>
+      <p className={styles.factMain}>
+        {formatDay(fixture.scheduledTime)} · {formatTime(delayed ? iso : fixture.scheduledTime)}
+      </p>
+      {delayed ? (
+        <p className={styles.factDelay}>
+          Delayed from {formatTime(fixture.scheduledTime)} — {fixture.courtName} is running behind.
+        </p>
+      ) : null}
+      <p className={styles.factSub}>
+        {fixture.status === "upcoming"
+          ? "Be courtside 10 minutes before kick-off."
+          : fixture.status === "live"
+            ? `In progress now${fixture.startedAt ? ` · kicked off ${formatTime(fixture.startedAt)}` : ""}.`
+            : "Played."}
+      </p>
+    </div>
   );
 }
