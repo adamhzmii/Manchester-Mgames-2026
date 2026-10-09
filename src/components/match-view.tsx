@@ -152,7 +152,7 @@ export function MatchView({
             <div className={styles.centre}>
               {fixture.status === "upcoming" ? (
                 <>
-                  <KickoffTime fixture={fixture} className={styles.kickoff} showWas />
+                  <KickoffTime fixture={fixture} className={styles.kickoff} />
                   <KickoffCountdown fixture={fixture} className={styles.until} />
                 </>
               ) : (
@@ -206,9 +206,6 @@ export function MatchView({
                     ? `In progress now${fixture.startedAt ? ` · kicked off ${formatTime(fixture.startedAt)}` : ""}.`
                     : "Played."}
               </p>
-              {fixture.status === "upcoming" ? (
-                <LateNote fixture={fixture} queue={false} onTime={false} />
-              ) : null}
             </div>
           </div>
 

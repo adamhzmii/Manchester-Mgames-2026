@@ -81,7 +81,7 @@ export function NextGame({
         </span>
 
         <span className={styles.when}>
-          <KickoffTime fixture={fixture} className={styles.kickoff} showWas />
+          <KickoffTime fixture={fixture} className={styles.kickoff} />
           <span className={styles.whenDay}>{formatDay(fixture.scheduledTime)}</span>
         </span>
         <LateNote fixture={fixture} className={styles.late} />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { KickoffTime, LateTag } from "@/components/delays";
+import { KickoffTime } from "@/components/delays";
 import { TrophyIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
@@ -125,7 +125,7 @@ function BracketMatch({ fixture }: { fixture: Fixture }) {
           "Full time"
         ) : (
           <>
-            <KickoffTime fixture={fixture} className={styles.metaTime} /> <LateTag fixture={fixture} />
+            <KickoffTime fixture={fixture} className={styles.metaTime} />
           </>
         )}
         {" · "}

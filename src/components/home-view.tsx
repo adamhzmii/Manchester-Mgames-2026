@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { LateCourts } from "@/components/delays";
 import { FindTeamButton } from "@/components/find-team-button";
 import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
 import { LiveScoreboard } from "@/components/live-scoreboard";
@@ -108,7 +107,6 @@ export function HomeView({
           {phase === "matchday" ? (
             <section className={styles.sNext}>
               <SectionHead title="Up next" href="/schedule" action="Full schedule" />
-              <LateCourts className={styles.late} />
               <UpNextList fixtures={fixtures} followed={favourites.teamIds} />
             </section>
           ) : null}

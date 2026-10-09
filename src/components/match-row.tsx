@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { KickoffTime, LateTag } from "@/components/delays";
+import { KickoffTime } from "@/components/delays";
 import { StarIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
@@ -71,7 +71,6 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
         ) : (
           <>
             <KickoffTime fixture={fixture} className={styles.time} />
-            <LateTag fixture={fixture} />
           </>
         )}
         {code ? <span className={styles.cat}>{code}</span> : null}

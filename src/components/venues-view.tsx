@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { KickoffTime, LateTag } from "@/components/delays";
+import { KickoffTime } from "@/components/delays";
 import {
   ChevronRightIcon,
   ExternalIcon,
@@ -157,9 +157,6 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
                     </span>
                     <span className={styles.courtMatch}>
                       {court.current.teamA} v {court.current.teamB}
-                      {court.current.status === "upcoming" ? (
-                        <LateTag fixture={court.current} className={styles.courtLate} />
-                      ) : null}
                     </span>
                     <ChevronRightIcon size={16} />
                   </Link>

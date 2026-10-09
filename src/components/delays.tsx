@@ -2,10 +2,9 @@
 
 import { createContext, useContext, useMemo } from "react";
 
-import { CheckIcon, ClockIcon } from "@/components/icons";
 import { RelTime } from "@/components/rel-time";
 import { useMinute } from "@/lib/clock";
-import { expectedStarts, lateCourts, type CourtDelay, type Expected } from "@/lib/delays";
+import { expectedStarts, type Expected } from "@/lib/delays";
 import { phaseOf } from "@/lib/matchday";
 import type { Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
@@ -15,7 +14,6 @@ import styles from "./delays.module.css";
 
 type Delays = {
   expected: ReadonlyMap<string, Expected>;
-  courts: CourtDelay[];
   /**
    * The day is underway (or about to be): "on time" and a game's place in
    * its court's queue mean something. A week out they would be noise.
@@ -23,7 +21,7 @@ type Delays = {
   underway: boolean;
 };
 
-const NONE: Delays = { expected: new Map(), courts: [], underway: false };
+const NONE: Delays = { expected: new Map(), underway: false };
 
 const DelaysContext = createContext<Delays>(NONE);
 
@@ -42,7 +40,6 @@ export function DelaysProvider({ children }: { children: React.ReactNode }) {
     const expected = expectedStarts(fixtures, now);
     return {
       expected,
-      courts: lateCourts(fixtures, expected),
       underway: phaseOf(fixtures, now) === "matchday",
     };
   }, [fixtures, now]);
@@ -84,55 +81,14 @@ export function useExpected(): ReadonlyMap<string, Expected> {
   return useContext(DelaysContext).expected;
 }
 
-export function useLateCourts(): CourtDelay[] {
-  return useContext(DelaysContext).courts;
-}
-
 /**
- * The kick-off to show: the official one, or the new one in orange — with
- * the old one struck through beside it where there is room (`showWas`).
+ * The kick-off to show: the time the game is now expected at, in the same
+ * colours as any other time. Delays happen on every court on the day; the
+ * committee chose not to flag each one, so a moved time is simply the time.
  */
-export function KickoffTime({
-  fixture,
-  className,
-  showWas = false,
-}: {
-  fixture: Fixture;
-  className?: string;
-  showWas?: boolean;
-}) {
-  const { iso, lateMin } = useKickoff(fixture);
-  if (showWas && lateMin > 0) {
-    return (
-      <span className={styles.moved}>
-        <s className={styles.was}>
-          <span className="mg-sr-only">was </span>
-          {formatTime(fixture.scheduledTime)}
-        </s>
-        <span className={className} data-late="">
-          <span className="mg-sr-only">now </span>
-          {formatTime(iso)}
-        </span>
-      </span>
-    );
-  }
-  return (
-    <span className={className} data-late={lateMin > 0 ? "" : undefined}>
-      {formatTime(iso)}
-    </span>
-  );
-}
-
-/** "+15 min", under a time that has moved. Nothing when it has not. */
-export function LateTag({ fixture, className }: { fixture: Fixture; className?: string }) {
-  const { lateMin } = useKickoff(fixture);
-  if (lateMin === 0) return null;
-  return (
-    <span className={`${styles.tag} ${className ?? ""}`}>
-      <span className="mg-sr-only">Running </span>+{lateMin} min
-      <span className="mg-sr-only"> late</span>
-    </span>
-  );
+export function KickoffTime({ fixture, className }: { fixture: Fixture; className?: string }) {
+  const { iso } = useKickoff(fixture);
+  return <span className={className}>{formatTime(iso)}</span>;
 }
 
 /** Where a game is in its court's queue, in words. */
@@ -143,8 +99,9 @@ export function queueText(fixture: Fixture, ahead: number, overdue: boolean): st
 }
 
 /**
- * How a game's time stands, for the places someone checks before walking
- * over: "Running 15 min late · was 08:30", or "On time", and on the day
+ * Two quiet lines under a game's time, for the places someone checks before
+ * walking over: the printed time, where the game has moved from it (so the
+ * time on their schedule from last week still makes sense), and on the day
  * where it is in its court's queue — "2 games before this one on Hall B".
  * The queue is the line to trust: an estimate can be wrong, the order of
  * games on a court cannot.
@@ -154,39 +111,27 @@ export function LateNote({
   className,
   onNight = false,
   queue = true,
-  onTime = true,
 }: {
   fixture: Fixture;
   className?: string;
-  /** On a dark band, where the page's orange is too dim. */
+  /** On a dark band. */
   onNight?: boolean;
   /** Add the court queue line on the day. */
   queue?: boolean;
-  /** Say "On time" on the day when it is. */
-  onTime?: boolean;
 }) {
   const { underway } = useContext(DelaysContext);
   const { lateMin, ahead, overdue } = useKickoff(fixture);
   if (fixture.status !== "upcoming") return null;
 
   const showQueue = queue && underway && ahead !== null && fixture.courtName !== "TBC";
-  const status =
-    lateMin > 0 ? (
-      <span className={`${styles.note} ${onNight ? styles.night : ""}`}>
-        <ClockIcon size={14} />
-        Running {lateMin} min late · was {formatTime(fixture.scheduledTime)}
-      </span>
-    ) : onTime && underway ? (
-      <span className={`${styles.note} ${styles.onTime} ${onNight ? styles.onTimeNight : ""}`}>
-        <CheckIcon size={14} />
-        On time
-      </span>
-    ) : null;
-
-  if (!status && !showQueue) return null;
+  if (lateMin === 0 && !showQueue) return null;
   return (
     <span className={`${styles.timing} ${className ?? ""}`}>
-      {status}
+      {lateMin > 0 ? (
+        <span className={`${styles.queue} ${onNight ? styles.queueNight : ""}`}>
+          Printed time {formatTime(fixture.scheduledTime)}
+        </span>
+      ) : null}
       {showQueue ? (
         <span className={`${styles.queue} ${onNight ? styles.queueNight : ""}`}>
           {queueText(fixture, ahead!, overdue)}
@@ -200,40 +145,4 @@ export function LateNote({
 export function KickoffCountdown({ fixture, className }: { fixture: Fixture; className?: string }) {
   const { iso } = useKickoff(fixture);
   return <RelTime iso={iso} className={className} />;
-}
-
-/**
- * Courts behind schedule right now, worst first — for the top of a list of
- * games. Narrowed to one sport where the list is one sport's.
- */
-export function LateCourts({
-  className,
-  sport,
-  court,
-}: {
-  className?: string;
-  sport?: string;
-  /** A court's name, where the list is one court's. */
-  court?: string;
-}) {
-  const courts = useLateCourts().filter(
-    (c) => (!sport || c.sportSlug === sport) && (!court || c.courtName === court),
-  );
-  if (courts.length === 0) return null;
-  return (
-    <div className={`${styles.strip} ${className ?? ""}`} role="status">
-      <span className={styles.stripTitle}>
-        <ClockIcon size={15} />
-        Running late
-      </span>
-      <ul className={styles.stripList}>
-        {courts.map((c) => (
-          <li key={`${c.venueShortName}-${c.courtName}`} className={styles.stripItem}>
-            {c.venueShortName} {c.courtName}
-            <span className={styles.stripMin}>+{c.lateMin} min</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 }
