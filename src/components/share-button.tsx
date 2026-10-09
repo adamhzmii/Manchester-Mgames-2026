@@ -3,14 +3,13 @@
 import { useState } from "react";
 
 /**
- * Shares a page through the phone's own share sheet — straight into WhatsApp,
- * which is where a team actually coordinates.
+ * Shares a page through the phone's own share sheet, so people send it
+ * wherever they like — WhatsApp, Instagram, Messages, anything.
  *
  * Always the site's real address, not whatever the browser is on: shared
  * from a test copy or a preview, the link should still open for everyone.
- * Where the browser has no share sheet, the link is copied; where it cannot
- * copy either (a page opened over plain http, as on a test copy), WhatsApp
- * opens with the message written.
+ * Where the browser has no share sheet (a computer, or a page opened over
+ * plain http), the link is copied instead, to paste anywhere.
  */
 const SITE = "https://manchestermgames.com";
 
@@ -38,17 +37,13 @@ export function ShareButton({
         if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
-    if (navigator.clipboard && window.isSecureContext) {
-      try {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        return;
-      } catch {
-        // Fall through to WhatsApp.
-      }
+    if (await copy(url)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      return;
     }
-    window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, "_blank", "noopener");
+    // Nothing could copy it: show the link to copy by hand.
+    window.prompt("Copy this link", url);
   };
 
   return (
@@ -56,4 +51,33 @@ export function ShareButton({
       {copied ? "Link copied" : children}
     </button>
   );
+}
+
+/**
+ * Puts text on the clipboard. The modern way needs a secure page; the old
+ * one (a hidden text box and the copy command) still works over plain http.
+ */
+async function copy(value: string): Promise<boolean> {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch {
+      // Try the old way.
+    }
+  }
+  const box = document.createElement("textarea");
+  box.value = value;
+  box.setAttribute("readonly", "");
+  box.style.position = "fixed";
+  box.style.opacity = "0";
+  document.body.appendChild(box);
+  box.select();
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    box.remove();
+  }
 }
