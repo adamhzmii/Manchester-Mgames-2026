@@ -11,7 +11,6 @@ import { TeamPicker } from "@/components/team-picker";
 import { signOut } from "@/lib/actions/auth";
 import type { Coordinator } from "@/lib/coordinator";
 import { SPORT_KEY, byKickoff, categoriesOf, type Fixture } from "@/lib/fixtures";
-import { formatHour, hourKey } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { arrivedByBackOrForward } from "@/lib/navigation";
 import type { PickerTeam, Sport } from "@/lib/queries";
@@ -146,56 +145,35 @@ export function ScheduleView({
   );
 
   /**
-   * Grouped by kick-off hour, strictly in time order — an hour heading is a
-   * claim about when a game starts, so a finished match sorted elsewhere would
-   * open a second 09:00 block under the 16:00 one.
-   *
-   * One block per hour whatever the order, too: the hour is each block's key,
-   * and two blocks sharing one left React unable to tell them apart, so
-   * filtering kept stale games on screen under the right count.
+   * One list in kick-off order — no hour headings: the time on each row
+   * already says when, and the headings only added length.
    */
-  const blocks = useMemo(() => {
-    const byHour = new Map<string, { key: string; label: string; fixtures: Fixture[] }>();
-    for (const fixture of [...visible].sort(byKickoff)) {
-      const key = hourKey(fixture.scheduledTime);
-      const block = byHour.get(key);
-      if (block) block.fixtures.push(fixture);
-      else byHour.set(key, { key, label: formatHour(fixture.scheduledTime), fixtures: [fixture] });
-    }
-    return [...byHour.values()];
-  }, [visible]);
+  const ordered = useMemo(() => [...visible].sort(byKickoff), [visible]);
 
-  // The hour the day is up to: the first block with a game still to finish.
-  const nowKey = useMemo(() => {
-    const started = fixtures.some((f) => f.status !== "upcoming");
-    if (!started) return null;
-    return blocks.find((b) => b.fixtures.some((f) => f.status !== "finished"))?.key ?? null;
-  }, [blocks, fixtures]);
+  // Where the day is up to: the first game still to finish, once any game
+  // has started. Before the day, the top of the list is the right place.
+  const nowId = useMemo(() => {
+    if (!fixtures.some((f) => f.status !== "upcoming")) return null;
+    return ordered.find((f) => f.status !== "finished")?.id ?? null;
+  }, [ordered, fixtures]);
 
-  // Open at "now", once per visit, and only once the day has begun: before
-  // then the top of the list is the right place to be, and re-scrolling under
-  // someone who just tapped a filter reads as the page fighting them.
+  // Open at "now", once per visit: re-scrolling under someone who just
+  // tapped a filter reads as the page fighting them.
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrolled = useRef(false);
   useEffect(() => {
-    if (scrolled.current || nowKey === null) return;
+    if (scrolled.current || nowId === null) return;
     // Back from a game: the browser puts the list where it was, and jumping
     // to "now" would lose the visitor's place.
     if (arrivedByBackOrForward()) {
       scrolled.current = true;
       return;
     }
-    const target = listRef.current?.querySelector<HTMLElement>(
-      `[data-hour="${CSS.escape(nowKey)}"]`,
-    );
+    const target = listRef.current?.querySelector<HTMLElement>(`a[href="/match/${nowId}"]`);
     if (!target) return;
     scrolled.current = true;
-    // The first block is already at the top; scrolling there would only hide
-    // the filters.
-    if (target !== listRef.current?.firstElementChild) {
-      target.scrollIntoView({ block: "start" });
-    }
-  }, [nowKey]);
+    if (target !== listRef.current?.querySelector("a")) target.scrollIntoView({ block: "center" });
+  }, [nowId]);
 
   return (
     <div className={styles.page}>
@@ -303,32 +281,13 @@ export function ScheduleView({
       </div>
 
       <div className={`mg-wrap ${styles.blocks}`} ref={listRef}>
-        {blocks.map((block) => {
-          const isNow = block.key === nowKey;
-          const past = block.fixtures.every((f) => f.status === "finished");
-          return (
-            <section
-              key={block.key}
-              className={styles.block}
-              data-hour={block.key}
-              data-past={past ? "" : undefined}
-            >
-              <h2 className={styles.hour}>
-                <span className={styles.hourTime}>{block.label}</span>
-                {isNow ? <span className={styles.now}>Now</span> : null}
-                <span className={styles.hourRule} />
-                <span className={styles.hourCount}>
-                  {block.fixtures.length} {block.fixtures.length === 1 ? "game" : "games"}
-                </span>
-              </h2>
-              <MatchList>
-                {block.fixtures.map((fixture) => (
-                  <MatchRow key={fixture.id} fixture={fixture} followed={favourites.teamIds} />
-                ))}
-              </MatchList>
-            </section>
-          );
-        })}
+        {ordered.length > 0 ? (
+          <MatchList>
+            {ordered.map((fixture) => (
+              <MatchRow key={fixture.id} fixture={fixture} followed={favourites.teamIds} />
+            ))}
+          </MatchList>
+        ) : null}
 
         {visible.length === 0 ? (
           <div className={styles.empty}>
