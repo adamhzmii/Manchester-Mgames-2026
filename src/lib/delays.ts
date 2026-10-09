@@ -176,8 +176,9 @@ export function expectedStarts(fixtures: readonly Fixture[], now: number): Map<s
       const start = Math.max(effectiveStart(f), courtWasFree);
       const finished = f.finishedAt ? Date.parse(f.finishedAt) : -Infinity;
       // A whistle before the game could have begun (an early test tap) says
-      // nothing about when the court is free: assume it took its slot.
-      end = finished > start ? finished : start + length;
+      // nothing about when the court is free: assume it took its slot. A
+      // walkover ends the moment it starts: the court is free at once.
+      end = finished >= start ? finished : start + length;
     } else if (f.status === "live") {
       const start = Math.max(effectiveStart(f), courtWasFree);
       // Past its slot it is overrunning: it ends no sooner than now. Unless

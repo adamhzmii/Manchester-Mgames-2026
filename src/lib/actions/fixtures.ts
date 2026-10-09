@@ -6,6 +6,7 @@ import { FIXTURE_SELECT, toFixture, type Fixture, type FixtureRow } from "@/lib/
 import { formatTime } from "@/lib/format";
 import { londonDate, londonToIso } from "@/lib/london-time";
 import { notifyLateGames } from "@/lib/late-notify";
+import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "@/lib/reschedule";
 import { sendPush } from "@/lib/push/server";
 import { getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -382,6 +383,70 @@ export async function correctKickoff(fixtureId: string, time: string): Promise<A
   return { ok: true, message: `Kick-off set to ${formatTime(iso)}.` };
 }
 
+// ---------------------------------------------------------------- moves ----
+
+const ORDER_REFUSED: ActionResult = {
+  ok: false,
+  message:
+    "Not moved — that would swap the order of two games in the same knockout round, and the bracket follows that order. Use Change time instead.",
+};
+
+/** Every game in a category: what a move is checked against. */
+async function categoryGames(supabase: Client, categoryId: string): Promise<Fixture[]> {
+  const { data } = await supabase.from("fixtures").select(FIXTURE_SELECT).eq("category_id", categoryId);
+  return ((data ?? []) as unknown as FixtureRow[]).map(toFixture);
+}
+
+async function courtName(supabase: Client, courtId: string): Promise<string | null> {
+  const { data } = await supabase.from("courts").select("name").eq("id", courtId).limit(1);
+  return data?.[0]?.name ?? null;
+}
+
+/**
+ * Gives a game a new official time and court, and tells its two teams'
+ * followers. Clears any start time set on it: that belonged to the old slot
+ * (and could not be earlier than the new printed time anyway).
+ */
+async function relocate(
+  supabase: Client,
+  game: Fixture,
+  iso: string,
+  courtId: string | null,
+): Promise<Fixture | null> {
+  const { data } = await supabase
+    .from("fixtures")
+    .update({
+      scheduled_time: iso,
+      court_id: courtId,
+      planned_start: null,
+      delay_minutes: 0,
+      delay_notified_minutes: 0,
+    })
+    .eq("id", game.id)
+    .eq("status", "upcoming")
+    .select(FIXTURE_SELECT);
+  if (!data || data.length === 0) return null;
+  return toFixture(data[0] as unknown as FixtureRow);
+}
+
+async function tellMoved(moved: Fixture): Promise<void> {
+  const teamIds = [moved.teamAId, moved.teamBId].filter((id): id is string => id !== null);
+  if (teamIds.length === 0) return;
+  try {
+    await sendPush(
+      {
+        title: "Game moved",
+        body: `${moved.teamA} v ${moved.teamB} is now at ${formatTime(moved.scheduledTime)}, ${moved.venueShortName} ${moved.courtName}.`,
+        url: `/match/${moved.id}`,
+        tag: `moved-${moved.id}`,
+      },
+      { teamIds },
+    );
+  } catch {
+    // The move is saved; an unreachable push service must not undo that.
+  }
+}
+
 /**
  * Moves a game that has not started: a new official time, a new court, or
  * both. Unlike "starts at" this changes the schedule itself, so it clears
@@ -408,41 +473,225 @@ export async function moveFixture(
     return { ok: false, message: "That's where and when it already is." };
   }
 
+  const name = court && court !== game.courtId ? await courtName(supabase, court) : null;
+  const change = { scheduledTime: iso, ...(name ? { courtName: name } : {}) };
+  if (!keepsKnockoutOrder(await categoryGames(supabase, game.categoryId), new Map([[game.id, change]]))) {
+    return ORDER_REFUSED;
+  }
+
+  const moved = await relocate(supabase, game, iso, court);
+  if (!moved) return SIGNED_OUT;
+  revalidateGames();
+  await tellMoved(moved);
+  await notifyLateGames(supabase);
+  return { ok: true, message: `Moved to ${formatTime(moved.scheduledTime)}, ${moved.venueShortName} ${moved.courtName}.` };
+}
+
+/**
+ * "Swap with next game": this game and the next one of its sport on its
+ * court trade printed times — a player running late, and the next game
+ * ready to go. Both teams' followers are told.
+ */
+export async function swapWithNext(fixtureId: string): Promise<ActionResult> {
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status !== "upcoming") return { ok: false, message: "This game has already started." };
+
+  const games = await categoryGamesOnCourt(supabase, game);
+  const next = nextOnCourt(game, games);
+  if (!next) return { ok: false, message: `There's no later ${game.sportName.toLowerCase()} game on ${game.courtName} to swap with.` };
+  if ((game.stage === "group") !== (next.stage === "group")) {
+    return { ok: false, message: "A group game and a knockout game can't swap. Use Change time instead." };
+  }
+  const changes = new Map([
+    [game.id, { scheduledTime: next.scheduledTime }],
+    [next.id, { scheduledTime: game.scheduledTime }],
+  ]);
+  if (!keepsKnockoutOrder(games, changes)) return ORDER_REFUSED;
+
+  const first = await relocate(supabase, game, next.scheduledTime, game.courtId);
+  if (!first) return SIGNED_OUT;
+  const second = await relocate(supabase, next, game.scheduledTime, next.courtId);
+  if (!second) {
+    // Put the first back rather than leave two games at one time.
+    await relocate(supabase, first, game.scheduledTime, game.courtId);
+    return { ok: false, message: "Not swapped — the next game may have just started. Try again." };
+  }
+
+  revalidateGames();
+  await tellMoved(first);
+  await tellMoved(second);
+  await notifyLateGames(supabase);
+  return {
+    ok: true,
+    message: `Swapped: ${second.teamA} v ${second.teamB} now ${formatTime(second.scheduledTime)}, ${first.teamA} v ${first.teamB} now ${formatTime(first.scheduledTime)}.`,
+  };
+}
+
+/** A game's sport on its court — what "next" and "last" are judged against. */
+async function categoryGamesOnCourt(supabase: Client, game: Fixture): Promise<Fixture[]> {
+  const { data } = await supabase.from("fixtures").select(FIXTURE_SELECT).eq("court_id", game.courtId ?? "");
+  const onCourt = ((data ?? []) as unknown as FixtureRow[]).map(toFixture);
+  const category = await categoryGames(supabase, game.categoryId);
+  const seen = new Set(onCourt.map((f) => f.id));
+  return [...onCourt, ...category.filter((f) => !seen.has(f.id))];
+}
+
+/** "Play later": the game goes to the end of its sport's games on its court. */
+export async function playLater(fixtureId: string): Promise<ActionResult> {
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status !== "upcoming") return { ok: false, message: "This game has already started." };
+
+  const games = await categoryGamesOnCourt(supabase, game);
+  const iso = laterTime(game, games);
+  if (!iso) return { ok: false, message: `It's already the last game on ${game.courtName}.` };
+  if (!keepsKnockoutOrder(games, new Map([[game.id, { scheduledTime: iso }]]))) return ORDER_REFUSED;
+
+  const moved = await relocate(supabase, game, iso, game.courtId);
+  if (!moved) return SIGNED_OUT;
+  revalidateGames();
+  await tellMoved(moved);
+  await notifyLateGames(supabase);
+  return { ok: true, message: `Moved to the end of ${moved.courtName}: now ${formatTime(moved.scheduledTime)}.` };
+}
+
+/**
+ * "Play on a free court now": a game waiting for its own court goes to one
+ * standing empty, at the current time, ready to start.
+ */
+export async function playNowOn(fixtureId: string, courtId: string): Promise<ActionResult> {
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status !== "upcoming") return { ok: false, message: "This game has already started." };
+
+  const { data: busy } = await supabase
+    .from("fixtures")
+    .select("id")
+    .eq("court_id", courtId)
+    .eq("status", "live")
+    .limit(1);
+  if (busy && busy.length > 0) return { ok: false, message: "That court has a game on right now." };
+
+  const now = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+  const iso = londonToIso(londonDate(game.scheduledTime), now);
+  const name = await courtName(supabase, courtId);
+  if (!iso || !name) return { ok: false, message: "Court not found." };
+  if (!keepsKnockoutOrder(await categoryGames(supabase, game.categoryId), new Map([[game.id, { scheduledTime: iso, courtName: name }]]))) {
+    return ORDER_REFUSED;
+  }
+
+  const moved = await relocate(supabase, game, iso, courtId);
+  if (!moved) return SIGNED_OUT;
+  revalidateGames();
+  await tellMoved(moved);
+  await notifyLateGames(supabase);
+  return { ok: true, message: `Moved to ${moved.courtName}, now. Tap Start game when it begins.` };
+}
+
+/**
+ * A court that can't be used — a spill, a broken net: every game of the
+ * sport still to play there moves to another court at the same times, and
+ * the delays on that court sort out the order.
+ */
+export async function moveCourtGames(
+  fromCourtId: string,
+  toCourtId: string,
+  sportSlug: string,
+): Promise<ActionResult> {
+  if (!(await getCoordinator())) return SIGNED_OUT;
+  if (fromCourtId === toCourtId) return { ok: false, message: "Pick a different court." };
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("fixtures")
+    .select(FIXTURE_SELECT)
+    .eq("court_id", fromCourtId)
+    .eq("status", "upcoming");
+  const games = ((data ?? []) as unknown as FixtureRow[]).map(toFixture).filter((f) => f.sportSlug === sportSlug);
+  if (games.length === 0) return { ok: false, message: "No games left to move on that court." };
+
+  const name = await courtName(supabase, toCourtId);
+  if (!name) return { ok: false, message: "Court not found." };
+  for (const categoryId of new Set(games.map((g) => g.categoryId))) {
+    const changes = new Map(games.filter((g) => g.categoryId === categoryId).map((g) => [g.id, { courtName: name }]));
+    if (!keepsKnockoutOrder(await categoryGames(supabase, categoryId), changes)) return ORDER_REFUSED;
+  }
+
+  let movedCount = 0;
+  for (const game of games) {
+    const moved = await relocate(supabase, game, game.scheduledTime, toCourtId);
+    if (!moved) continue;
+    movedCount += 1;
+    await tellMoved(moved);
+  }
+  revalidateGames();
+  await notifyLateGames(supabase);
+  return { ok: true, message: `Moved ${movedCount} ${movedCount === 1 ? "game" : "games"} to ${name}.` };
+}
+
+/**
+ * A walkover: a team that never turned up, or one that couldn't carry on.
+ * The game ends with the sport's walkover score to the other side.
+ */
+export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<ActionResult> {
+  if (winner !== "a" && winner !== "b") return { ok: false, message: "Pick the winner." };
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status === "finished") return { ok: false, message: "This game has already finished." };
+  if (game.teamAId === null || game.teamBId === null) {
+    return { ok: false, message: "Set both teams first." };
+  }
+
+  const score = walkoverScore(game.sportSlug, game.stage);
+  const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("fixtures")
     .update({
-      scheduled_time: iso,
-      court_id: court,
-      planned_start: null,
-      delay_minutes: 0,
-      delay_notified_minutes: 0,
+      status: "finished",
+      score_a: winner === "a" ? score : 0,
+      score_b: winner === "b" ? score : 0,
+      started_at: game.startedAt ?? now,
+      finished_at: now,
     })
     .eq("id", fixtureId)
-    .select(FIXTURE_SELECT);
-  if (error) return { ok: false, message: `Could not move: ${error.message}` };
+    .neq("status", "finished")
+    .select("id");
+  if (error) return { ok: false, message: `Could not save: ${error.message}` };
   if (!data || data.length === 0) return SIGNED_OUT;
 
-  const moved = toFixture(data[0] as unknown as FixtureRow);
-  const where = `${moved.venueShortName} ${moved.courtName}`;
   revalidateGames();
-
-  const teamIds = [moved.teamAId, moved.teamBId].filter((id): id is string => id !== null);
-  if (teamIds.length > 0) {
-    try {
-      await sendPush(
-        {
-          title: "Game moved",
-          body: `${moved.teamA} v ${moved.teamB} is now at ${formatTime(moved.scheduledTime)}, ${where}.`,
-          url: `/match/${moved.id}`,
-          tag: `moved-${moved.id}`,
-        },
-        { teamIds },
-      );
-    } catch {
-      // The move is saved; an unreachable push service must not undo that.
-    }
+  const [won, lost] = winner === "a" ? [game.teamA, game.teamB] : [game.teamB, game.teamA];
+  try {
+    await sendPush(
+      {
+        title: "Walkover",
+        body: `${won} win ${score}–0 against ${lost} by walkover.`,
+        url: `/match/${game.id}`,
+        tag: `fixture-${game.id}`,
+      },
+      { teamIds: [game.teamAId, game.teamBId] },
+    );
+  } catch {
+    // Saved already; push is best effort.
   }
-
   await notifyLateGames(supabase);
-  return { ok: true, message: `Moved to ${formatTime(moved.scheduledTime)}, ${where}.` };
+  return { ok: true, message: `${won} win ${score}–0 by walkover.` };
 }

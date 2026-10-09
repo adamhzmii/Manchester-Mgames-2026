@@ -1,29 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AlertIcon, CheckIcon, ChevronRightIcon, ClockIcon } from "@/components/icons";
-import {
-  ChangeTime,
-  KickoffFix,
-  Result,
-  SaveState,
-  StartButton,
-  Stepper,
-  finishGame,
-  saveGame,
-  useScoreKeeper,
-  type GameChange,
-} from "@/components/scorer-controls";
+import { AlertBox, CourtMoves, LiveGame, NextGame, UndoBar, type Recent } from "@/components/court-game";
+import { CourtGrid } from "@/components/court-grid";
+import type { GameChange } from "@/components/scorer-controls";
 import { SportBadge } from "@/components/sport-badge";
 import { signOut } from "@/lib/actions/auth";
-import type { ActionResult } from "@/lib/actions/fixtures";
 import { useMinute } from "@/lib/clock";
 import {
   courtStates,
   expectedStarts,
-  type CourtAlert,
   type CourtState,
   type Expected,
 } from "@/lib/delays";
@@ -32,14 +21,13 @@ import { formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
 import { relative } from "@/lib/matchday";
 import type { Sport } from "@/lib/queries";
-import type { FixtureStatus } from "@/lib/supabase/types";
 import { useStored } from "@/lib/use-stored";
 
-import consoleStyles from "./score-console.module.css";
 import styles from "./court-sheet.module.css";
 
 const SPORT_KEY = "mgames26:coord-sport";
 const courtsKey = (sport: string) => `mgames26:coord-courts:${sport}`;
+const viewKey = (sport: string) => `mgames26:coord-view:${sport}`;
 
 /** A save this old that the feed still disagrees with is dropped: the feed wins. */
 const OVERRIDE_MS = 90_000;
@@ -47,7 +35,6 @@ const OVERRIDE_MS = 90_000;
 const UNDO_MS = 2 * 60_000;
 
 type Override = GameChange & { at: number; startedAt?: string; finishedAt?: string };
-type Recent = { fixtureId: string; from: FixtureStatus; to: FixtureStatus; at: number; text: string };
 
 /**
  * The coordinators' screen for the day — the spreadsheet they used to keep,
@@ -292,8 +279,22 @@ function SportCourts({
   onForget: (fixtureId: string) => void;
 }) {
   const [stored, setStored] = useStored(courtsKey(sport?.slug ?? "none"));
+  const [storedView, setStoredView] = useStored(viewKey(sport?.slug ?? "none"));
+  // A grid of every court at once, like the spreadsheet, where there are
+  // many courts; cards where there are one or two.
+  const view = storedView === "grid" || storedView === "cards" ? storedView : states.length > 3 ? "grid" : "cards";
   const chosen = parseCourts(stored).filter((key) => states.some((c) => c.key === key));
   const shown = chosen.length === 0 ? states : states.filter((c) => chosen.includes(c.key));
+
+  // Badminton's and pickleball's courts by hall ("Court C1" is in Hall C):
+  // one tap for each of the two coordinators to take theirs.
+  const halls = [
+    ...states.reduce((byHall, c) => {
+      const hall = /^Court ([A-Z])\d+$/.exec(c.courtName)?.[1];
+      if (hall) byHall.set(hall, [...(byHall.get(hall) ?? []), c.key]);
+      return byHall;
+    }, new Map<string, string[]>()),
+  ].filter(([, keys]) => keys.length > 1 && keys.length < states.length);
 
   const toggle = (key: string) => {
     const next = chosen.includes(key) ? chosen.filter((k) => k !== key) : [...chosen, key];
@@ -318,6 +319,20 @@ function SportCourts({
             >
               All {states.length}
             </button>
+            {halls.map(([hall, keys]) => {
+              const on = keys.length === chosen.length && keys.every((k) => chosen.includes(k));
+              return (
+                <button
+                  key={hall}
+                  type="button"
+                  className={`${styles.courtChip} ${on ? styles.courtChipOn : ""}`}
+                  aria-pressed={on}
+                  onClick={() => setStored(JSON.stringify(keys))}
+                >
+                  Hall {hall}
+                </button>
+              );
+            })}
             {states.map((c) => (
               <button
                 key={c.key}
@@ -335,10 +350,39 @@ function SportCourts({
         </div>
       ) : null}
 
+      <div className={styles.viewToggle} role="radiogroup" aria-label="View">
+        {(["grid", "cards"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={view === v}
+            className={`${styles.viewOption} ${view === v ? styles.viewOptionOn : ""}`}
+            onClick={() => setStoredView(v)}
+          >
+            {v === "grid" ? "Grid" : "Cards"}
+          </button>
+        ))}
+      </div>
+
+      {view === "grid" ? (
+        <CourtGrid
+          courts={shown}
+          allCourts={states}
+          sportSlug={sport.slug}
+          fixtures={fixtures}
+          expected={expected}
+          recent={recent.filter((r) => now - r.at < UNDO_MS)}
+          onChange={onChange}
+          onForget={onForget}
+        />
+      ) : (
       <div className={styles.courts}>
         {shown.map((state) => (
           <CourtCard
             key={state.key}
+            courts={states}
+            sportSlug={sport.slug}
             state={state}
             fixtures={fixtures}
             expected={expected}
@@ -350,6 +394,7 @@ function SportCourts({
           />
         ))}
       </div>
+      )}
     </>
   );
 }
@@ -366,6 +411,8 @@ function parseCourts(raw: string | null): string[] {
 
 function CourtCard({
   state,
+  courts,
+  sportSlug,
   fixtures,
   expected,
   recent,
@@ -373,6 +420,9 @@ function CourtCard({
   onForget,
 }: {
   state: CourtState;
+  /** Every court of the sport, for moving games between them. */
+  courts: CourtState[];
+  sportSlug: string;
   fixtures: Fixture[];
   expected: ReadonlyMap<string, Expected>;
   recent: Recent[];
@@ -430,12 +480,15 @@ function CourtCard({
             fixtures={fixtures}
             expected={expected.get(next.id)}
             courtBusy={live !== null}
+            courts={courts}
             onChange={onChange}
           />
         ) : (
           <p className={styles.free}>No more games on this court.</p>
         )}
       </div>
+
+      <CourtMoves court={state} courts={courts} sportSlug={sportSlug} />
 
       <details className={styles.day}>
         <summary className={styles.daySummary}>
@@ -451,125 +504,6 @@ function CourtCard({
         </ol>
       </details>
     </section>
-  );
-}
-
-/** The game being played: score it, finish it. */
-function LiveGame({ fixture, onChange }: { fixture: Fixture; onChange: (change: GameChange) => void }) {
-  const keeper = useScoreKeeper(fixture, onChange);
-  const { scoreA, scoreB, warning } = keeper;
-
-  return (
-    <div className={styles.game}>
-      <p className={styles.gameMeta}>
-        <span className={styles.liveDot} aria-hidden="true" />
-        Live · {fixture.stageLabel}
-        {fixture.categoryName && fixture.categoryName !== "Open" ? ` · ${fixture.categoryName}` : ""}
-      </p>
-      <div className={consoleStyles.sides}>
-        <Stepper
-          name={fixture.teamA}
-          value={scoreA}
-          onBump={(d) => keeper.bump("a", d)}
-          onType={(v) => keeper.setScores(v, scoreB)}
-        />
-        <Stepper
-          name={fixture.teamB}
-          value={scoreB}
-          onBump={(d) => keeper.bump("b", d)}
-          onType={(v) => keeper.setScores(scoreA, v)}
-        />
-      </div>
-      {warning ? (
-        <p className={consoleStyles.warning} role="alert">
-          {warning}
-        </p>
-      ) : null}
-      <button type="button" className={`mg-btn ${consoleStyles.finish} ${styles.big}`} onClick={keeper.finish}>
-        Finish game
-      </button>
-      <div className={styles.gameFoot}>
-        <SaveState keeper={keeper} />
-      </div>
-      <KickoffFix fixture={fixture} />
-      <button
-        type="button"
-        className={consoleStyles.reset}
-        onClick={() => {
-          if (!window.confirm("Reset this game to not started? Its score will be cleared.")) return;
-          keeper.reset();
-        }}
-      >
-        Started by mistake? Reset to not started
-      </button>
-    </div>
-  );
-}
-
-/** The game to start next: when it is now due, and the button. */
-function NextGame({
-  fixture,
-  fixtures,
-  expected,
-  courtBusy,
-  onChange,
-}: {
-  fixture: Fixture;
-  fixtures: Fixture[];
-  expected: Expected | undefined;
-  courtBusy: boolean;
-  onChange: (change: GameChange) => void;
-}) {
-  const keeper = useScoreKeeper(fixture, onChange);
-  const ready = fixture.teamAId !== null && fixture.teamBId !== null;
-  const lateMin = expected?.lateMin ?? 0;
-  const shown = new Date(Date.parse(fixture.scheduledTime) + lateMin * 60_000).toISOString();
-
-  return (
-    <div className={styles.game}>
-      <p className={styles.gameMeta}>
-        {fixture.stageLabel}
-        {fixture.categoryName && fixture.categoryName !== "Open" ? ` · ${fixture.categoryName}` : ""}
-      </p>
-      <p className={styles.teams}>
-        {fixture.teamA} <span className={styles.vs}>v</span> {fixture.teamB}
-      </p>
-      <p className={styles.when}>
-        {lateMin > 0 ? (
-          <>
-            <s className={styles.was}>{formatTime(fixture.scheduledTime)}</s>
-            <span className={styles.nowTime}>{formatTime(shown)}</span>
-            <span className={styles.lateTag}>+{lateMin} min</span>
-          </>
-        ) : (
-          <>
-            <span className={styles.onTimeTime}>{formatTime(fixture.scheduledTime)}</span>
-            <span className={styles.onTimeTag}>on time</span>
-          </>
-        )}
-      </p>
-      {expected?.overdue && !courtBusy ? (
-        <p className={styles.due}>Due now — tap Start game the moment it begins.</p>
-      ) : null}
-
-      {ready ? (
-        <StartButton
-          fixture={fixture}
-          fixtures={fixtures}
-          onStart={keeper.start}
-          onChange={onChange}
-          className={styles.big}
-        />
-      ) : (
-        <Link href={`/match/${fixture.id}`} className={`mg-btn ${consoleStyles.secondary} ${styles.big}`}>
-          Set the teams first
-        </Link>
-      )}
-      <div className={styles.gameFoot}>
-        <SaveState keeper={keeper} />
-      </div>
-      <ChangeTime fixture={fixture} compact kickoff={{ iso: shown, lateMin }} />
-    </div>
   );
 }
 
@@ -610,126 +544,6 @@ function DayRow({
         <ChevronRightIcon size={16} />
       </Link>
     </li>
-  );
-}
-
-/** "Finished 21–19 · Undo" for a couple of minutes after a Start or Finish. */
-function UndoBar({
-  recent,
-  fixtures,
-  onChange,
-  onForget,
-}: {
-  recent: Recent;
-  fixtures: Fixture[];
-  onChange: (change: GameChange) => void;
-  onForget: (fixtureId: string) => void;
-}) {
-  const [result, setResult] = useState<ActionResult | null>(null);
-  const [pending, startTransition] = useTransition();
-  const game = fixtures.find((f) => f.id === recent.fixtureId);
-  if (!game) return null;
-
-  const undo = () =>
-    startTransition(async () => {
-      // Back to how it was: a start undone clears the score, a finish undone
-      // puts the game back on with the score it had.
-      const a = recent.from === "upcoming" ? null : game.scoreA;
-      const b = recent.from === "upcoming" ? null : game.scoreB;
-      const answer = await saveGame(game.id, recent.from, a, b);
-      setResult(answer);
-      if (!answer.ok) return;
-      onChange({ fixtureId: game.id, status: recent.from, scoreA: a, scoreB: b });
-      onForget(game.id);
-    });
-
-  return (
-    <div className={styles.undo} role="status">
-      <CheckIcon size={15} />
-      <span className={styles.undoText}>{recent.text}</span>
-      <button type="button" className={styles.undoButton} disabled={pending} onClick={undo}>
-        {pending ? "Undoing…" : "Undo"}
-      </button>
-      <Result result={result && !result.ok ? result : null} />
-    </div>
-  );
-}
-
-/** Something on the court that looks wrong, with the fix where there is one. */
-function AlertBox({
-  alert,
-  fixtures,
-  onChange,
-}: {
-  alert: CourtAlert;
-  fixtures: Fixture[];
-  onChange: (change: GameChange) => void;
-}) {
-  const [result, setResult] = useState<ActionResult | null>(null);
-  const [pending, startTransition] = useTransition();
-  const game = fixtures.find((f) => f.id === alert.fixtureId);
-  if (!game) return null;
-  const name = `${game.teamA} v ${game.teamB}`;
-
-  if (alert.kind === "left-live") {
-    const level = game.stage !== "group" && (game.scoreA ?? 0) === (game.scoreB ?? 0);
-    return (
-      <div className={styles.alert} role="alert">
-        <AlertIcon size={16} />
-        <div className={styles.alertBody}>
-          <p>
-            <strong>{name}</strong> is still marked live, but a later game here has started.
-          </p>
-          {level ? (
-            <Link href={`/match/${game.id}`} className={styles.alertAction}>
-              Open it to record the result
-            </Link>
-          ) : (
-            <button
-              type="button"
-              className={styles.alertAction}
-              disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  const done = await finishGame(game);
-                  setResult(done);
-                  if (done.ok) {
-                    onChange({
-                      fixtureId: game.id,
-                      status: "finished",
-                      scoreA: game.scoreA ?? 0,
-                      scoreB: game.scoreB ?? 0,
-                    });
-                  }
-                })
-              }
-            >
-              {pending ? "Saving…" : `Finish it ${game.scoreA ?? 0}–${game.scoreB ?? 0}`}
-            </button>
-          )}
-          <Result result={result} />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.alert} role="alert">
-      <AlertIcon size={16} />
-      <div className={styles.alertBody}>
-        {alert.kind === "long-live" ? (
-          <p>
-            <strong>{name}</strong> has been live for {alert.minutes} min. If it has ended, tap
-            Finish game.
-          </p>
-        ) : (
-          <p>
-            <strong>{name}</strong> was due {alert.minutes} min ago. Tap Start game when it begins,
-            or change its time.
-          </p>
-        )}
-      </div>
-    </div>
   );
 }
 

@@ -653,3 +653,350 @@
   color: var(--mg-late);
   margin-right: 4px;
 }
+
+/* --------------------------------------------------------- view toggle ---- */
+
+.viewToggle {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 3px;
+  border-radius: var(--mg-r);
+  background: var(--mg-sunk);
+}
+
+.viewOption {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: transparent;
+  color: var(--mg-ink-2);
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.viewOptionOn {
+  background: var(--mg-night);
+  color: var(--mg-gold);
+}
+
+/* ---------------------------------------------------------------- grid ---- */
+
+.gridWrap {
+  margin-top: 8px;
+}
+
+.gridWrapScroll {
+  margin-top: 8px;
+  margin-inline: calc(var(--mg-gutter) * -1);
+  padding-inline: var(--mg-gutter);
+  overflow-x: auto;
+}
+
+.grid {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-night);
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.3);
+}
+
+.gridRow {
+  display: contents;
+}
+
+/* Court names stay in view while the day scrolls, like a frozen row. */
+.gridCorner,
+.gridHead {
+  position: sticky;
+  top: var(--mg-header-height);
+  z-index: 2;
+}
+
+.gridCorner {
+  min-height: 1px;
+  background: var(--mg-night);
+}
+
+.gridHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-night-3);
+  color: #fff;
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gridHeadLate {
+  font-size: 13px;
+  color: var(--mg-late-night);
+}
+
+.gridTime {
+  padding-top: 8px;
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mg-night-muted);
+  scroll-margin-top: 140px;
+}
+
+.gridCell {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.cell {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  padding: 6px 7px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-night-2);
+  box-shadow: inset 0 0 0 1px var(--mg-night-line);
+  color: var(--mg-night-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cell[data-state="done"] {
+  opacity: 0.55;
+}
+
+.cell[data-state="live"] {
+  background: color-mix(in srgb, var(--mg-live) 22%, var(--mg-night-2));
+  box-shadow: inset 0 0 0 2px var(--mg-live);
+}
+
+.cell[data-state="next"] {
+  box-shadow: inset 0 0 0 2px var(--mg-gold);
+}
+
+.cellTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-family: var(--mg-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.cellTag {
+  color: var(--mg-gold);
+}
+
+.cellStatus {
+  color: var(--mg-night-muted);
+}
+
+.cell[data-state="live"] .cellStatus {
+  color: #fff;
+}
+
+.cell[data-state="next"] .cellStatus {
+  color: var(--mg-gold);
+}
+
+.cell[data-state="later"] .cellStatus {
+  color: var(--mg-late-night);
+}
+
+.cellTeam {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cellName {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cellScore {
+  flex: 0 0 auto;
+  font-family: var(--mg-display);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.cellMoved {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mg-late-night);
+}
+
+/* --------------------------------------------------------------- panel ---- */
+
+.panelBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(10, 6, 20, 0.6);
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+  width: min(560px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: var(--mg-r-lg) var(--mg-r-lg) 0 0;
+  background: var(--mg-night);
+  color: var(--mg-night-text);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 700px) {
+  .panelBackdrop {
+    align-items: center;
+  }
+
+  .panel {
+    border-radius: var(--mg-r-lg);
+  }
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panelTitle {
+  font-family: var(--mg-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.panelSub {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--mg-night-muted);
+}
+
+.panelClose {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--mg-night-2);
+  color: #fff;
+  cursor: pointer;
+}
+
+.panelLink {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mg-gold);
+}
+
+/* ---------------------------------------------------------------- moves ---- */
+
+.moves {
+  padding-top: 12px;
+  border-top: 1px solid var(--mg-night-line);
+}
+
+.movesSummary {
+  min-height: 36px;
+  font-weight: 700;
+  color: var(--mg-gold);
+  cursor: pointer;
+}
+
+.movesBody {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.moveButton {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-2);
+  box-shadow: inset 0 0 0 1px var(--mg-night-line);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.moveButton span {
+  font-size: 13px;
+  color: var(--mg-night-muted);
+}
+
+.moveGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.moveLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-night-muted);
+}
+
+.moveChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.moveChip {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-night-3);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.moveChip:disabled,
+.moveButton:disabled {
+  opacity: 0.5;
+}
