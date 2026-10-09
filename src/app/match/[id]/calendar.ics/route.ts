@@ -1,3 +1,6 @@
+import { expectedStarts } from "@/lib/delays";
+import { serverNow } from "@/lib/demo";
+import { formatTime } from "@/lib/format";
 import { getFixtures, getVenues } from "@/lib/queries";
 
 /** How long a calendar entry blocks out; games run 20–40 minutes. */
@@ -26,7 +29,13 @@ function fold(line: string): string {
 
 /**
  * One game as a calendar entry, with a reminder 20 minutes before — enough to
- * walk between Trinity and Sugden. Served rather than generated in the
+ * walk between Trinity and Sugden.
+ *
+ * At the time the game is expected now, not the printed one: a court running
+ * late on the day moves the entry too. A calendar keeps its own copy once
+ * added, so this is the time at the moment of the tap; adding it again
+ * replaces the earlier copy (same UID, higher SEQUENCE) in calendars that
+ * honour that, Apple's among them. Served rather than generated in the
  * browser: iPhones only offer "Add to Calendar" for a real text/calendar
  * response, not for a file a page builds itself.
  */
@@ -37,7 +46,13 @@ export async function GET(_request: Request, ctx: RouteContext<"/match/[id]/cale
   if (!fixture) return new Response("Game not found", { status: 404 });
 
   const venue = venues.find((v) => v.slug === fixture.venueSlug);
-  const start = Date.parse(fixture.scheduledTime);
+  const printed = Date.parse(fixture.scheduledTime);
+  const lateMin =
+    fixture.status === "upcoming"
+      ? (expectedStarts(fixtures, serverNow()).get(fixture.id)?.lateMin ?? 0)
+      : 0;
+  const start = printed + lateMin * 60_000;
+  const moved = lateMin > 0 ? ` Delayed from ${formatTime(fixture.scheduledTime)}; times can move on the day.` : "";
   const url = `https://manchestermgames.com/match/${fixture.id}`;
   const location = [venue?.name ?? fixture.venueShortName, fixture.courtName, venue?.address]
     .filter(Boolean)
@@ -52,11 +67,13 @@ export async function GET(_request: Request, ctx: RouteContext<"/match/[id]/cale
     "BEGIN:VEVENT",
     `UID:${fixture.id}@manchestermgames.com`,
     `DTSTAMP:${stamp(Date.now())}`,
+    // Rises every minute, so an entry added later replaces one added earlier.
+    `SEQUENCE:${Math.floor(Date.now() / 60_000) - 29_000_000}`,
     `DTSTART:${stamp(start)}`,
     `DTEND:${stamp(start + DURATION_MIN * 60_000)}`,
     `SUMMARY:${text(`${fixture.sportName} ${fixture.stageLabel}: ${fixture.teamA} v ${fixture.teamB}`)}`,
     `LOCATION:${text(location)}`,
-    `DESCRIPTION:${text(`MGames 2026 — live score and directions: ${url}`)}`,
+    `DESCRIPTION:${text(`MGames 2026 — live score, latest time and directions: ${url}.${moved}`)}`,
     `URL:${url}`,
     "BEGIN:VALARM",
     "ACTION:DISPLAY",
