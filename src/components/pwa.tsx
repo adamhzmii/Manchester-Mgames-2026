@@ -2,6 +2,9 @@
 
 import { useEffect } from "react";
 
+import { FOLLOW_PARAM } from "@/lib/backup-site";
+import { adoptFavourites, mirrorFavouritesForWorker } from "@/lib/use-favourite-teams";
+
 /**
  * Registers the service worker, which notifications and the offline copy of
  * the site depend on. Renders nothing.
@@ -37,7 +40,10 @@ export function Pwa() {
       };
       if (document.readyState === "complete") register();
       else window.addEventListener("load", register, { once: true });
+      mirrorFavouritesForWorker();
     }
+
+    adoptCarriedTeams();
 
     // Taking the event is what stops Chrome showing its own install bar.
     const hold = (event: Event) => event.preventDefault();
@@ -46,4 +52,23 @@ export function Pwa() {
   }, []);
 
   return null;
+}
+
+/**
+ * Arriving at the backup address from a blocked network: the link carries the
+ * teams the visitor follows on the main address (localStorage does not cross
+ * over). Follow them here too, then tidy the parameter out of the address bar
+ * so a shared link does not hand them to somebody else.
+ */
+function adoptCarriedTeams() {
+  const url = new URL(window.location.href);
+  const carried = url.searchParams.get(FOLLOW_PARAM);
+  if (carried === null) return;
+  const ids = carried
+    .split(",")
+    .filter((id) => /^[\w-]{1,64}$/.test(id))
+    .slice(0, 100);
+  adoptFavourites(ids);
+  url.searchParams.delete(FOLLOW_PARAM);
+  window.history.replaceState(window.history.state, "", url);
 }

@@ -87,6 +87,39 @@ function write(ids: readonly string[]): void {
   cachedRaw = JSON.stringify(ids);
   cachedValue = ids.length === 0 ? EMPTY : ids;
   for (const listener of listeners) listener();
+  mirrorForWorker(ids);
+}
+
+/**
+ * A copy the service worker can read. When a network blocks our address
+ * (see src/lib/backup-site.ts) the worker sends the visitor to the backup
+ * address, where localStorage starts empty; it reads the teams from here to
+ * bring them along. Not "mgames-…": the worker clears those on every update.
+ */
+const WORKER_CACHE = "mgames26-prefs";
+export const WORKER_FOLLOW_KEY = "/__mgames/follow";
+
+function mirrorForWorker(ids: readonly string[]): void {
+  if (typeof caches === "undefined") return;
+  void caches
+    .open(WORKER_CACHE)
+    .then((cache) => cache.put(WORKER_FOLLOW_KEY, new Response(JSON.stringify(ids))))
+    .catch(() => {});
+}
+
+/** Teams followed before the mirror existed get copied over on any visit. */
+export function mirrorFavouritesForWorker(): void {
+  mirrorForWorker(getSnapshot());
+}
+
+/**
+ * Teams brought over from the other address in the link. Added to whatever
+ * is already followed here, never replacing it.
+ */
+export function adoptFavourites(ids: readonly string[]): void {
+  const current = getSnapshot();
+  const added = ids.filter((id) => !current.includes(id));
+  if (added.length > 0) write([...current, ...added]);
 }
 
 export function useFavouriteTeams() {

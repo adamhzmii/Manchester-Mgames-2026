@@ -6,12 +6,14 @@ import { usePathname } from "next/navigation";
 
 import { BellIcon, CloseIcon, WifiOffIcon } from "@/components/icons";
 import { UPDATE_TYPE_LABEL, UpdateTypeIcon } from "@/components/update-type-icon";
+import { BACKUP_ORIGIN, backupUrl, useBlockedHere } from "@/lib/backup-site";
 import { useNow } from "@/lib/clock";
 import { useLiveFeed } from "@/lib/live-feed";
 import { daysUntil, firstKickoff, liveFixtures, phaseOf } from "@/lib/matchday";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { formatTime } from "@/lib/format";
 import { isUnseen, markUpdatesSeen, useUpdatesSeen } from "@/lib/updates-seen";
+import { useFavouriteTeams } from "@/lib/use-favourite-teams";
 
 import styles from "./site-header.module.css";
 
@@ -197,6 +199,8 @@ const STALE_AFTER_MS = 45_000;
 function StaleStrip() {
   const { failing, lastSuccess } = useLiveFeed();
   const now = useNow();
+  const blocked = useBlockedHere(failing);
+  if (blocked) return <BlockedStrip />;
   if (!failing || now === null) return null;
 
   const offline = typeof navigator !== "undefined" && navigator.onLine === false;
@@ -213,6 +217,41 @@ function StaleStrip() {
             ? ` · showing scores from ${formatTime(new Date(lastSuccess).toISOString())}`
             : ""}
         </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The scores stopped loading and the backup address still answers: this
+ * network is blocking manchestermgames.com, as University wifi does (see
+ * src/lib/backup-site.ts). Say so in words a player understands and offer
+ * the way round it, keeping them on the same page with the same teams.
+ */
+function BlockedStrip() {
+  const { teamIds } = useFavouriteTeams();
+
+  return (
+    <div className={`${styles.stale} ${styles.blocked}`} role="alert">
+      <div className={`mg-wrap ${styles.staleInner} ${styles.blockedInner}`}>
+        <WifiOffIcon size={16} />
+        <span className={styles.blockedText}>
+          <strong>Uni wifi (eduroam) blocks this address.</strong> Open the backup link for live
+          scores, or switch to mobile data.
+        </span>
+        <a
+          href={BACKUP_ORIGIN}
+          className={styles.blockedLink}
+          onClick={(event) => {
+            event.preventDefault();
+            window.location.href = backupUrl(
+              window.location.pathname + window.location.search,
+              teamIds,
+            );
+          }}
+        >
+          Open backup link
+        </a>
       </div>
     </div>
   );
