@@ -346,7 +346,7 @@ export function courtStates(
     });
   }
 
-  // Fixed, natural order — Hall C1, C2 … C4, D1 — so the courts never
+  // Fixed, natural order — Court C1, C2 … C4, D1 — so the courts never
   // shuffle as games start and finish.
   return states.sort(
     (a, b) =>

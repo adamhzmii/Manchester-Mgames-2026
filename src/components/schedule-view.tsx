@@ -113,7 +113,7 @@ export function ScheduleView({
   );
 
   // The courts and pitches this sport (and category) is played on, in order:
-  // Pitch A before Pitch B, Hall C2 before Hall C10.
+  // Pitch A before Pitch B, Court C2 before Court C10.
   const courts = useMemo(() => {
     const found = new Map<string, string>();
     for (const f of categoryFixtures) {
