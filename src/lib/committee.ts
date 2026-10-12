@@ -29,10 +29,10 @@ export const SPORT_HEADS: Record<string, string[]> = {
 
 /** The heads running the day itself. */
 export const OPERATIONS: { role: string; names: string[] }[] = [
-  { role: "Vendors", names: ["Hannah", "Rafiq"] },
-  { role: "First aid", names: ["Yuan", "Rafiq"] },
   { role: "Volunteers", names: ["Avienash", "Ashley"] },
   { role: "Referees", names: ["Max", "Aaron"] },
+  { role: "Vendors", names: ["Hannah", "Rafiq"] },
+  { role: "First aid", names: ["Yuan", "Rafiq"] },
 ];
 
 export const SOCIETY_INSTAGRAM = ["mssmsports", "instamssm"];

@@ -152,21 +152,11 @@
   color: var(--mg-ink-2);
 }
 
-/* --------------------------------------------------------------- thanks -- */
 
-.thanks {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
-  border-radius: var(--mg-r-lg);
-  background: var(--mg-gold-wash);
-  color: var(--mg-ink);
-  font-size: 15px;
-  line-height: 1.5;
-}
 
 .socials {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -192,11 +182,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .thanks {
-    background: color-mix(in srgb, var(--mg-gold) 14%, var(--mg-night-2));
-    color: var(--mg-night-text);
-  }
-
   .kicker {
     color: var(--mg-gold);
   }

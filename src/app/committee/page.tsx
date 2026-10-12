@@ -30,8 +30,9 @@ function initials(name: string): string {
 }
 
 /**
- * Who runs the day, in the committee's own order: the directors, each
- * sport's heads, then the heads keeping the day going around them.
+ * Who runs the day, in the committee's own order: the directors, the heads
+ * keeping the day going (volunteers and referees first), then each sport's
+ * heads.
  */
 export default async function CommitteePage() {
   const sports = await getSports();
@@ -78,6 +79,20 @@ export default async function CommitteePage() {
         </ul>
       </section>
 
+      <section className={styles.section} aria-labelledby="operations">
+        <h2 id="operations" className={styles.title}>
+          Running the day
+        </h2>
+        <ul className={styles.rows}>
+          {OPERATIONS.map((team) => (
+            <li key={team.role} className={styles.row}>
+              <span className={styles.rowRole}>{team.role}</span>
+              <span className={styles.rowNames}>{team.names.join(" · ")}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className={styles.section} aria-labelledby="sports">
         <h2 id="sports" className={styles.title}>
           Heads of sport
@@ -97,36 +112,19 @@ export default async function CommitteePage() {
         </ul>
       </section>
 
-      <section className={styles.section} aria-labelledby="operations">
-        <h2 id="operations" className={styles.title}>
-          Running the day
-        </h2>
-        <ul className={styles.rows}>
-          {OPERATIONS.map((team) => (
-            <li key={team.role} className={styles.row}>
-              <span className={styles.rowRole}>{team.role}</span>
-              <span className={styles.rowNames}>{team.names.join(" · ")}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className={styles.thanks}>
-        <p>A big thank you to every volunteer, referee and coordinator making MGames 2026 happen.</p>
-        <div className={styles.socials}>
-          {SOCIETY_INSTAGRAM.map((handle) => (
-            <a
-              key={handle}
-              href={`https://instagram.com/${handle}`}
-              target="_blank"
-              rel="noreferrer"
-              className={styles.social}
-            >
-              <InstagramIcon size={16} />@{handle}
-            </a>
-          ))}
-        </div>
-      </section>
+      <div className={styles.socials}>
+        {SOCIETY_INSTAGRAM.map((handle) => (
+          <a
+            key={handle}
+            href={`https://instagram.com/${handle}`}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.social}
+          >
+            <InstagramIcon size={16} />@{handle}
+          </a>
+        ))}
+      </div>
 
       <p className={styles.credit}>Website by {WEBSITE_BY}</p>
     </div>
