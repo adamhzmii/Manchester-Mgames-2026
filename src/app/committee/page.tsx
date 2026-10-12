@@ -112,10 +112,7 @@ export default async function CommitteePage() {
       </section>
 
       <section className={styles.thanks}>
-        <p>
-          Thank you to every volunteer, referee and coordinator who made the day happen, and to
-          every player who turned up to play.
-        </p>
+        <p>A big thank you to every volunteer, referee and coordinator making MGames 2026 happen.</p>
         <div className={styles.socials}>
           {SOCIETY_INSTAGRAM.map((handle) => (
             <a

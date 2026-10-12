@@ -19,60 +19,63 @@
   text-transform: uppercase;
 }
 
-/* -------------------------------------------------------- emergency ---- */
+/* -------------------------------------------------------- first aid ---- */
 
-.emergency {
+.firstAid {
   display: grid;
-  gap: 12px;
-  padding: 16px;
-  border-radius: var(--mg-r-lg);
-  background: var(--mg-live-wash);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mg-live) 30%, transparent);
-}
-
-.emergencyTitle {
-  display: flex;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  color: var(--mg-live);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
 }
 
-.callFirstAid {
-  display: flex;
+.firstAidIcon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 56px;
-  border-radius: var(--mg-r);
-  background: var(--mg-live);
-  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mg-live-wash);
+  color: var(--mg-live);
+}
+
+.firstAidText {
+  display: grid;
+  gap: 3px;
+}
+
+.firstAidTitle {
   font-family: var(--mg-display);
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.firstAidWho {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+.firstAidBody {
   font-size: 14px;
+  line-height: 1.4;
   color: var(--mg-ink-2);
 }
 
-.firstAidWho svg {
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: var(--mg-live);
+.firstAidCall {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--mg-live);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
 }
 
-.firstAidWho strong {
-  color: var(--mg-ink);
+.firstAid .contacts {
+  grid-column: 1 / -1;
 }
 
 /* -------------------------------------------------------- handbook ---- */
@@ -237,11 +240,6 @@
   text-transform: uppercase;
 }
 
-.emergencyNote {
-  font-size: 14px;
-  color: var(--mg-ink-2);
-}
-
 /* ----------------------------------------------------------- format ---- */
 
 .formats,
@@ -344,40 +342,10 @@ details[open] > summary .chevron {
 
 /* ----------------------------------------------------------- venues ---- */
 
-.venues {
-  display: grid;
-  gap: 8px;
-}
-
 @media (min-width: 600px) {
   .venues {
     grid-template-columns: 1fr 1fr;
   }
-}
-
-.venue {
-  display: grid;
-  gap: 4px;
-  padding: 14px;
-  border-radius: var(--mg-r-lg);
-  background: var(--mg-card);
-  box-shadow: var(--mg-shadow);
-  color: var(--mg-ink);
-}
-
-.venueName {
-  font-family: var(--mg-display);
-  font-size: 19px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.venueLine {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 14px;
-  color: var(--mg-ink-2);
 }
 
 .list {

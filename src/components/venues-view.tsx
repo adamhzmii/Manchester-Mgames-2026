@@ -226,7 +226,7 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
                 tone="red"
               />
             ) : null}
-            {/* No venue has its own prayer room: the two nearby, closest first. */}
+            {/* No venue has its own prayer room: the ones nearby, closest first. */}
             <li className={styles.facility}>
               <span className={styles.facilityIcon}>
                 <PrayerIcon size={20} />
@@ -252,7 +252,7 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
                 ))}
               </span>
             </li>
-            {facilities ? (
+            {facilities?.toilets ? (
               <Facility icon={<ToiletIcon size={20} />} label="Toilets" value={facilities.toilets} />
             ) : null}
           </ul>

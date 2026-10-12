@@ -32,33 +32,38 @@ export const EVENT_CONTACTS: Contact[] = [
 ];
 
 /**
- * The head of first aid, called straight from the top of the Info page. In
- * place of a "Call 999" button there: a one-tap 999 on a page every visitor
- * opens invites prank calls. Yuan runs first aid on the day, the first-aid
- * teams included, and gets the right person to you.
+ * The head of first aid, called from the Info page. There is a first aider
+ * at every venue; the head of first aid knows where each one is and sends
+ * the nearest. Called by role, not name: whoever holds the phone on the day.
+ * In place of a "Call 999" button: a one-tap 999 on a page every visitor
+ * opens invites prank calls.
  */
 export const FIRST_AID = {
-  name: "Yuan",
   role: "Head of First Aid",
   tel: "+447785442051",
   display: "+44 7785 442051",
-  note: "Runs first aid on the day, and sends the nearest first aider to you.",
 };
 
 export type VenueFacilities = {
   firstAid: string;
-  toilets: string;
+  toilets?: string;
 };
+
+/** Every venue has a first aider; the head of first aid sends them. */
+const FIRST_AIDER = `A first aider is on site. Call the Head of First Aid: ${FIRST_AID.display}`;
 
 /** Keyed by venue slug, so the Venues page can show the building you are in. */
 export const VENUE_FACILITIES: Record<string, VenueFacilities> = {
   trinity: {
-    firstAid: "Main Hall entrance",
+    firstAid: FIRST_AIDER,
     toilets: "Signposted throughout · accessible WC at reception",
   },
   sugden: {
-    firstAid: "Ground-floor reception",
+    firstAid: FIRST_AIDER,
     toilets: "Signposted throughout · accessible WC at reception",
+  },
+  "denmark-road": {
+    firstAid: FIRST_AIDER,
   },
 };
 
@@ -72,21 +77,28 @@ export type PrayerRoom = {
   walk: Partial<Record<string, number>>;
 };
 
-/** Neither venue has its own; these are the two closest. */
+/** No venue has its own; these are the three nearby, as the committee timed them. */
 export const PRAYER_ROOMS: PrayerRoom[] = [
-  {
-    name: "McDougall Prayer Hall",
-    where: "McDougall Centre, Burlington Street",
-    address: "McDougall Centre, Burlington Street, Manchester M15 6HQ",
-    notes: ["Student ID required", "Prayer mats and an ablution room"],
-    walk: { trinity: 3, sugden: 17 },
-  },
   {
     name: "Students' Union Faith Space",
     where: "University of Manchester Students' Union, Faith Space Room, 2nd floor",
     address: "University of Manchester Students' Union, Oxford Road, Manchester M13 9PR",
     notes: ["No student ID required"],
     walk: { trinity: 11, sugden: 12 },
+  },
+  {
+    name: "Manchester Museum Prayer Room",
+    where: "Manchester Museum, Prayer Room, Level 1",
+    address: "Manchester Museum, Oxford Road, Manchester M13 9PL",
+    notes: ["Prayer mats and an ablution room"],
+    walk: { trinity: 7, sugden: 10 },
+  },
+  {
+    name: "McDougall Prayer Hall",
+    where: "McDougall Centre, Prayer Hall",
+    address: "McDougall Centre, Burlington Street, Manchester M15 6HQ",
+    notes: ["Student ID required", "Prayer mats and an ablution room"],
+    walk: { trinity: 3, sugden: 17 },
   },
 ];
 
@@ -125,7 +137,7 @@ export const FAQ = [
   {
     question: "What if my game is delayed or moved?",
     answer:
-      "The site keeps up for you. If a court falls behind, every game after it there shows its new expected time in orange, worked out from when games really start and finish. Follow your team and turn on notifications to be told when your game slips 10 minutes or more, or moves. Bigger changes are posted under Updates too.",
+      "The site keeps up for you. If a court falls behind, every game after it there shows its new expected time, worked out from when games really start and finish. Follow your team and turn on notifications to be told when your game slips 10 minutes or more, or moves. Bigger changes are posted under Updates too.",
   },
   {
     question: "Where are the rules?",
@@ -135,7 +147,7 @@ export const FAQ = [
   {
     question: "Is there somewhere to pray?",
     answer:
-      "Yes, two prayer spaces nearby. McDougall Prayer Hall is 3 minutes' walk from Trinity (student ID required; prayer mats and an ablution room). The Students' Union Faith Space, 2nd floor, needs no student ID — 11 minutes from Trinity, 12 from Sugden.",
+      "Yes, three nearby. The Students' Union Faith Space (2nd floor) needs no student ID — 11 minutes from Trinity, 12 from Sugden. Manchester Museum's Prayer Room (Level 1) has prayer mats and an ablution room — 7 minutes from Trinity, 10 from Sugden. McDougall Prayer Hall is 3 minutes from Trinity (student ID required; prayer mats and an ablution room).",
   },
   {
     question: "How do I keep track of my own team?",
