@@ -89,6 +89,15 @@
   font-weight: 800;
 }
 
+.portrait {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px var(--mg-gold);
+}
+
 .directorName {
   font-family: var(--mg-display);
   font-size: 22px;

@@ -62,11 +62,15 @@ export default async function CommitteePage() {
           Directors
         </h2>
         <ul className={styles.directors}>
-          {DIRECTORS.map((name) => (
+          {DIRECTORS.map(({ name, photo }) => (
             <li key={name} className={styles.director}>
-              <span className={styles.avatar} aria-hidden="true">
-                {initials(name)}
-              </span>
+              {photo ? (
+                <Image src={photo} alt={name} width={112} height={112} className={styles.portrait} />
+              ) : (
+                <span className={styles.avatar} aria-hidden="true">
+                  {initials(name)}
+                </span>
+              )}
               <span className={styles.directorName}>{name}</span>
               <span className={styles.directorRole}>MGames Director</span>
             </li>

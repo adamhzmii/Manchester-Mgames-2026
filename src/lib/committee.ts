@@ -9,7 +9,11 @@
  */
 export const GROUP_PHOTO: string | null = null;
 
-export const DIRECTORS = ["Adam Hazmi", "Shing Hui"];
+/** The two directors, with a portrait each (under /public; null for initials). */
+export const DIRECTORS: { name: string; photo: string | null }[] = [
+  { name: "Adam Hazmi", photo: "/committee/adam-hazmi.jpg" },
+  { name: "Shing Hui", photo: "/committee/shing-hui.jpg" },
+];
 
 /** Heads of each sport, keyed by the sport's slug. */
 export const SPORT_HEADS: Record<string, string[]> = {
