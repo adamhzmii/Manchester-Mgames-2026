@@ -1,6 +1,6 @@
 import type { Fixture } from "@/lib/fixtures";
 import { qualification, type Qualification } from "@/lib/slots";
-import { pointsRule, type GroupMeta, type TeamMeta } from "@/lib/standings";
+import { pointsLine, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import type { FixtureStage } from "@/lib/supabase/types";
 
 /**
@@ -87,8 +87,7 @@ export function describeFormat(
       lines.push(`${name}: ${groupsPhrase(sizes).toLowerCase()}.${through}`);
     }
     if (sportGroups.length > 0) {
-      const rule = pointsRule(sportSlug);
-      lines.push(`Everyone plays everyone in their group. ${rule.win} points for a win, ${rule.draw} for a draw.`);
+      lines.push(`Everyone plays everyone in their group. ${pointsLine(sportSlug)}`);
     }
   } else if (sportGroups.length > 0) {
     const sizes = sportGroups.map((g) => sportTeams.filter((t) => t.groupId === g.id).length);
@@ -98,8 +97,7 @@ export function describeFormat(
         : `${groupsPhrase(sizes)}, everyone plays everyone in their group.`,
     );
 
-    const rule = pointsRule(sportSlug);
-    lines.push(`${rule.win} points for a win, ${rule.draw} for a draw.`);
+    lines.push(pointsLine(sportSlug));
 
     const firstKnockout = rounds.find((r) => r !== "third_place");
     if (firstKnockout) {

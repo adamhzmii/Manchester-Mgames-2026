@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { Fixture } from "../src/lib/fixtures.ts";
-import { computeStandings, type GroupMeta, type TeamMeta } from "../src/lib/standings.ts";
+import { allowsDraws, pointsLine, computeStandings, type GroupMeta, type TeamMeta } from "../src/lib/standings.ts";
 
 const GROUP: GroupMeta = { id: "g1", name: "Group A", sortOrder: 1, categoryId: "c1" };
 
@@ -185,4 +185,12 @@ test("teams appear with a played count of zero before any results", () => {
     group.rows.map((r) => r.played),
     [0, 0, 0, 0],
   );
+});
+
+test("table tennis and pickleball have no draws; the other sports do", () => {
+  assert.equal(allowsDraws("table-tennis"), false);
+  assert.equal(allowsDraws("pickleball"), false);
+  assert.equal(allowsDraws("football"), true);
+  assert.equal(pointsLine("pickleball"), "3 points for a win. No draws.");
+  assert.equal(pointsLine("netball"), "3 points for a win, 1 for a draw.");
 });

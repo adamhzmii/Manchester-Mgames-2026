@@ -12,7 +12,7 @@ import { useLiveFixtures } from "@/lib/live-feed";
 import type { Sport } from "@/lib/queries";
 import {
   computeStandings,
-  pointsRule,
+  pointsLine,
   bestPlaceTable,
   type GroupMeta,
   type TeamMeta,
@@ -176,7 +176,6 @@ function SportStandings({
     { value: "games", label: "Games" },
   ];
   const active = tab && tabs.some((t) => t.value === tab) ? tab : tabs[0].value;
-  const rule = pointsRule(sport.slug);
 
   return (
     <>
@@ -221,8 +220,8 @@ function SportStandings({
                   round: firstKnockoutRound(tables[0].categoryId, fixtures),
                 })} `
               : null}
-            {rule.win} points for a win, {rule.draw} for a draw. Level on points is split by score
-            difference, then by score.
+            {pointsLine(sport.slug)} Level on points is split by score difference, then by total
+            score.
           </p>
         </section>
       ) : null}

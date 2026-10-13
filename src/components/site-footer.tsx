@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { HANDBOOK_URL } from "@/lib/info-content";
+import { INFO_PACK_URL, RULEBOOK_URL } from "@/lib/info-content";
 
 import styles from "./site-footer.module.css";
 
@@ -38,8 +38,11 @@ export function SiteFooter() {
               {link.label}
             </Link>
           ))}
-          <a href={HANDBOOK_URL} target="_blank" rel="noreferrer">
-            Handbook
+          <a href={RULEBOOK_URL} target="_blank" rel="noreferrer">
+            Rulebook
+          </a>
+          <a href={INFO_PACK_URL} target="_blank" rel="noreferrer">
+            Info pack
           </a>
         </nav>
 

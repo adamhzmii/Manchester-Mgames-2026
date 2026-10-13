@@ -9,10 +9,17 @@
  */
 
 /**
- * The MGames handbook: the info pack and the rulebook in one PDF, on Google
- * Drive, shared so anyone with the link can open it.
+ * The MGames 2026 rulebook: general and sport-by-sport rules, a Google Doc
+ * shared so anyone with the link can read it.
  */
-export const HANDBOOK_URL =
+export const RULEBOOK_URL =
+  "https://docs.google.com/document/d/1Eztxsx97Si7VtIR6AH_v59nh5FIWOScoEtjllYqF9uQ/edit?usp=sharing";
+
+/**
+ * The participant info pack. Until its own version is ready, the handbook
+ * PDF on Google Drive.
+ */
+export const INFO_PACK_URL =
   "https://drive.google.com/file/d/1KNs4fotwofsR3zFLBL9r1TgQZ4-kE2Q1/view?usp=sharing";
 
 export type Contact = {
@@ -120,7 +127,7 @@ export function walkingRouteTo(address: string): string {
 export const TRAVEL = {
   /** Buses worth knowing, by pair of venue slugs in either order. */
   buses: [{ between: ["trinity", "sugden"], line: "Bus 142, every 10 min — 6 minutes" }],
-  note: "Your wristband gets you into every venue all day. Stewards in gold hi-vis are at each reception.",
+  note: "Keep your wristband on all day, between games too.",
 };
 
 export const GETTING_THERE = [
@@ -130,9 +137,14 @@ export const GETTING_THERE = [
 
 export const FAQ = [
   {
+    question: "When should I arrive?",
+    answer:
+      "MGames runs 8am to 8pm. Check in at your sport's venue at least 20 minutes before your first game: your ID is checked and you get your wristband — purple for Malaysian players, yellow for non-Malaysian. Keep it on all day. A team that can't put out a legal line-up within 5 minutes of its start time forfeits the game.",
+  },
+  {
     question: "Can I move between the venues?",
     answer:
-      "Yes. Your wristband gets you into every venue all day. Trinity to Sugden is a 12-minute walk, or 6 minutes on bus 142. The football is at Denmark Road, about 8 minutes' walk from Trinity. There's no food at Denmark Road — the Food page shows where the stalls are.",
+      "Yes. Trinity to Sugden is a 12-minute walk, or 6 minutes on bus 142. The football is at Denmark Road, about 8 minutes' walk from Trinity. There's no food at Denmark Road — the Food page shows where the stalls are.",
   },
   {
     question: "What if my game is delayed or moved?",
@@ -142,7 +154,7 @@ export const FAQ = [
   {
     question: "Where are the rules?",
     answer:
-      "In the MGames handbook — the info pack and the rulebook for every sport in one PDF. It's linked at the top of the Info page.",
+      "In the MGames 2026 rulebook: the general rules and every sport's rules. It's linked at the top of the Info page, next to the info pack.",
   },
   {
     question: "Is there somewhere to pray?",

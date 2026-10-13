@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds MGames 2026's real timetable — every game at the time and on the
 // court in the committee's fixture spreadsheet ("[INTERNAL] MGAMES 26 FIXTURE
-// SCHEDULE", version 2) — with mock teams until registration closes, and
+// SCHEDULE", version 3) — with mock teams until registration closes, and
 // writes it as a migration.
 //
 //   node tools/schedule-2026.mjs > supabase/migrations/<stamp>_real_timetable.sql
@@ -96,6 +96,14 @@ const SPORTS = [
       {
         slug: "open",
         name: "Open",
+        names: [
+          ["MCCH", "Maui", "muiz.pdfc", "Bankfield All Star FC"],
+          ["Hombres FT", "Haram Ballerz", "Anak Harimau", "Glasgow"],
+          ["Avengers FC", "RTJ", "Geng Bangku FC", "Brexit Hasta City FC"],
+          ["Aadi and friends", "Woxbridge United", "Woman United (U21)", "MSSM"],
+          ["LumFC", "Asam Pedas", "DUMAS", "Fourteen"],
+          ["Siu", "6eer6ellyFC", "CGB", "6ola 6oys"],
+        ],
         groups: [
           { size: 4, courts: ["Pitch A"], times: every("09:00", 15, 6) },
           { size: 4, courts: ["Pitch B"], times: every("09:00", 15, 6) },
@@ -160,12 +168,11 @@ const SPORTS = [
       {
         slug: "open",
         name: "Open",
-        // The sheet's own names, with a stand-in for its "TBC".
         names: [
-          ["Chinatown", "Rough Sets", "Volvolley", "bang bang"],
-          ["Teh Tarik Spikers", "MSS Lboro", "Rice for Life"],
-          ["Team Luther", "Maggi Goreng", "Kopi o Peng"],
-          ["WBS", "Pandan Power", "Kugem"],
+          ["Kopi O Kosong", "Hitam Manis", "BANG BANG", "Brandon Kuan En Hong (TBC)"],
+          ["MSSM", "Jojo Volleyball Club", "Karasini"],
+          ["Adobo Lumpur", "naeem's team (TBC)", "Eddin"],
+          ["kyvo", "Kieran n Co", "Under Cooked"],
         ],
         groups: [
           { size: 4, courts: ["Hall B"], times: every("08:30", 22, 6) },
@@ -222,10 +229,10 @@ const SPORTS = [
         slug: "open",
         name: "Open",
         names: [
-          ["Mamak Ultimate", "Sotong", "B2efris", "Stallion A"],
-          ["Brahaha", "Mamak Ultimate 2", "Stallion B", "Bounce"],
-          ["Bounce 2", "Mamak Ultimate 3", "Brohoho"],
-          ["Mamak Ultimate 4", "Beefr1s", "Brakaka"],
+          ["Mamak Teh Tarik", "Mamak Roti Canai", "Mamak Maggie Goreng", "Mamak Tandoori"],
+          ["yellow mamba at the pharmacy", "alliGato", "ariGato", "Bristeal"],
+          ["Bristole", "Bristolen", "Stallions A"],
+          ["Stallions B", "Stallions C", "Beefsteaks"],
         ],
         groups: [
           { size: 4, courts: ["Sport Hall"], times: ["08:30", "08:52", "09:16", "09:39", "10:03", "10:26"] },
@@ -234,10 +241,10 @@ const SPORTS = [
           { size: 3, courts: ["Sport Hall"], times: ["13:53", "14:15", "14:37"] },
         ],
         knockouts: [
-          ko("QF", 1, "15:20", "Sport Hall", "Group A winner", "Group C runner-up"),
-          ko("QF", 2, "15:42", "Sport Hall", "Group B winner", "Group D runner-up"),
-          ko("QF", 3, "16:04", "Sport Hall", "Group C winner", "Group A runner-up"),
-          ko("QF", 4, "16:26", "Sport Hall", "Group D winner", "Group B runner-up"),
+          ko("QF", 1, "15:20", "Sport Hall", "Group A winner", "Group B runner-up"),
+          ko("QF", 2, "15:42", "Sport Hall", "Group B winner", "Group A runner-up"),
+          ko("QF", 3, "16:04", "Sport Hall", "Group C winner", "Group D runner-up"),
+          ko("QF", 4, "16:26", "Sport Hall", "Group D winner", "Group C runner-up"),
           ko("SF", 1, "16:53", "Sport Hall", win("QF", 1), win("QF", 2)),
           ko("SF", 2, "17:15", "Sport Hall", win("QF", 3), win("QF", 4)),
           ...thirdAndFinal("17:40", "Sport Hall", "18:00", "Sport Hall"),
@@ -338,25 +345,62 @@ const SPORTS = [
   {
     slug: "pickleball",
     venue: "sugden",
-    // Hall D, once badminton is out of it.
+    // Hall D, once badminton is out of it. Group games are first to 15 with
+    // a 15-minute cap, in 20-minute slots; knockouts are best of three to 11
+    // under a 35-minute cap (rulebook 8.4).
     courts: ["Court D1", "Court D2", "Court D3", "Court D4"],
-    len: { group: 25, knockout: 40, final: 40 },
+    len: { group: 20, quarterfinal: 20, knockout: 35, final: 35 },
     categories: [
-      { slug: "md", name: "Men's Doubles", pair: ["Court D1", "Court D2"] },
-      { slug: "xd", name: "Mixed Doubles", pair: ["Court D3", "Court D4"] },
-    ].map(({ slug, name, pair }) => ({
-      slug,
-      name,
-      groups: [
-        { size: 4, courts: pair, times: ["14:00", "14:25", "14:50"] },
-        { size: 4, courts: pair, times: ["15:15", "15:40", "16:05"] },
-      ],
-      knockouts: [
-        ko("SF", 1, "16:35", pair[0], "Group A winner", "Group B runner-up"),
-        ko("SF", 2, "16:35", pair[1], "Group B winner", "Group A runner-up"),
-        ...thirdAndFinal("17:20", pair[0], "17:20", pair[1]),
-      ],
-    })),
+      {
+        slug: "md",
+        name: "Men's Doubles",
+        groups: [
+          // Two courts side by side, three rounds, as the sheet lays them out.
+          {
+            size: 4,
+            courts: ["Court D1", "Court D2"],
+            times: ["14:00", "14:40", "15:20"],
+            rounds: [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]],
+          },
+          {
+            size: 4,
+            courts: ["Court D1", "Court D2"],
+            times: ["14:20", "15:00", "15:40"],
+            rounds: [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]],
+          },
+          { size: 3, courts: ["Court D3"], times: ["14:00", "14:40", "15:20"], pairs: [[0, 1], [0, 2], [1, 2]] },
+          { size: 3, courts: ["Court D3"], times: ["14:20", "15:00", "15:40"], pairs: [[0, 1], [0, 2], [1, 2]] },
+        ],
+        knockouts: [
+          ko("QF", 1, "16:05", "Court D1", "Group A winner", "Group B runner-up"),
+          ko("QF", 2, "16:05", "Court D2", "Group B winner", "Group A runner-up"),
+          ko("QF", 3, "16:05", "Court D3", "Group C winner", "Group D runner-up"),
+          ko("QF", 4, "16:25", "Court D1", "Group D winner", "Group C runner-up"),
+          ko("SF", 1, "16:45", "Court D2", win("QF", 1), win("QF", 3)),
+          ko("SF", 2, "16:45", "Court D1", win("QF", 2), win("QF", 4)),
+          // After the semi-finals' 35-minute cap (the sheet had 17:10).
+          ...thirdAndFinal("17:25", "Court D2", "17:25", "Court D1"),
+        ],
+      },
+      {
+        slug: "xd",
+        name: "Mixed Doubles",
+        // Four pairs: one group, then semi-finals, as the rulebook has it.
+        groups: [
+          {
+            size: 4,
+            courts: ["Court D4"],
+            times: every("14:00", 20, 6),
+            pairs: [[0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2]],
+          },
+        ],
+        knockouts: [
+          ko("SF", 1, "16:45", "Court D3", "Group A 1st", "Group A 4th"),
+          ko("SF", 2, "16:45", "Court D4", "Group A 2nd", "Group A 3rd"),
+          ...thirdAndFinal("17:25", "Court D3", "17:25", "Court D4"),
+        ],
+      },
+    ],
   },
   {
     slug: "table-tennis",
@@ -420,8 +464,8 @@ for (const sport of SPORTS) {
       // One court: the sheet's order of games. Two courts: rounds, side by side.
       const games =
         group.courts.length === 1
-          ? PAIRS[group.size].map((pair, i) => ({ pair, court: group.courts[0], time: group.times[i] }))
-          : ROUNDS[group.size].flatMap((round, r) =>
+          ? (group.pairs ?? PAIRS[group.size]).map((pair, i) => ({ pair, court: group.courts[0], time: group.times[i] }))
+          : (group.rounds ?? ROUNDS[group.size]).flatMap((round, r) =>
               round.map((pair, i) => ({ pair, court: group.courts[i], time: group.times[r] })),
             );
       const expected = (group.size * (group.size - 1)) / 2;
@@ -453,7 +497,8 @@ for (const sport of SPORTS) {
     for (const k of cat.knockouts) {
       const stage = KO_STAGE[k.stage] ?? k.stage;
       fixtureRows.push([sport.slug, cat.slug, null, stage, null, null, label(k.a), label(k.b), sport.venue, k.court, `${DAY} ${k.time}${OFFSET}`]);
-      const len = stage === "final" || stage === "third_place" ? sport.len.final : sport.len.knockout;
+      const len =
+        stage === "final" || stage === "third_place" ? sport.len.final : (sport.len[stage] ?? sport.len.knockout);
       bookings.push([sport, k.court, toMin(k.time), toMin(k.time) + len, `${tag} ${stage}`, []]);
     }
   });
@@ -482,7 +527,7 @@ const q = (v) => (v === null ? "null" : typeof v === "number" ? String(v) : `'${
 const values = (rows) => rows.map((r) => `  (${r.map(q).join(", ")})`).join(",\n");
 
 const sql = `-- MGames 2026's real timetable, generated by tools/schedule-2026.mjs from the
--- committee's fixture spreadsheet (version 2): every game at its time and on
+-- committee's fixture spreadsheet (version 3): every game at its time and on
 -- its court, every knockout slot wired to the game that feeds it. Teams are
 -- placeholders until registration closes, except volleyball's and frisbee's,
 -- which the sheet names.
@@ -511,7 +556,7 @@ begin
   delete from announcements where id is not null;
   insert into announcements (type, title, body, published_at) values
     ('notice', 'Welcome to MGames 2026!',
-     'Doors open at 08:30. Collect your wristband at reception — it gets you into every venue all day.',
+     'MGames runs 8am to 8pm. Check in at your sport''s venue at least 20 minutes before your first game to collect your wristband.',
      '${DAY} 08:00${OFFSET}');
 end;
 $$;
@@ -519,6 +564,11 @@ $$;
 revoke all on function reset_demo_day_to_pre_event() from public;
 revoke all on function reset_demo_day_to_pre_event() from anon, authenticated;
 grant execute on function reset_demo_day_to_pre_event() to service_role;
+
+-- The welcome update already posted says what the rulebook says.
+update announcements
+  set body = 'MGames runs 8am to 8pm. Check in at your sport''s venue at least 20 minutes before your first game to collect your wristband.'
+  where title = 'Welcome to MGames 2026!';
 
 -- Out with the old mock: categories take their groups, teams and games with them.
 delete from categories where id is not null;

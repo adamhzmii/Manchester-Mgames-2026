@@ -273,7 +273,7 @@ const SCRIPT: Record<
       minutesAgo: 90,
       type: "notice",
       title: "See you tomorrow",
-      body: "Doors open at 08:30. Find your team's first game on the Schedule page.",
+      body: "MGames runs 8am to 8pm. Check in at your venue 20 minutes before your first game.",
     },
   ],
   morning: [
@@ -281,7 +281,7 @@ const SCRIPT: Record<
       minutesAgo: 10,
       type: "notice",
       title: "Doors are open",
-      body: "Collect your wristband at reception — it gets you into both venues all day.",
+      body: "Check in at your venue 20 minutes before your first game to collect your wristband.",
     },
   ],
   midday: [
@@ -307,7 +307,7 @@ const SCRIPT: Record<
       minutesAgo: 260,
       type: "notice",
       title: "Doors are open",
-      body: "Collect your wristband at reception — it gets you into both venues all day.",
+      body: "Check in at your venue 20 minutes before your first game to collect your wristband.",
     },
   ],
   post: [

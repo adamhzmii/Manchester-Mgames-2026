@@ -14,6 +14,7 @@ import {
 import { courtKey } from "@/lib/delays";
 import type { Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
+import { allowsDraws } from "@/lib/standings";
 import type { FixtureStatus } from "@/lib/supabase/types";
 
 import styles from "./score-console.module.css";
@@ -167,8 +168,12 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     // A level knockout cannot send anyone through, and the bracket after it
     // would stall. Penalties, a golden point — whatever decides it is the
     // score to record.
-    if (fixture.stage !== "group" && a === b) {
-      setWarning("Knockout games can't end level. Record the deciding score so a winner goes through.");
+    if (a === b && (fixture.stage !== "group" || !allowsDraws(fixture.sportSlug))) {
+      setWarning(
+        fixture.stage !== "group"
+          ? "Knockout games can't end level. Record the deciding score so a winner goes through."
+          : `${fixture.sportName} games can't end level. Record the deciding score.`,
+      );
       return;
     }
     setStatus("finished");

@@ -6,6 +6,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   ExternalIcon,
+  InfoIcon,
   FirstAidIcon,
   PhoneIcon,
   PrayerIcon,
@@ -17,7 +18,8 @@ import {
   FAQ,
   FIRST_AID,
   GETTING_THERE,
-  HANDBOOK_URL,
+  INFO_PACK_URL,
+  RULEBOOK_URL,
   PRAYER_ROOMS,
   walkingRouteTo,
 } from "@/lib/info-content";
@@ -29,7 +31,7 @@ import styles from "./info.module.css";
 export const metadata: Metadata = {
   title: "Info & help",
   description:
-    "The MGames 2026 handbook, first aid, getting there, prayer rooms, questions and how each sport's tournament works.",
+    "The MGames 2026 rulebook and info pack, first aid, getting there, prayer rooms, questions and how each sport's tournament works.",
 };
 
 /** Reads the fixture list for the format section. */
@@ -48,17 +50,29 @@ export default async function InfoPage() {
     <div className={`mg-wrap ${styles.page}`}>
       <h1 className="mg-page-title">Info &amp; help</h1>
 
-      {/* The handbook first: the info pack and every sport's rules. */}
-      <a href={HANDBOOK_URL} target="_blank" rel="noreferrer" className={styles.handbook}>
-        <span className={styles.handbookIcon}>
-          <BookIcon size={22} />
-        </span>
-        <span className={styles.handbookText}>
-          <span className={styles.handbookTitle}>MGames handbook</span>
-          <span className={styles.handbookSub}>The info pack and every sport&rsquo;s rules, in one PDF</span>
-        </span>
-        <ExternalIcon size={18} />
-      </a>
+      {/* The two documents first: the rules, and everything else to know. */}
+      <div className={styles.documents}>
+        <a href={RULEBOOK_URL} target="_blank" rel="noreferrer" className={styles.handbook}>
+          <span className={styles.handbookIcon}>
+            <BookIcon size={22} />
+          </span>
+          <span className={styles.handbookText}>
+            <span className={styles.handbookTitle}>Rulebook</span>
+            <span className={styles.handbookSub}>General and sport-by-sport rules</span>
+          </span>
+          <ExternalIcon size={18} />
+        </a>
+        <a href={INFO_PACK_URL} target="_blank" rel="noreferrer" className={styles.handbook}>
+          <span className={styles.handbookIcon}>
+            <InfoIcon size={22} />
+          </span>
+          <span className={styles.handbookText}>
+            <span className={styles.handbookTitle}>Info pack</span>
+            <span className={styles.handbookSub}>Everything to know for the day</span>
+          </span>
+          <ExternalIcon size={18} />
+        </a>
+      </div>
 
       {/* First aid, kept short: who to call, and that someone will come. */}
       <section className={styles.firstAid} aria-labelledby="first-aid">

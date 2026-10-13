@@ -281,6 +281,24 @@ export function teamForm(fixtures: readonly Fixture[], teamId: string): FormResu
 }
 
 /** Points a win and a draw are worth in this sport, for explaining the table. */
+/**
+ * Sports whose group games always produce a winner (rulebook: table tennis
+ * and pickleball have no draws). A level score there can't be a result.
+ */
+const NO_DRAWS = new Set(["table-tennis", "pickleball"]);
+
+export function allowsDraws(sportSlug: string): boolean {
+  return !NO_DRAWS.has(sportSlug);
+}
+
+/** "3 points for a win, 1 for a draw." — or no draw, where there are none. */
+export function pointsLine(sportSlug: string): string {
+  const rule = pointsRule(sportSlug);
+  return allowsDraws(sportSlug)
+    ? `${rule.win} points for a win, ${rule.draw} for a draw.`
+    : `${rule.win} points for a win. No draws.`;
+}
+
 export function pointsRule(sportSlug: string): { win: number; draw: number } {
   return POINTS_RULES[sportSlug] ?? DEFAULT_POINTS;
 }

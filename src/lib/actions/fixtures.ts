@@ -6,6 +6,7 @@ import { FIXTURE_SELECT, toFixture, type Fixture, type FixtureRow } from "@/lib/
 import { formatTime } from "@/lib/format";
 import { londonDate, londonToIso } from "@/lib/london-time";
 import { notifyLateGames } from "@/lib/late-notify";
+import { allowsDraws } from "@/lib/standings";
 import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "@/lib/reschedule";
 import { sendPush } from "@/lib/push/server";
 import { TAG, getCoordinator } from "@/lib/queries";
@@ -76,12 +77,23 @@ export async function updateFixtureScore(
   const { data: before } = await supabase
     .from("fixtures")
     .select(
-      `status, team_a_id, team_b_id,
+      `status, stage, team_a_id, team_b_id,
        team_a:teams!fixtures_team_a_id_fkey ( name ),
-       team_b:teams!fixtures_team_b_id_fkey ( name )`,
+       team_b:teams!fixtures_team_b_id_fkey ( name ),
+       category:categories ( sport:sports ( slug ) )`,
     )
     .eq("id", fixtureId)
     .limit(1);
+
+  // A finished game that can't end level: any knockout, and every game in
+  // the sports with no draws (table tennis, pickleball).
+  if (status === "finished" && scoreA !== null && scoreA === scoreB && before?.[0]) {
+    const row = before[0] as { stage: string; category?: { sport?: { slug: string } | null } | null };
+    const sport = row.category?.sport?.slug ?? "";
+    if (row.stage !== "group" || !allowsDraws(sport)) {
+      return { status: "error", message: "This game can't end level. Record the deciding score." };
+    }
+  }
 
   const { data, error } = await supabase
     .from("fixtures")

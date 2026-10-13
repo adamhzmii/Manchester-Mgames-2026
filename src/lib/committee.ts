@@ -17,7 +17,7 @@ export const DIRECTORS: { name: string; photo: string | null }[] = [
 
 /** Heads of each sport, keyed by the sport's slug. */
 export const SPORT_HEADS: Record<string, string[]> = {
-  football: ["Jonny", "Danial Imran"],
+  football: ["Jonathan Yee", "Danial Imran"],
   basketball: ["Daniel Tan", "Aaron Choong"],
   netball: ["Kellie", "Aisyah Rasidi"],
   volleyball: ["Fiona", "Raden"],
