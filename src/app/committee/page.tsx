@@ -17,7 +17,7 @@ import styles from "./committee.module.css";
 
 export const metadata: Metadata = {
   title: "Committee",
-  description: "The Malaysian Students' Society Manchester committee running MGames 2026.",
+  description: "The Malaysian Students' Society of Manchester committee running MGames 2026.",
 };
 
 /** Initials for a name's badge: "Adam Hazmi" → "AH", "Jonny" → "J". */
@@ -40,7 +40,7 @@ export default async function CommitteePage() {
   return (
     <div className={`mg-wrap ${styles.page}`}>
       <header className={styles.head}>
-        <p className={styles.kicker}>Malaysian Students&rsquo; Society Manchester</p>
+        <p className={styles.kicker}>Malaysian Students&rsquo; Society of Manchester</p>
         <h1 className="mg-page-title">Meet the committee</h1>
         <p className={styles.lede}>The people behind Manchester MGames 2026.</p>
       </header>

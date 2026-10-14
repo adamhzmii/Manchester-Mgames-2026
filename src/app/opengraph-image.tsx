@@ -10,7 +10,7 @@ export const alt = "Manchester MGames 2026 — Saturday 24 October, Trinity, Sug
 
 export default function OpengraphImage() {
   return ogCard({
-    kicker: "Malaysian Students’ Society Manchester",
+    kicker: "Malaysian Students’ Society of Manchester",
     title: ["MANCHESTER", "MGAMES 2026"],
     goldLast: true,
     lines: ["Saturday 24 October 2026", "Trinity, Sugden & Denmark Road · 8 sports · live scores"],
