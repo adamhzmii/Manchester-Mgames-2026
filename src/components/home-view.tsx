@@ -197,7 +197,7 @@ function Masthead({ venues }: { venues: Venue[] }) {
 
   return (
     <div className={styles.masthead}>
-      <p className={styles.mastKicker}>Malaysian Students&rsquo; Society Manchester</p>
+      <p className={styles.mastKicker}>Malaysian Students&rsquo; Society of Manchester</p>
       <h1 className={styles.mastTitle}>
         Manchester
         <br />
