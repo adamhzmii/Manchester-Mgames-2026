@@ -688,11 +688,22 @@
   margin-top: 8px;
 }
 
+/* More courts than fit: the grid scrolls in its own box, both ways, so the
+   court names can stay pinned inside it. (A sideways-only scroller would
+   pin them to itself rather than the page, pushed down over the first row.) */
 .gridWrapScroll {
   margin-top: 8px;
-  margin-inline: calc(var(--mg-gutter) * -1);
-  padding-inline: var(--mg-gutter);
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100dvh - var(--mg-header-height) - var(--mg-bottom-nav-height) - 16px);
+  border: 1px solid rgba(242, 182, 48, 0.3);
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-night);
+}
+
+/* The box carries the frame; the grid inside just scrolls. */
+.gridWrapScroll .grid {
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .grid {
@@ -718,6 +729,24 @@
 
 .gridCorner {
   min-height: 1px;
+  background: var(--mg-night);
+}
+
+/* Frozen panes in the scrolling box: names along the top, times down the side. */
+.gridWrapScroll .gridCorner,
+.gridWrapScroll .gridHead {
+  top: 0;
+}
+
+.gridWrapScroll .gridCorner {
+  left: 0;
+  z-index: 3;
+}
+
+.gridWrapScroll .gridTime {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   background: var(--mg-night);
 }
 
