@@ -424,7 +424,9 @@ export async function correctKickoff(fixtureId: string, time: string): Promise<A
   if (!game) return { ok: false, message: "Game not found." };
   if (game.status === "upcoming") return { ok: false, message: "This game hasn't started yet." };
 
-  const iso = londonToIso(londonDate(game.scheduledTime), time);
+  // The day it really started, not the printed one: a game played on a
+  // practice run before the 24th would otherwise read 00:39 as match day's.
+  const iso = londonToIso(londonDate(game.startedAt ?? game.scheduledTime), time);
   if (!iso) return { ok: false, message: "Pick a time." };
   if (Date.parse(iso) > Date.now() + 60_000) {
     return { ok: false, message: "That time hasn't happened yet." };
