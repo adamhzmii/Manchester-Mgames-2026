@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import { Suspense } from "react";
@@ -86,6 +87,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Suspense fallback={null}>
                 <NavigationTracker />
               </Suspense>
+              {/* Visitor counts for the day (Vercel Web Analytics): cookieless,
+                  and served from the site's own address, so it works wherever
+                  the site itself loads. */}
+              <Analytics />
             </DelaysProvider>
           </LiveFeedProvider>
         </ClockProvider>
