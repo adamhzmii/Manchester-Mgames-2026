@@ -4,6 +4,7 @@ import { KickoffTime } from "@/components/delays";
 import { StarIcon } from "@/components/icons";
 import { Score } from "@/components/score";
 import { SportBadge } from "@/components/sport-badge";
+import { scoreline, settledBy } from "@/lib/deciders";
 import { formatTime } from "@/lib/format";
 import { categoryCode, type Fixture } from "@/lib/fixtures";
 import { winningSide } from "@/lib/matchday";
@@ -39,6 +40,8 @@ type MatchRowProps = {
  */
 export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRowProps) {
   const winner = winningSide(fixture);
+  // Penalties or overtime, shown beside each side's score: "1 (4)".
+  const decided = settledBy(fixture);
   // Knockouts by round; group games by their group ("GRP A"), so a group
   // game is never mistaken for a knockout one.
   const tag =
@@ -111,15 +114,21 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
       </span>
 
       {showScores ? (
-        <span className={styles.scores} aria-label={`Score ${fixture.scoreA ?? 0} to ${fixture.scoreB ?? 0}`}>
-          <Score
-            value={fixture.scoreA}
-            className={`${styles.score} ${winner === "b" ? styles.lost : ""}`}
-          />
-          <Score
-            value={fixture.scoreB}
-            className={`${styles.score} ${winner === "a" ? styles.lost : ""}`}
-          />
+        <span className={styles.scores} aria-label={`Score ${scoreline(fixture)}`}>
+          <span className={styles.scoreLine}>
+            {decided ? <span className={styles.decider}>({decided.a})</span> : null}
+            <Score
+              value={fixture.scoreA}
+              className={`${styles.score} ${winner === "b" ? styles.lost : ""}`}
+            />
+          </span>
+          <span className={styles.scoreLine}>
+            {decided ? <span className={styles.decider}>({decided.b})</span> : null}
+            <Score
+              value={fixture.scoreB}
+              className={`${styles.score} ${winner === "a" ? styles.lost : ""}`}
+            />
+          </span>
         </span>
       ) : (
         <span className={styles.scores} aria-hidden="true" />

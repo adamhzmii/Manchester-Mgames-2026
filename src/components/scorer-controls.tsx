@@ -11,6 +11,7 @@ import {
   updateFixtureScore,
   type ActionResult,
 } from "@/lib/actions/fixtures";
+import { deciderKind, deciderTitle, settledBy } from "@/lib/deciders";
 import { courtKey } from "@/lib/delays";
 import type { Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
@@ -54,18 +55,26 @@ type Save =
   | { state: "saved"; at: number }
   | { state: "error"; message: string };
 
-/** Saves one game's status and score. */
+/**
+ * Saves one game's status and score — and, for a level knockout settled by
+ * penalties or overtime, that result. Left out, the stored one stands.
+ */
 export async function saveGame(
   fixtureId: string,
   status: FixtureStatus,
   a: number | null,
   b: number | null,
+  decider?: readonly [number, number],
 ): Promise<ActionResult> {
   const form = new FormData();
   form.set("fixtureId", fixtureId);
   form.set("status", status);
   form.set("scoreA", a === null ? "" : String(a));
   form.set("scoreB", b === null ? "" : String(b));
+  if (decider) {
+    form.set("deciderA", String(decider[0]));
+    form.set("deciderB", String(decider[1]));
+  }
   return safely(async () => {
     const result = await updateFixtureScore({ status: "idle", message: null }, form);
     return { ok: result.status === "success", message: result.message ?? "Could not save." };
@@ -78,7 +87,14 @@ export function finishGame(f: Fixture): Promise<ActionResult> {
 }
 
 /** A save on its way: what the game will look like once it lands. */
-export type GameChange = { fixtureId: string; status: FixtureStatus; scoreA: number | null; scoreB: number | null };
+export type GameChange = {
+  fixtureId: string;
+  status: FixtureStatus;
+  scoreA: number | null;
+  scoreB: number | null;
+  /** Penalties or overtime, when this save records them. */
+  decider?: readonly [number, number];
+};
 
 /**
  * A game's score and status as the coordinator is editing them: big +/−
@@ -96,6 +112,12 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
   const [dirty, setDirty] = useState(false);
   const [save, setSave] = useState<Save>({ state: "idle" });
   const [warning, setWarning] = useState<string | null>(null);
+  // Penalties (football) or overtime (basketball), for a knockout level at
+  // full time. Asked for only then: the box opens on the Finish tap.
+  const kind = deciderKind(fixture.sportSlug, fixture.stage);
+  const [deciderA, setDeciderA] = useState<number | null>(fixture.deciderA);
+  const [deciderB, setDeciderB] = useState<number | null>(fixture.deciderB);
+  const [deciding, setDeciding] = useState(settledBy(fixture) !== null);
   const [, startTransition] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -108,20 +130,33 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
       setScoreA(fixture.scoreA);
       setScoreB(fixture.scoreB);
       setStatus(fixture.status);
+      setDeciderA(fixture.deciderA);
+      setDeciderB(fixture.deciderB);
     }
   }
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const persist = (next: { status: FixtureStatus; a: number | null; b: number | null }) => {
+  const persist = (next: {
+    status: FixtureStatus;
+    a: number | null;
+    b: number | null;
+    decider?: readonly [number, number];
+  }) => {
     clearTimeout(timer.current);
     setSave({ state: "saving" });
     startTransition(async () => {
-      const result = await saveGame(fixture.id, next.status, next.a, next.b);
+      const result = await saveGame(fixture.id, next.status, next.a, next.b, next.decider);
       if (result.ok) {
         // Only once it has landed: a screen that moved a game to "Now
         // playing" on a save that then failed would be showing a lie.
-        onChange?.({ fixtureId: fixture.id, status: next.status, scoreA: next.a, scoreB: next.b });
+        onChange?.({
+          fixtureId: fixture.id,
+          status: next.status,
+          scoreA: next.a,
+          scoreB: next.b,
+          decider: next.decider,
+        });
         setDirty(false);
         setSave({ state: "saved", at: Date.now() });
       } else {
@@ -137,6 +172,8 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     setScoreB(b);
     setDirty(true);
     setWarning(null);
+    // Off level, there is nothing for penalties to decide.
+    if ((a ?? 0) !== (b ?? 0)) setDeciding(false);
     // While a game is live, scores save themselves. Before kick-off or after
     // the final whistle a change is a correction, and waits for a deliberate
     // tap.
@@ -162,13 +199,37 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     persist({ status: "live", a, b });
   };
 
+  const setDecider = (a: number | null, b: number | null) => {
+    setDeciderA(a);
+    setDeciderB(b);
+    setDirty(true);
+    setWarning(null);
+  };
+
   const finish = () => {
     const a = scoreA ?? 0;
     const b = scoreB ?? 0;
     // A level knockout cannot send anyone through, and the bracket after it
-    // would stall. Penalties, a golden point — whatever decides it is the
-    // score to record.
+    // would stall. Football and basketball settle it with penalties or
+    // overtime, kept beside the score; elsewhere play goes on — a golden
+    // point, the next rally — and that deciding score is the one to record.
     if (a === b && (fixture.stage !== "group" || !allowsDraws(fixture.sportSlug))) {
+      if (kind) {
+        if (!deciding) {
+          setDeciding(true);
+          setWarning(null);
+          return;
+        }
+        if (deciderA === null || deciderB === null || deciderA === deciderB) {
+          setWarning(
+            `Enter the ${deciderTitle(kind).toLowerCase()} result, with one team ahead, then finish.`,
+          );
+          return;
+        }
+        setStatus("finished");
+        persist({ status: "finished", a, b, decider: [deciderA, deciderB] });
+        return;
+      }
       setWarning(
         fixture.stage !== "group"
           ? "Knockout games can't end level. Record the deciding score so a winner goes through."
@@ -180,9 +241,17 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     persist({ status: "finished", a, b });
   };
 
-  const retry = () => persist({ status, a: scoreA, b: scoreB });
+  const retry = () =>
+    persist({
+      status,
+      a: scoreA,
+      b: scoreB,
+      decider:
+        deciding && deciderA !== null && deciderB !== null ? [deciderA, deciderB] : undefined,
+    });
 
-  const saveCorrection = () => persist({ status: "finished", a: scoreA, b: scoreB });
+  // A finished game's correction goes through the same checks as finishing.
+  const saveCorrection = finish;
 
   const reopen = () => {
     setStatus("live");
@@ -193,6 +262,9 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     setStatus("upcoming");
     setScoreA(null);
     setScoreB(null);
+    setDeciderA(null);
+    setDeciderB(null);
+    setDeciding(false);
     persist({ status: "upcoming", a: null, b: null });
   };
 
@@ -203,6 +275,11 @@ export function useScoreKeeper(fixture: Fixture, onChange?: (change: GameChange)
     dirty,
     save,
     warning,
+    kind,
+    deciding: deciding && kind !== null && (scoreA ?? 0) === (scoreB ?? 0),
+    deciderA,
+    deciderB,
+    setDecider,
     setScores,
     bump,
     start,
@@ -288,6 +365,41 @@ export function Stepper({
         >
           <PlusIcon size={26} />
         </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The penalty shoot-out (or basketball overtime) result, for a knockout
+ * level at full time. Shown once Finish game is tapped on a level score, and
+ * on a finished game it settled, so it can be corrected.
+ */
+export function DeciderEntry({ keeper, fixture }: { keeper: ScoreKeeper; fixture: Fixture }) {
+  if (!keeper.deciding || !keeper.kind) return null;
+  const { deciderA: a, deciderB: b } = keeper;
+  const penalties = keeper.kind === "penalties";
+  return (
+    <div className={styles.decider} role="group" aria-label={deciderTitle(keeper.kind)}>
+      <p className={styles.toolTitle}>{deciderTitle(keeper.kind)}</p>
+      <p className={styles.toolNote}>
+        {penalties
+          ? `Level at ${keeper.scoreA ?? 0}–${keeper.scoreB ?? 0}. Enter the shoot-out result. The match score stays ${keeper.scoreA ?? 0}–${keeper.scoreB ?? 0}.`
+          : `Level at ${keeper.scoreA ?? 0}–${keeper.scoreB ?? 0}. Enter the overtime score (first to 5, from 0–0). The match score stays ${keeper.scoreA ?? 0}–${keeper.scoreB ?? 0}.`}
+      </p>
+      <div className={styles.sides}>
+        <Stepper
+          name={fixture.teamA}
+          value={a}
+          onBump={(d) => keeper.setDecider(Math.max(0, (a ?? 0) + d), b ?? 0)}
+          onType={(v) => keeper.setDecider(v, b)}
+        />
+        <Stepper
+          name={fixture.teamB}
+          value={b}
+          onBump={(d) => keeper.setDecider(a ?? 0, Math.max(0, (b ?? 0) + d))}
+          onType={(v) => keeper.setDecider(a, v)}
+        />
       </div>
     </div>
   );

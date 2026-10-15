@@ -230,6 +230,14 @@
   color: var(--mg-night-muted);
 }
 
+/* "Kelantan won 4–3 on penalties", under Full time. */
+.decided {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mg-gold);
+  text-align: center;
+}
+
 /* ------------------------------------------------------------- body ---- */
 
 .body {

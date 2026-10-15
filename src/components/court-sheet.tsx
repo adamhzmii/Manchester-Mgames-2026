@@ -10,6 +10,7 @@ import type { GameChange } from "@/components/scorer-controls";
 import { SportBadge } from "@/components/sport-badge";
 import { signOut } from "@/lib/actions/auth";
 import { useMinute } from "@/lib/clock";
+import { deciderKind, deciderShort, scoreline } from "@/lib/deciders";
 import {
   courtStates,
   expectedStarts,
@@ -120,7 +121,13 @@ export function CourtSheet({
             ? `Started ${before.teamA} v ${before.teamB}.`
             : `Reopened ${before.teamA} v ${before.teamB}.`
           : change.status === "finished"
-            ? `Finished ${before.teamA} ${change.scoreA}–${change.scoreB} ${before.teamB}.`
+            ? `Finished ${before.teamA} ${change.scoreA}–${change.scoreB} ${before.teamB}${
+                change.decider
+                  ? `, ${change.decider[0]}–${change.decider[1]} ${
+                      deciderShort(deciderKind(before.sportSlug, before.stage) ?? "penalties")
+                    }`
+                  : ""
+              }.`
             : `Reset ${before.teamA} v ${before.teamB} to not started.`;
       // Only the latest tap can be undone here: Undo is for "that was the
       // wrong button", and a stack of them pushed the courts off screen.
@@ -219,12 +226,15 @@ function applyOverrides(
   return feed.map((f) => {
     const o = overrides.get(f.id);
     if (!o || (now !== null && now - o.at > OVERRIDE_MS)) return f;
-    if (f.status === o.status && f.scoreA === o.scoreA && f.scoreB === o.scoreB) return f;
+    const sameDecider = !o.decider || (f.deciderA === o.decider[0] && f.deciderB === o.decider[1]);
+    if (f.status === o.status && f.scoreA === o.scoreA && f.scoreB === o.scoreB && sameDecider) return f;
     return {
       ...f,
       status: o.status,
       scoreA: o.scoreA,
       scoreB: o.scoreB,
+      deciderA: o.decider ? o.decider[0] : o.status === "upcoming" ? null : f.deciderA,
+      deciderB: o.decider ? o.decider[1] : o.status === "upcoming" ? null : f.deciderB,
       startedAt: o.status === "upcoming" ? null : (o.startedAt ?? f.startedAt),
       finishedAt: o.status === "finished" ? (o.finishedAt ?? f.finishedAt) : null,
     };
@@ -536,7 +546,7 @@ function DayRow({
         </span>
         <span className={styles.rowState}>
           {fixture.status === "finished"
-            ? `${fixture.scoreA}–${fixture.scoreB}`
+            ? scoreline(fixture)
             : fixture.status === "live"
               ? "Live"
               : ""}

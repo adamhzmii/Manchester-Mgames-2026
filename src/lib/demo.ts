@@ -1,5 +1,6 @@
 import "server-only";
 
+import { deciderKind } from "@/lib/deciders";
 import { courtKey, slotLengths } from "@/lib/delays";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
@@ -155,11 +156,20 @@ function finalScore(f: Fixture): [number, number] {
   const [min, max] = RANGE[f.sportSlug] ?? [0, 4];
   let a = pick(`${f.id}a`, min, max);
   let b = pick(`${f.id}b`, min, max);
-  if (a === b && f.stage !== "group") {
+  // Football and basketball knockouts stay level and go to a decider.
+  if (a === b && f.stage !== "group" && !deciderKind(f.sportSlug, f.stage)) {
     if (hash(`${f.id}t`) % 2 === 0) a += 1;
     else b += 1;
   }
   return [a, b];
+}
+
+/** Penalties (4–3 and the like) or a first-to-five overtime, for a level knockout. */
+function demoDecider(f: Fixture): [number, number] {
+  const overtime = deciderKind(f.sportSlug, f.stage) === "overtime";
+  const win = overtime ? 5 : pick(`${f.id}d`, 3, 5);
+  const lose = overtime ? pick(`${f.id}d`, 0, 4) : win - pick(`${f.id}m`, 1, 2);
+  return hash(`${f.id}p`) % 2 === 0 ? [win, lose] : [lose, win];
 }
 
 /** The same score scaled back to how far through the game we are. */
@@ -233,12 +243,22 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
 
     // A rehearsal invents its own day: whatever timings the real database
     // holds from a dry run do not belong in it.
-    f = { ...f, plannedStart: null, startedAt: null, finishedAt: null };
+    f = { ...f, plannedStart: null, startedAt: null, finishedAt: null, deciderA: null, deciderB: null };
     if (!ready || now < start) {
       f = { ...f, status: "upcoming", scoreA: null, scoreB: null };
     } else if (now >= end) {
       const [a, b] = finalScore(f);
-      f = { ...f, status: "finished", scoreA: a, scoreB: b, startedAt: iso(start), finishedAt: iso(end) };
+      const [da, db] = a === b && deciderKind(f.sportSlug, f.stage) ? demoDecider(f) : [null, null];
+      f = {
+        ...f,
+        status: "finished",
+        scoreA: a,
+        scoreB: b,
+        deciderA: da,
+        deciderB: db,
+        startedAt: iso(start),
+        finishedAt: iso(end),
+      };
     } else {
       const [a, b] = liveScore(f, (now - start) / (end - start));
       f = { ...f, status: "live", scoreA: a, scoreB: b, startedAt: iso(start) };

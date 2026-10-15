@@ -1,3 +1,4 @@
+import { settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 
 /**
@@ -101,9 +102,15 @@ export function relative(target: number, now: number): string {
   return diff > 0 ? `in ${text}` : `${text} ago`;
 }
 
-/** The winning side of a finished game, or null for a draw or no result. */
+/**
+ * The winning side of a finished game, or null for a draw or no result. A
+ * knockout level on the score is won on its decider (penalties, overtime).
+ */
 export function winningSide(f: Fixture): "a" | "b" | null {
   if (f.status !== "finished" || f.scoreA === null || f.scoreB === null) return null;
-  if (f.scoreA === f.scoreB) return null;
+  if (f.scoreA === f.scoreB) {
+    const decider = settledBy(f);
+    return decider ? (decider.a > decider.b ? "a" : "b") : null;
+  }
   return f.scoreA > f.scoreB ? "a" : "b";
 }

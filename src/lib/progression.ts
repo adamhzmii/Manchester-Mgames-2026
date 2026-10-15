@@ -1,4 +1,5 @@
 import type { Fixture } from "@/lib/fixtures";
+import { winningSide } from "@/lib/matchday";
 import { feederGame, parseSlot, roundGames } from "@/lib/slots";
 import { computeStandings, rankPlace, type GroupMeta, type TeamMeta } from "@/lib/standings";
 import type { FixtureStage } from "@/lib/supabase/types";
@@ -18,9 +19,9 @@ import type { FixtureStage } from "@/lib/supabase/types";
 export type SlotTeam = { id: string; name: string };
 
 export function winnerOf(f: Fixture): SlotTeam | null {
-  if (f.status !== "finished" || f.scoreA === null || f.scoreB === null) return null;
-  if (f.teamAId === null || f.teamBId === null || f.scoreA === f.scoreB) return null;
-  return f.scoreA > f.scoreB ? { id: f.teamAId, name: f.teamA } : { id: f.teamBId, name: f.teamB };
+  const side = winningSide(f);
+  if (side === null || f.teamAId === null || f.teamBId === null) return null;
+  return side === "a" ? { id: f.teamAId, name: f.teamA } : { id: f.teamBId, name: f.teamB };
 }
 
 export function loserOf(f: Fixture): SlotTeam | null {

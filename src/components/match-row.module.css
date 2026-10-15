@@ -184,6 +184,20 @@
   font-variant-numeric: tabular-nums;
 }
 
+.scoreLine {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+/* "(4)": the penalty or overtime score, quieter than the match score. */
+.decider {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mg-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
 .score[data-flash] {
   animation: mg-score-flash 1.6s ease-out;
 }

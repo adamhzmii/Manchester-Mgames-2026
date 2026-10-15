@@ -10,6 +10,7 @@ import {
   Result,
   SaveState,
   StartButton,
+  DeciderEntry,
   Stepper,
   safely,
   useScoreKeeper,
@@ -119,6 +120,8 @@ export function ScoreConsole({
               onType={(v) => keeper.setScores(scoreA, v)}
             />
           </div>
+
+          <DeciderEntry keeper={keeper} fixture={fixture} />
 
           {warning ? (
             <p className={styles.warning} role="alert">

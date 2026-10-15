@@ -2,6 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 
+import { deciderKind, deciderPhrase, deciderTitle } from "@/lib/deciders";
 import { FIXTURE_SELECT, toFixture, type Fixture, type FixtureRow } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
 import { londonDate, londonToIso } from "@/lib/london-time";
@@ -11,7 +12,7 @@ import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "@/lib
 import { sendPush } from "@/lib/push/server";
 import { TAG, getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
-import type { FixtureStatus } from "@/lib/supabase/types";
+import type { FixtureStage, FixtureStatus } from "@/lib/supabase/types";
 
 export type UpdateFixtureState = {
   status: "idle" | "success" | "error";
@@ -64,6 +65,16 @@ export async function updateFixtureScore(
     return { status: "error", message: "Scores must be whole numbers, zero or above." };
   }
 
+  // A penalty shoot-out or overtime result, sent only by a finish that
+  // needed one. Absent leaves whatever is stored: undoing a finish and
+  // finishing again should not ask for the penalties twice.
+  const sentDecider = formData.has("deciderA") || formData.has("deciderB");
+  const deciderA = parseScore(formData.get("deciderA"));
+  const deciderB = parseScore(formData.get("deciderB"));
+  if (deciderA === "invalid" || deciderB === "invalid") {
+    return { status: "error", message: "Penalties must be whole numbers, zero or above." };
+  }
+
   // Mirrors the fixtures_finished_has_scores CHECK. Caught here so the
   // coordinator sees a sentence rather than a Postgres constraint name.
   if (status === "finished" && (scoreA === null || scoreB === null)) {
@@ -77,7 +88,7 @@ export async function updateFixtureScore(
   const { data: before } = await supabase
     .from("fixtures")
     .select(
-      `status, stage, team_a_id, team_b_id,
+      `status, stage, team_a_id, team_b_id, decider_a, decider_b,
        team_a:teams!fixtures_team_a_id_fkey ( name ),
        team_b:teams!fixtures_team_b_id_fkey ( name ),
        category:categories ( sport:sports ( slug ) )`,
@@ -85,19 +96,49 @@ export async function updateFixtureScore(
     .eq("id", fixtureId)
     .limit(1);
 
+  const row = before?.[0] as
+    | {
+        stage: FixtureStage;
+        decider_a: number | null;
+        decider_b: number | null;
+        category?: { sport?: { slug: string } | null } | null;
+      }
+    | undefined;
+  const sport = row?.category?.sport?.slug ?? "";
+  const kind = row ? deciderKind(sport, row.stage) : null;
+  const level = scoreA !== null && scoreA === scoreB;
+
+  // The decider belongs to a level knockout of a sport that has one. Off
+  // level, or reset, it goes; otherwise a new one replaces the stored one.
+  const decider: { decider_a: number | null; decider_b: number | null } =
+    !kind || !level || status === "upcoming"
+      ? { decider_a: null, decider_b: null }
+      : sentDecider
+        ? { decider_a: deciderA, decider_b: deciderB }
+        : { decider_a: row?.decider_a ?? null, decider_b: row?.decider_b ?? null };
+
   // A finished game that can't end level: any knockout, and every game in
-  // the sports with no draws (table tennis, pickleball).
-  if (status === "finished" && scoreA !== null && scoreA === scoreB && before?.[0]) {
-    const row = before[0] as { stage: string; category?: { sport?: { slug: string } | null } | null };
-    const sport = row.category?.sport?.slug ?? "";
-    if (row.stage !== "group" || !allowsDraws(sport)) {
+  // the sports with no draws (table tennis, pickleball). Football and
+  // basketball knockouts can, once their penalties or overtime pick a winner.
+  if (status === "finished" && level && row && (row.stage !== "group" || !allowsDraws(sport))) {
+    if (!kind) {
       return { status: "error", message: "This game can't end level. Record the deciding score." };
+    }
+    if (
+      decider.decider_a === null ||
+      decider.decider_b === null ||
+      decider.decider_a === decider.decider_b
+    ) {
+      return {
+        status: "error",
+        message: `Level at full time. Record the ${deciderTitle(kind).toLowerCase()} result — one team ahead.`,
+      };
     }
   }
 
   const { data, error } = await supabase
     .from("fixtures")
-    .update({ score_a: scoreA, score_b: scoreB, status })
+    .update({ score_a: scoreA, score_b: scoreB, status, ...decider })
     .eq("id", fixtureId)
     .select("id");
 
@@ -127,6 +168,10 @@ export async function updateFixtureScore(
       (before?.[0] as { team_a?: { name: string } | null } | undefined)?.team_a?.name ?? "TBC",
     teamBName:
       (before?.[0] as { team_b?: { name: string } | null } | undefined)?.team_b?.name ?? "TBC",
+    decided:
+      kind && level && decider.decider_a !== null && decider.decider_b !== null
+        ? `${decider.decider_a}–${decider.decider_b} ${deciderPhrase(kind)}`
+        : null,
   });
 
   // A kick-off or final whistle is what moves the court's timetable: a late
@@ -175,6 +220,8 @@ async function notifyFixtureChange(f: {
   teamBId: string | null;
   teamAName: string;
   teamBName: string;
+  /** "4–3 on penalties", for a level knockout settled by its decider. */
+  decided: string | null;
 }): Promise<void> {
   if (f.previousStatus === f.status) return;
 
@@ -190,6 +237,7 @@ async function notifyFixtureChange(f: {
   } else if (f.status === "finished") {
     title = "Full time";
     body = `${f.teamAName} ${f.scoreA ?? "-"} – ${f.scoreB ?? "-"} ${f.teamBName}`;
+    if (f.decided) body += `, ${f.decided}`;
   }
 
   if (!title || !body) return;
@@ -683,6 +731,8 @@ export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<A
       status: "finished",
       score_a: winner === "a" ? score : 0,
       score_b: winner === "b" ? score : 0,
+      decider_a: null,
+      decider_b: null,
       started_at: game.startedAt ?? now,
       finished_at: now,
     })

@@ -1,4 +1,5 @@
 import { byKickoff, type Fixture } from "@/lib/fixtures";
+import { winningSide } from "@/lib/matchday";
 import { DEFAULT_PLACES, qualification } from "@/lib/slots";
 
 /**
@@ -274,9 +275,10 @@ export function teamForm(fixtures: readonly Fixture[], teamId: string): FormResu
     )
     .sort(byKickoff)
     .map((f) => {
-      const mine = f.teamAId === teamId ? f.scoreA! : f.scoreB!;
-      const theirs = f.teamAId === teamId ? f.scoreB! : f.scoreA!;
-      return mine > theirs ? "W" : mine < theirs ? "L" : "D";
+      // Through winningSide, so a knockout won on penalties is a W, not a D.
+      const side = winningSide(f);
+      if (side === null) return "D";
+      return side === (f.teamAId === teamId ? "a" : "b") ? "W" : "L";
     });
 }
 

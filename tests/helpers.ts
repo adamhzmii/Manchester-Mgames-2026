@@ -38,6 +38,8 @@ export function fixture(overrides: Partial<Fixture> = {}): Fixture {
     startedAt: null,
     finishedAt: null,
     plannedStart: null,
+    deciderA: null,
+    deciderB: null,
     ...overrides,
   };
 }

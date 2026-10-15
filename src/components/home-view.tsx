@@ -13,6 +13,7 @@ import { SportBadge } from "@/components/sport-badge";
 import { UpdateTypeIcon, UPDATE_TYPE_LABEL } from "@/components/update-type-icon";
 import { YourTeam } from "@/components/your-team";
 import { useMinute } from "@/lib/clock";
+import { deciderShort, settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatPrice, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
@@ -339,10 +340,9 @@ function Champions({ finals }: { finals: Podium[] }) {
       <h2 className={styles.championsTitle}>Champions</h2>
       <div className={styles.champions}>
         {finals.map((p) => {
-          const [a, b] =
-            p.final.teamAId === p.gold.teamId
-              ? [p.final.scoreA, p.final.scoreB]
-              : [p.final.scoreB, p.final.scoreA];
+          const goldIsA = p.final.teamAId === p.gold.teamId;
+          const [a, b] = goldIsA ? [p.final.scoreA, p.final.scoreB] : [p.final.scoreB, p.final.scoreA];
+          const decided = settledBy(p.final);
           return (
             <Link key={p.categoryId} href={`/match/${p.final.id}`} className={styles.champion}>
               <span className={styles.championSport}>
@@ -357,6 +357,9 @@ function Champions({ finals }: { finals: Podium[] }) {
                 Beat {p.silver.name}{" "}
                 <span className={styles.nowrap}>
                   {a}–{b}
+                  {decided
+                    ? ` (${goldIsA ? decided.a : decided.b}–${goldIsA ? decided.b : decided.a} ${deciderShort(decided.kind)})`
+                    : ""}
                 </span>
               </span>
             </Link>

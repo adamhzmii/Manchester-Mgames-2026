@@ -12,6 +12,7 @@ import {
   Result,
   SaveState,
   StartButton,
+  DeciderEntry,
   Stepper,
   safely,
   useScoreKeeper,
@@ -73,6 +74,7 @@ export function LiveGame({
           onType={(v) => keeper.setScores(scoreA, v)}
         />
       </div>
+      <DeciderEntry keeper={keeper} fixture={fixture} />
       {warning ? (
         <p className={consoleStyles.warning} role="alert">
           {warning}

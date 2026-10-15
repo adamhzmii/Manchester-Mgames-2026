@@ -191,6 +191,8 @@ export interface Database {
           delay_minutes: number;
           delay_notified_minutes: number;
           planned_start: Timestamptz | null;
+          decider_a: number | null;
+          decider_b: number | null;
           created_at: Timestamptz;
           updated_at: Timestamptz;
         };
@@ -204,6 +206,8 @@ export interface Database {
           | "delay_minutes"
           | "delay_notified_minutes"
           | "planned_start"
+          | "decider_a"
+          | "decider_b"
         > & {
           id?: string;
           created_at?: Timestamptz;
@@ -213,6 +217,8 @@ export interface Database {
           delay_minutes?: number;
           delay_notified_minutes?: number;
           planned_start?: Timestamptz | null;
+          decider_a?: number | null;
+          decider_b?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["fixtures"]["Insert"]>;
         Relationships: [

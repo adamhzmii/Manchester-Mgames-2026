@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KickoffTime } from "@/components/delays";
 import { TrophyIcon } from "@/components/icons";
 import { Score } from "@/components/score";
+import { settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { winningSide } from "@/lib/matchday";
 import { bracketOrder } from "@/lib/progression";
@@ -104,15 +105,18 @@ export function Bracket({ fixtures }: { fixtures: readonly Fixture[] }) {
 function BracketMatch({ fixture }: { fixture: Fixture }) {
   const side = winningSide(fixture);
   const shown = fixture.status !== "upcoming";
+  const decided = settledBy(fixture);
 
   return (
     <Link href={`/match/${fixture.id}`} className={styles.match} data-status={fixture.status}>
       <span className={`${styles.line} ${side === "b" ? styles.lost : ""} ${side === "a" ? styles.won : ""} ${fixture.teamAId === null ? styles.tbc : ""}`}>
         <span className={styles.team}>{fixture.teamA}</span>
+        {decided ? <span className={styles.decider}>({decided.a})</span> : null}
         {shown ? <Score value={fixture.scoreA} className={styles.score} /> : null}
       </span>
       <span className={`${styles.line} ${side === "a" ? styles.lost : ""} ${side === "b" ? styles.won : ""} ${fixture.teamBId === null ? styles.tbc : ""}`}>
         <span className={styles.team}>{fixture.teamB}</span>
+        {decided ? <span className={styles.decider}>({decided.b})</span> : null}
         {shown ? <Score value={fixture.scoreB} className={styles.score} /> : null}
       </span>
       <span className={styles.meta}>

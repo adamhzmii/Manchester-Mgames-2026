@@ -1,3 +1,4 @@
+import { scoreline } from "@/lib/deciders";
 import { formatDay, formatTime } from "@/lib/format";
 import { OG_SIZE, ogCard } from "@/lib/og-card";
 import { getFixtures } from "@/lib/queries";
@@ -19,7 +20,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const competition = [f.sportName, f.categoryName !== "Open" ? f.categoryName : null, f.stageLabel]
     .filter(Boolean)
     .join(" · ");
-  const score = `${f.scoreA ?? 0}–${f.scoreB ?? 0}`;
+  const score = scoreline(f);
   return ogCard({
     kicker: competition,
     badge:

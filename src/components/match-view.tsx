@@ -19,6 +19,7 @@ import { ScoreConsole } from "@/components/score-console";
 import { ShareButton } from "@/components/share-button";
 import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
+import { deciderPhrase, settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatDay, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
@@ -88,6 +89,7 @@ export function MatchView({
       : null;
   const group = groups.find((g) => g.id === fixture.groupId);
   const winner = winningSide(fixture);
+  const decided = settledBy(fixture);
 
   const table =
     fixture.stage === "group" && group
@@ -165,6 +167,13 @@ export function MatchView({
                   ) : (
                     <span className={styles.ft}>Full time</span>
                   )}
+                  {decided ? (
+                    <span className={styles.decided}>
+                      {decided.a > decided.b ? fixture.teamA : fixture.teamB} won{" "}
+                      {Math.max(decided.a, decided.b)}–{Math.min(decided.a, decided.b)}{" "}
+                      {deciderPhrase(decided.kind)}
+                    </span>
+                  ) : null}
                 </>
               )}
             </div>

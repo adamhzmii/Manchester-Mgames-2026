@@ -24,6 +24,8 @@ function row(overrides: Partial<FixtureRow> = {}): FixtureRow {
     started_at: null,
     finished_at: null,
     planned_start: null,
+    decider_a: null,
+    decider_b: null,
     placeholder_a: null,
     placeholder_b: null,
     group_id: "g1",

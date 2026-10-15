@@ -16,6 +16,8 @@ export const FIXTURE_SELECT = `
   started_at,
   finished_at,
   planned_start,
+  decider_a,
+  decider_b,
   placeholder_a,
   placeholder_b,
   group_id,
@@ -38,6 +40,8 @@ export type FixtureRow = {
   started_at: string | null;
   finished_at: string | null;
   planned_start: string | null;
+  decider_a: number | null;
+  decider_b: number | null;
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
@@ -119,6 +123,13 @@ export type Fixture = {
    * before the printed time. Null leaves it to the site's estimate.
    */
   plannedStart: string | null;
+  /**
+   * How a level knockout was settled where the score stays level: the
+   * penalty shoot-out in football, the first-to-five overtime in basketball.
+   * Null for every other game. See deciders.ts.
+   */
+  deciderA: number | null;
+  deciderB: number | null;
 };
 
 const STAGE_LABELS: Record<FixtureStage, string> = {
@@ -192,6 +203,8 @@ export function toFixture(row: FixtureRow): Fixture {
     startedAt: row.started_at,
     finishedAt: row.finished_at,
     plannedStart: row.planned_start ?? null,
+    deciderA: row.decider_a ?? null,
+    deciderB: row.decider_b ?? null,
   };
 }
 

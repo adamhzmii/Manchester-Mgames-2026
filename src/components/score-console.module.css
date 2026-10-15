@@ -323,6 +323,20 @@
 }
 
 /* "Another game is still live here — finished?" before Start. */
+/* Penalties / overtime: gold-edged, so it reads as the step before Finish. */
+.decider {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--mg-r);
+  background: var(--mg-night-2);
+  box-shadow: inset 0 0 0 1px rgba(242, 182, 48, 0.55);
+}
+
+.decider .toolTitle {
+  color: var(--mg-gold);
+}
+
 .guard {
   display: grid;
   gap: 10px;

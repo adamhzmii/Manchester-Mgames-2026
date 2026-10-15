@@ -13,6 +13,7 @@ import {
 } from "@/components/court-game";
 import { CloseIcon } from "@/components/icons";
 import type { GameChange } from "@/components/scorer-controls";
+import { deciderNote, scoreline } from "@/lib/deciders";
 import { courtKey, type CourtState, type Expected } from "@/lib/delays";
 import { byKickoff, categoryCode, type Fixture } from "@/lib/fixtures";
 import { formatTime } from "@/lib/format";
@@ -180,7 +181,7 @@ export function CourtGrid({
           ) : (
             <div className={styles.game}>
               <p className={styles.teams}>
-                {game.teamA} {game.scoreA}–{game.scoreB} {game.teamB}
+                {game.teamA} {scoreline(game)} {game.teamB}
               </p>
               <p className={styles.gameMeta}>
                 Finished{game.finishedAt ? ` at ${formatTime(game.finishedAt)}` : ""}.
@@ -225,6 +226,8 @@ function GameCell({
 }) {
   const tag = STAGE_TAG[game.stage] ?? categoryCode(game) ?? (game.groupName?.replace(/^Group\s+/i, "GRP ") ?? "");
   const state = game.status === "live" ? "live" : game.status === "finished" ? "done" : next ? "next" : "later";
+  // "4–3 pens" in place of FT, for a level knockout settled that way.
+  const decided = deciderNote(game);
   const late = game.status === "upcoming" && (expected?.lateMin ?? 0) > 0;
   const moved = late
     ? formatTime(new Date(Date.parse(game.scheduledTime) + expected!.lateMin * 60_000).toISOString())
@@ -235,7 +238,7 @@ function GameCell({
       <span className={styles.cellTop}>
         <span className={styles.cellTag}>{tag}</span>
         <span className={styles.cellStatus}>
-          {state === "live" ? "LIVE" : state === "done" ? "FT" : state === "next" ? "NEXT" : moved ? `→${moved}` : ""}
+          {state === "live" ? "LIVE" : state === "done" ? (decided ?? "FT") : state === "next" ? "NEXT" : moved ? `→${moved}` : ""}
         </span>
       </span>
       <span className={styles.cellTeam}>
