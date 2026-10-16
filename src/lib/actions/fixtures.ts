@@ -400,15 +400,37 @@ export async function setPlannedStart(fixtureId: string, time: string | null): P
   if (error) return { ok: false, message: `Could not save: ${error.message}` };
   if (!data || data.length === 0) return SIGNED_OUT;
 
+  // The newest word on a court wins. A start time set earlier on a later game
+  // ("on time after all", at 08:50) would otherwise pin it there and stop
+  // this change reaching it or anything after it — "later games follow on"
+  // has to be true. So later games still to play here drop theirs and
+  // follow on from this one; set one again afterwards if it really differs.
+  let released = 0;
+  if (game.courtId) {
+    const { data: cleared } = await supabase
+      .from("fixtures")
+      .update({ planned_start: null })
+      .eq("court_id", game.courtId)
+      .eq("status", "upcoming")
+      .gt("scheduled_time", game.scheduledTime)
+      .not("planned_start", "is", null)
+      .select("id");
+    released = cleared?.length ?? 0;
+  }
+
   revalidateGames();
   await notifyLateGames(supabase);
+  const followOn =
+    released > 0
+      ? ` Later games on ${game.courtName} follow on (${released === 1 ? "a start time set on one of them was" : `start times set on ${released} of them were`} cleared).`
+      : ` Later games on ${game.courtName} follow on.`;
   return {
     ok: true,
     message: iso
       ? Date.parse(iso) === Date.parse(game.scheduledTime)
-        ? `Back on time: starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.`
-        : `Starts at ${formatTime(iso)}. Later games on ${game.courtName} follow on.`
-      : "Back to the site's estimate.",
+        ? `Back on time: starts at ${formatTime(iso)}.${followOn}`
+        : `Starts at ${formatTime(iso)}.${followOn}`
+      : `Back to the site's estimate.${followOn}`,
   };
 }
 

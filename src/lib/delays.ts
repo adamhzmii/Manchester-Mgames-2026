@@ -17,8 +17,10 @@ import { feederGame } from "@/lib/slots";
  *   - unless a coordinator has said when it starts ("starts at 10:05"): they
  *     are standing at the court, so that time stands — never before the
  *     printed one — and the games after it follow on from it;
- *   - a game takes its slot: the time until the next game on its court, at
- *     most the court's usual slot, so a lunch break counts as slack;
+ *   - a game takes its slot: the time until the next game on its court. A
+ *     real break (half as long again as the usual slot, or more) is slack,
+ *     and the game takes just the usual slot. Uneven slots (22, 24, 23 min)
+ *     are not slack: a delay carries through them whole;
  *   - a live game that runs past its slot pushes everything after it, minute
  *     by minute — until a later game on the court starts, which means it is
  *     over whatever its button says;
@@ -87,9 +89,16 @@ export function gamesByCourt(fixtures: readonly Fixture[]): Map<string, Fixture[
   return byCourt;
 }
 
+/** A gap at least this many times the usual slot is a break, not a slot. */
+const BREAK_RATIO = 1.5;
+
 /**
- * Each game's slot, in ms: the time until the next game on its court, capped
- * at the court's usual gap so a long break is slack rather than a long game.
+ * Each game's slot, in ms: the time until the next game on its court. A
+ * break — a gap of half as long again as the court's usual slot, or more —
+ * is slack rather than a long game, so the game takes the usual slot and the
+ * rest absorbs a delay. Anything shorter is the game's own slot: capping an
+ * uneven timetable (22, 24, 23 minutes) at its middle value would quietly
+ * shave a minute or two off a delay at every game until it vanished.
  */
 export function slotLengths(fixtures: readonly Fixture[]): Map<string, number> {
   const result = new Map<string, number>();
@@ -103,7 +112,7 @@ export function slotLengths(fixtures: readonly Fixture[]): Map<string, number> {
     sorted.forEach((f, i) => {
       const next = sorted[i + 1];
       const gap = next ? Date.parse(next.scheduledTime) - Date.parse(f.scheduledTime) : 0;
-      result.set(f.id, gap > 0 ? Math.min(gap, usual) : usual);
+      result.set(f.id, gap > 0 && gap < usual * BREAK_RATIO ? gap : usual);
     });
   }
   return result;

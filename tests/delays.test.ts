@@ -303,3 +303,17 @@ test("a start time a coordinator types shows exactly, not rounded", () => {
   // 24 minutes, as set; the game after is the site's estimate, to the nearest 5.
   assert.deepEqual(late(day, "07:00"), [24, 25]);
 });
+
+test("a delay carries whole through uneven slots, and only a real break absorbs it", () => {
+  // Frisbee's printed day on its one pitch: mostly 22-minute slots, some 17
+  // to 27, and a 43-minute break before the quarter-finals at 15:20.
+  const times = [
+    "08:30", "08:52", "09:16", "09:39", "10:03", "10:26", "10:47", "11:06", "11:28",
+    "11:46", "12:08", "12:25", "12:47", "13:09", "13:31", "13:53", "14:15", "14:37",
+    "15:20", "15:42", "16:04", "16:26", "16:53", "17:15", "17:40", "18:00",
+  ];
+  const day = times.map((t, i) => game(t, i === 0 ? { plannedStart: at("08:40") } : {}));
+  const groups = Array(18).fill(10);
+  const knockouts = Array(8).fill(0);
+  assert.deepEqual(late(day, "08:00"), [...groups, ...knockouts]);
+});
