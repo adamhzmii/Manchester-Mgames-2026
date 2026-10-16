@@ -175,6 +175,11 @@
   text-decoration: none;
 }
 
+.socialHandle {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
 .credit {
   font-size: 13px;
   color: var(--mg-ink-3);

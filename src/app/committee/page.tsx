@@ -113,7 +113,7 @@ export default async function CommitteePage() {
       </section>
 
       <div className={styles.socials}>
-        {SOCIETY_INSTAGRAM.map((handle) => (
+        {SOCIETY_INSTAGRAM.map(({ handle, label }) => (
           <a
             key={handle}
             href={`https://instagram.com/${handle}`}
@@ -121,7 +121,9 @@ export default async function CommitteePage() {
             rel="noreferrer"
             className={styles.social}
           >
-            <InstagramIcon size={16} />@{handle}
+            <InstagramIcon size={16} />
+            {label}
+            <span className={styles.socialHandle}>@{handle}</span>
           </a>
         ))}
       </div>

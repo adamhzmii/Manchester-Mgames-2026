@@ -54,6 +54,8 @@ export const FIRST_AID = {
 export type VenueFacilities = {
   firstAid: string;
   toilets?: string;
+  /** Said where it matters: a venue with nothing to eat. */
+  food?: string;
 };
 
 /** Every venue has a first aider; the head of first aid sends them. */
@@ -71,8 +73,32 @@ export const VENUE_FACILITIES: Record<string, VenueFacilities> = {
   },
   "denmark-road": {
     firstAid: FIRST_AIDER,
+    food: "No food here. Bring water and snacks, or eat before you come.",
   },
 };
+
+/**
+ * The Malaysian minimum on court, from the rulebook's nationality section
+ * (General Rules C). The cause of most arguments on the day, so the short
+ * version is on the Info page; the rulebook stays the authority.
+ */
+export const QUOTAS: { sport: string; onCourt: string; malaysians: string; also?: string }[] = [
+  { sport: "Football", onCourt: "5", malaysians: "3", also: "Playing with 4: at least 2 Malaysians" },
+  { sport: "Basketball", onCourt: "5", malaysians: "3" },
+  { sport: "Frisbee", onCourt: "5", malaysians: "3", also: "At least 1 woman" },
+  { sport: "Volleyball", onCourt: "6", malaysians: "4", also: "At least 2 women" },
+  { sport: "Netball", onCourt: "7", malaysians: "4", also: "At most 2 men" },
+  { sport: "Badminton, table tennis, pickleball doubles", onCourt: "2", malaysians: "1" },
+  { sport: "Badminton singles", onCourt: "1", malaysians: "1" },
+];
+
+/** The wristband rules (General Rules D), as players need them. */
+export const WRISTBANDS = [
+  "Purple for Malaysian players, yellow for everyone else. You get yours at check-in, after your ID is checked.",
+  "Wear it where it can be seen all day, between games too. Don't cover, cut or swap it.",
+  "No wristband, no playing. Lost or damaged one? Go to the Head of Sports for your sport.",
+  "The minimums apply at kick-off and after every substitution. Raise a quota concern at the next stoppage, not after the result.",
+];
 
 export type PrayerRoom = {
   name: string;

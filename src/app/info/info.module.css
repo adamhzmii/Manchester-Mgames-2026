@@ -389,6 +389,73 @@ details[open] > summary .chevron {
   font-size: 15px;
 }
 
+/* ------------------------------------------------------------ quotas ---- */
+
+.quotas {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+}
+
+.quotaTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.quotaTable th,
+.quotaTable td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--mg-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.quotaTable thead th {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mg-ink-3);
+}
+
+.quotaTable tbody th {
+  font-weight: 700;
+  color: var(--mg-ink);
+}
+
+.quotaTable td {
+  font-variant-numeric: tabular-nums;
+  color: var(--mg-ink-2);
+}
+
+.quotaAlso {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mg-ink-3);
+}
+
+.wristbands {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--mg-ink-2);
+  font-size: 14px;
+}
+
+.quotaNote {
+  font-size: 13px;
+  color: var(--mg-ink-3);
+}
+
+.quotaNote a {
+  color: inherit;
+  font-weight: 700;
+}
+
 .faqA {
   padding: 0 14px 14px;
   color: var(--mg-ink-2);

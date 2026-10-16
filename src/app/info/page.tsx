@@ -21,6 +21,8 @@ import {
   INFO_PACK_URL,
   RULEBOOK_URL,
   PRAYER_ROOMS,
+  QUOTAS,
+  WRISTBANDS,
   walkingRouteTo,
 } from "@/lib/info-content";
 import { getFixtures, getSports, getStandingsData, getVenues } from "@/lib/queries";
@@ -172,6 +174,47 @@ export default async function InfoPage() {
               <p className={styles.faqA}>{item.answer}</p>
             </details>
           ))}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="quotas">
+        <h2 id="quotas" className={styles.title}>
+          Malaysian players &amp; wristbands
+        </h2>
+        <div className={styles.quotas}>
+          <table className={styles.quotaTable}>
+            <thead>
+              <tr>
+                <th scope="col">Sport</th>
+                <th scope="col">On court</th>
+                <th scope="col">Malaysians, at least</th>
+              </tr>
+            </thead>
+            <tbody>
+              {QUOTAS.map((q) => (
+                <tr key={q.sport}>
+                  <th scope="row">
+                    {q.sport}
+                    {q.also ? <span className={styles.quotaAlso}>{q.also}</span> : null}
+                  </th>
+                  <td>{q.onCourt}</td>
+                  <td>{q.malaysians}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <ul className={styles.wristbands}>
+            {WRISTBANDS.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <p className={styles.quotaNote}>
+            The short version. The{" "}
+            <a href={RULEBOOK_URL} target="_blank" rel="noreferrer">
+              rulebook
+            </a>{" "}
+            has the full rules and exceptions, and the Head of Sports has the final say.
+          </p>
         </div>
       </section>
 

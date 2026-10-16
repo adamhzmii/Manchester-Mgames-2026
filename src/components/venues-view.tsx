@@ -9,6 +9,7 @@ import {
   ChevronRightIcon,
   ExternalIcon,
   FirstAidIcon,
+  FoodIcon,
   PinIcon,
   PrayerIcon,
   ToiletIcon,
@@ -254,6 +255,9 @@ export function VenuesView({ venues, vendors, fixtures: initial, initialVenue }:
             </li>
             {facilities?.toilets ? (
               <Facility icon={<ToiletIcon size={20} />} label="Toilets" value={facilities.toilets} />
+            ) : null}
+            {facilities?.food ? (
+              <Facility icon={<FoodIcon size={20} />} label="Food" value={facilities.food} />
             ) : null}
           </ul>
         </section>

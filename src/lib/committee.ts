@@ -35,6 +35,10 @@ export const OPERATIONS: { role: string; names: string[] }[] = [
   { role: "First aid", names: ["Yuan", "Rafiq"] },
 ];
 
-export const SOCIETY_INSTAGRAM = ["mssmsports", "instamssm"];
+/** Each account named, so nobody has to guess which is which. */
+export const SOCIETY_INSTAGRAM = [
+  { handle: "mssmsports", label: "MSSM Sports" },
+  { handle: "instamssm", label: "MSSM" },
+];
 
 export const WEBSITE_BY = "Adam Hazmi";
