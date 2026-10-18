@@ -50,6 +50,15 @@ function groupsPhrase(sizes: number[]): string {
   return `${Count} groups (${listed})`;
 }
 
+/**
+ * A group that ends in medal games rather than a bracket — pickleball's mixed
+ * doubles: "1st and 2nd play the final, 3rd and 4th play for third."
+ */
+function medalGamesLine(categoryId: string, games: readonly Fixture[]): string {
+  const third = games.some((f) => f.categoryId === categoryId && f.stage === "third_place");
+  return third ? "1st and 2nd play the final, 3rd and 4th play for third." : "1st and 2nd play the final.";
+}
+
 export function describeFormat(
   sportSlug: string,
   fixtures: readonly Fixture[],
@@ -77,13 +86,15 @@ export function describeFormat(
       const firstKnockout = ROUND_ORDER.find(
         (stage) => stage !== "third_place" && games.some((f) => f.categoryId === id && f.stage === stage),
       );
-      const through = firstKnockout
-        ? ` ${throughLine(qualification(id, games), {
-            groups: own.length,
-            groupSize: Math.max(...sizes),
-            round: firstKnockout,
-          })}`
-        : "";
+      const through = !firstKnockout
+        ? ""
+        : firstKnockout === "final"
+          ? ` ${medalGamesLine(id, games)}`
+          : ` ${throughLine(qualification(id, games), {
+              groups: own.length,
+              groupSize: Math.max(...sizes),
+              round: firstKnockout,
+            })}`;
       lines.push(`${name}: ${groupsPhrase(sizes).toLowerCase()}.${through}`);
     }
     if (sportGroups.length > 0) {
@@ -100,7 +111,9 @@ export function describeFormat(
     lines.push(pointsLine(sportSlug));
 
     const firstKnockout = rounds.find((r) => r !== "third_place");
-    if (firstKnockout) {
+    if (firstKnockout === "final") {
+      lines.push(medalGamesLine(sportGroups[0].categoryId, games));
+    } else if (firstKnockout) {
       lines.push(
         throughLine(qualification(sportGroups[0].categoryId, games), {
           groups: sportGroups.length,
@@ -113,7 +126,9 @@ export function describeFormat(
     lines.push("Straight knockout: win and you go through.");
   }
 
-  if (rounds.includes("third_place")) {
+  // Third place from the semi-finals; a group's own third-place game is
+  // explained with its group above.
+  if (rounds.includes("third_place") && rounds.includes("semifinal")) {
     lines.push("Losing semi-finalists play off for third.");
   }
 

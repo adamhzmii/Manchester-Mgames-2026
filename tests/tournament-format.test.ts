@@ -53,3 +53,19 @@ test("a sport with no groups is described as a straight knockout", () => {
   assert.deepEqual(format.lines, ["Straight knockout: win and you go through."]);
   assert.deepEqual(format.rounds, ["Play-off"]);
 });
+
+test("a group that ends in medal games says who plays for which", () => {
+  const groups = [{ id: "g", name: "Group A", sortOrder: 1, categoryId: "c", sportSlug: "pickleball" }];
+  const teams = [1, 2, 3, 4, 5].map((n) => ({ id: `x${n}`, name: `x${n}`, groupId: "g", sportSlug: "pickleball" }));
+  const fixtures = [
+    fixture({ sportSlug: "pickleball", stage: "group", groupId: "g", categoryId: "c" }),
+    fixture({ sportSlug: "pickleball", stage: "third_place", categoryId: "c", slotA: "Group A 3rd", slotB: "Group A 4th" }),
+    fixture({ sportSlug: "pickleball", stage: "final", categoryId: "c", slotA: "Group A 1st", slotB: "Group A 2nd" }),
+  ];
+  const format = describeFormat("pickleball", fixtures, groups, teams);
+  assert.deepEqual(format.lines, [
+    "One group of 5, everyone plays everyone.",
+    "3 points for a win. No draws.",
+    "1st and 2nd play the final, 3rd and 4th play for third.",
+  ]);
+});
