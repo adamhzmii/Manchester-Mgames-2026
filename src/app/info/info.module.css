@@ -354,39 +354,78 @@ details[open] > summary .chevron {
   }
 }
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  background: var(--mg-card);
-  border-radius: var(--mg-r-lg);
-  box-shadow: var(--mg-shadow);
-  overflow: hidden;
-}
-
-.listItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  color: var(--mg-ink-2);
-}
-
-.listItem + .listItem {
-  box-shadow: inset 0 1px 0 var(--mg-line);
-}
-
-.listItem svg {
-  flex: 0 0 auto;
-  color: var(--mg-plum);
-}
-
 /* -------------------------------------------------------------- faq ---- */
 
 .faqQ {
   justify-content: space-between;
   font-weight: 700;
   font-size: 15px;
+}
+
+/* ------------------------------------------------------------ travel ---- */
+
+.travel {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .travel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.travelCard {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--mg-r-lg);
+  background: var(--mg-card);
+  box-shadow: var(--mg-shadow);
+}
+
+.travelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mg-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mg-ink);
+}
+
+.travelHead svg {
+  flex: 0 0 auto;
+  color: var(--mg-plum);
+}
+
+.routes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Bus numbers, like the number on the front of the bus. */
+.route {
+  min-width: 44px;
+  padding: 4px 8px;
+  border-radius: var(--mg-r-sm);
+  background: var(--mg-night);
+  color: var(--mg-gold);
+  font-family: var(--mg-display);
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.app {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--mg-sunk);
+  color: var(--mg-ink-2);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------ quotas ---- */

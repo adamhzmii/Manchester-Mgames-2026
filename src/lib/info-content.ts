@@ -153,10 +153,37 @@ export const TRAVEL = {
   note: "Keep your wristband on all day, between games too.",
 };
 
-export const GETTING_THERE = [
-  "Manchester Piccadilly station is a 12-minute walk from Sugden.",
-  "Football is at Denmark Road, a short walk from Manchester Oxford Road station.",
+/** From each train station to each venue, in minutes, as the committee timed them. */
+export const STATIONS: { name: string; times: { venue: string; walk: number; bus: number }[] }[] = [
+  {
+    name: "Manchester Oxford Road",
+    times: [
+      { venue: "Sugden", walk: 7, bus: 5 },
+      { venue: "Trinity", walk: 19, bus: 12 },
+      { venue: "Denmark Road", walk: 25, bus: 14 },
+    ],
+  },
+  {
+    name: "Manchester Piccadilly",
+    times: [
+      { venue: "Sugden", walk: 18, bus: 12 },
+      { venue: "Trinity", walk: 30, bus: 21 },
+      { venue: "Denmark Road", walk: 37, bus: 24 },
+    ],
+  },
 ];
+
+export const BUSES = {
+  network: "Bee Network",
+  routes: ["142", "143", "147", "42", "43"],
+  lines: [
+    "43 is the airport route.",
+    "Rule of thumb: look for a bus with a 4 in its number.",
+    "Tap & Go: pay with your contactless card or phone.",
+  ],
+};
+
+export const TRAVEL_APPS = ["Google Maps", "Citymapper", "Bee Network", "Uber", "Bolt"];
 
 export const FAQ = [
   {

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import {
   BookIcon,
+  BusIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   ExternalIcon,
@@ -17,11 +18,13 @@ import {
   EVENT_CONTACTS,
   FAQ,
   FIRST_AID,
-  GETTING_THERE,
   INFO_PACK_URL,
   RULEBOOK_URL,
+  BUSES,
   PRAYER_ROOMS,
   QUOTAS,
+  STATIONS,
+  TRAVEL_APPS,
   WRISTBANDS,
   walkingRouteTo,
 } from "@/lib/info-content";
@@ -118,14 +121,62 @@ export default async function InfoPage() {
         <h2 id="getting-there" className={styles.title}>
           Getting there
         </h2>
-        <ul className={styles.list}>
-          {GETTING_THERE.map((line) => (
-            <li key={line} className={styles.listItem}>
-              <TrainIcon size={18} />
-              {line}
-            </li>
+        <div className={styles.travel}>
+          {STATIONS.map((station) => (
+            <div key={station.name} className={styles.travelCard}>
+              <p className={styles.travelHead}>
+                <TrainIcon size={18} />
+                {station.name}
+              </p>
+              <table className={styles.quotaTable}>
+                <thead>
+                  <tr>
+                    <th scope="col">To</th>
+                    <th scope="col">Walk</th>
+                    <th scope="col">Bus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {station.times.map((t) => (
+                    <tr key={t.venue}>
+                      <th scope="row">{t.venue}</th>
+                      <td>{t.walk} min</td>
+                      <td>{t.bus} min</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ))}
-        </ul>
+          <div className={styles.travelCard}>
+            <p className={styles.travelHead}>
+              <BusIcon size={18} />
+              {BUSES.network} buses
+            </p>
+            <p className={styles.routes}>
+              {BUSES.routes.map((route) => (
+                <span key={route} className={styles.route}>
+                  {route}
+                </span>
+              ))}
+            </p>
+            <ul className={styles.wristbands}>
+              {BUSES.lines.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+          <div className={styles.travelCard}>
+            <p className={styles.travelHead}>Useful apps</p>
+            <p className={styles.routes}>
+              {TRAVEL_APPS.map((app) => (
+                <span key={app} className={styles.app}>
+                  {app}
+                </span>
+              ))}
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className={styles.section} aria-labelledby="prayer">
