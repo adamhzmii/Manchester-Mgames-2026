@@ -15,12 +15,9 @@
 export const RULEBOOK_URL =
   "https://docs.google.com/document/d/1Eztxsx97Si7VtIR6AH_v59nh5FIWOScoEtjllYqF9uQ/edit?usp=sharing";
 
-/**
- * The participant info pack. Until its own version is ready, the handbook
- * PDF on Google Drive.
- */
+/** The participant info pack: a PDF on Google Drive, open to anyone with the link. */
 export const INFO_PACK_URL =
-  "https://drive.google.com/file/d/1KNs4fotwofsR3zFLBL9r1TgQZ4-kE2Q1/view?usp=sharing";
+  "https://drive.google.com/file/d/1NhucVLWOg0MkEf2jWMkyn-22Sj8qlEAH/view?usp=sharing";
 
 export type Contact = {
   label: string;
