@@ -8,7 +8,7 @@ import { formatTime } from "@/lib/format";
 import { londonDate, londonToIso } from "@/lib/london-time";
 import { notifyLateGames } from "@/lib/late-notify";
 import { allowsDraws } from "@/lib/standings";
-import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "@/lib/reschedule";
+import { keepsKnockoutOrder, laterTime, nextOnCourt } from "@/lib/reschedule";
 import { sendPush } from "@/lib/push/server";
 import { TAG, getCoordinator } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -138,7 +138,8 @@ export async function updateFixtureScore(
 
   const { data, error } = await supabase
     .from("fixtures")
-    .update({ score_a: scoreA, score_b: scoreB, status, ...decider })
+    // A score saved by hand is a played result: it is no longer a forfeit.
+    .update({ score_a: scoreA, score_b: scoreB, status, ...decider, forfeit: null })
     .eq("id", fixtureId)
     .select("id");
 
@@ -732,8 +733,11 @@ export async function moveCourtGames(
 }
 
 /**
- * A walkover: a team that never turned up, or one that couldn't carry on.
- * The game ends with the sport's walkover score to the other side.
+ * A forfeit (rulebook H.6–H.7, H.11): a team that never turned up, or one
+ * that couldn't carry on. The other side wins. Its official score is 0 to
+ * the side that forfeited, and the winner keeps whatever it had scored (0–0
+ * if no play had happened); the game is then left out of score difference
+ * in the tables — see standings.ts.
  */
 export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<ActionResult> {
   if (winner !== "a" && winner !== "b") return { ok: false, message: "Pick the winner." };
@@ -747,14 +751,15 @@ export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<A
     return { ok: false, message: "Set both teams first." };
   }
 
-  const score = walkoverScore(game.sportSlug, game.stage);
+  const kept = game.status === "live" ? ((winner === "a" ? game.scoreA : game.scoreB) ?? 0) : 0;
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("fixtures")
     .update({
       status: "finished",
-      score_a: winner === "a" ? score : 0,
-      score_b: winner === "b" ? score : 0,
+      score_a: winner === "a" ? kept : 0,
+      score_b: winner === "b" ? kept : 0,
+      forfeit: winner === "a" ? "b" : "a",
       decider_a: null,
       decider_b: null,
       started_at: game.startedAt ?? now,
@@ -771,8 +776,8 @@ export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<A
   try {
     await sendPush(
       {
-        title: "Walkover",
-        body: `${won} win ${score}–0 against ${lost} by walkover.`,
+        title: "Win by forfeit",
+        body: `${won} win by forfeit against ${lost}.`,
         url: `/match/${game.id}`,
         tag: `fixture-${game.id}`,
       },
@@ -782,5 +787,64 @@ export async function awardGame(fixtureId: string, winner: "a" | "b"): Promise<A
     // Saved already; push is best effort.
   }
   await notifyLateGames(supabase);
-  return { ok: true, message: `${won} win ${score}–0 by walkover.` };
+  return { ok: true, message: `${won} win by forfeit.` };
+}
+
+/**
+ * A double forfeit (rulebook H.10): neither team turned up. No winner, no
+ * points for either, a forfeit on both records. In a knockout nobody goes
+ * through automatically: the Head of Sport decides.
+ */
+export async function doubleForfeit(fixtureId: string): Promise<ActionResult> {
+  if (!(await getCoordinator())) return SIGNED_OUT;
+
+  const supabase = await createClient();
+  const game = await readGame(supabase, fixtureId);
+  if (!game) return { ok: false, message: "Game not found." };
+  if (game.status === "finished") return { ok: false, message: "This game has already finished." };
+  if (game.teamAId === null || game.teamBId === null) {
+    return { ok: false, message: "Set both teams first." };
+  }
+
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("fixtures")
+    .update({
+      status: "finished",
+      score_a: 0,
+      score_b: 0,
+      forfeit: "both",
+      decider_a: null,
+      decider_b: null,
+      started_at: game.startedAt ?? now,
+      finished_at: now,
+    })
+    .eq("id", fixtureId)
+    .neq("status", "finished")
+    .select("id");
+  if (error) return { ok: false, message: `Could not save: ${error.message}` };
+  if (!data || data.length === 0) return SIGNED_OUT;
+
+  revalidateGames();
+  try {
+    await sendPush(
+      {
+        title: "Double forfeit",
+        body: `${game.teamA} v ${game.teamB} is recorded as a double forfeit.`,
+        url: `/match/${game.id}`,
+        tag: `fixture-${game.id}`,
+      },
+      { teamIds: [game.teamAId, game.teamBId] },
+    );
+  } catch {
+    // Saved already; push is best effort.
+  }
+  await notifyLateGames(supabase);
+  return {
+    ok: true,
+    message:
+      game.stage === "group"
+        ? "Double forfeit: no winner, no points for either."
+        : "Double forfeit: nobody goes through automatically. The Head of Sport decides.",
+  };
 }

@@ -94,6 +94,8 @@ export type GameChange = {
   scoreB: number | null;
   /** Penalties or overtime, when this save records them. */
   decider?: readonly [number, number];
+  /** Who forfeited, when this change is a forfeit. */
+  forfeit?: Fixture["forfeit"];
 };
 
 /**

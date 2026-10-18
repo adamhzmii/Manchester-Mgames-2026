@@ -14,6 +14,7 @@ import {
   computeStandings,
   pointsLine,
   bestPlaceTable,
+  tieBreakLine,
   type GroupMeta,
   type TeamMeta,
 } from "@/lib/standings";
@@ -220,8 +221,7 @@ function SportStandings({
                   round: firstKnockoutRound(tables[0].categoryId, fixtures),
                 })} `
               : null}
-            {pointsLine(sport.slug)} Level on points is split by score difference, then by total
-            score.
+            {pointsLine(sport.slug)} {tieBreakLine(sport.slug)}
           </p>
         </section>
       ) : null}

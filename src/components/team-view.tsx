@@ -16,6 +16,7 @@ import type { PickerTeam, Venue } from "@/lib/queries";
 import {
   computeStandings,
   bestPlaceTable,
+  tieBreakLine,
   type GroupMeta,
   type StandingsGroup,
   type TeamMeta,
@@ -168,7 +169,7 @@ export function TeamView({
                 round: firstKnockoutRound(team.categoryId, fixtures),
                 group: table.groupName,
               })}{" "}
-              Level on points is split by score difference, then by score.
+              {tieBreakLine(team.sportSlug)}
             </p>
           </section>
         ) : null}

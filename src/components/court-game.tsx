@@ -20,6 +20,7 @@ import {
 } from "@/components/scorer-controls";
 import {
   awardGame,
+  doubleForfeit,
   moveCourtGames,
   playLater,
   playNowOn,
@@ -30,7 +31,7 @@ import type { CourtAlert, CourtState, Expected } from "@/lib/delays";
 import type { Fixture } from "@/lib/fixtures";
 import type { FixtureStatus } from "@/lib/supabase/types";
 import { formatTime } from "@/lib/format";
-import { laterTime, nextOnCourt, walkoverScore } from "@/lib/reschedule";
+import { laterTime, nextOnCourt } from "@/lib/reschedule";
 
 import styles from "./court-sheet.module.css";
 import consoleStyles from "./score-console.module.css";
@@ -38,7 +39,7 @@ import consoleStyles from "./score-console.module.css";
 /**
  * One game on the court sheet — the one being played, the one up next —
  * and the moves a coordinator makes with it on the day: swap it with the
- * next game, play it on a free court, push it to the end, award a walkover.
+ * next game, play it on a free court, push it to the end, award a forfeit.
  * Shared by the sheet's cards and its grid.
  */
 
@@ -273,8 +274,10 @@ export function GameMoves({
 }
 
 /**
- * A walkover: a team that didn't turn up, or (during a game) one that
- * couldn't carry on. The other side wins by the sport's walkover score.
+ * A forfeit (rulebook H.6–H.11): a team that didn't turn up, or (during a
+ * game) one that couldn't carry on. The other side wins; the score stands at
+ * 0 for the side that forfeited, and the game is left out of score
+ * difference. Before kick-off, neither turning up is a double forfeit.
  */
 function Award({
   fixture,
@@ -288,11 +291,12 @@ function Award({
   const [result, setResult] = useState<ActionResult | null>(null);
   const [pending, startTransition] = useTransition();
   if (fixture.teamAId === null || fixture.teamBId === null) return null;
-  const score = walkoverScore(fixture.sportSlug, fixture.stage);
 
   const award = (side: "a" | "b") => {
     const [won, lost] = side === "a" ? [fixture.teamA, fixture.teamB] : [fixture.teamB, fixture.teamA];
-    if (!window.confirm(`${won} win ${score}–0 by walkover against ${lost}?`)) return;
+    const kept = live ? ((side === "a" ? fixture.scoreA : fixture.scoreB) ?? 0) : 0;
+    const shown = side === "a" ? `${kept}–0` : `0–${kept}`;
+    if (!window.confirm(`${won} win by forfeit against ${lost}? Recorded as ${shown}, and left out of score difference.`)) return;
     startTransition(async () => {
       const answer = await safely(() => awardGame(fixture.id, side));
       setResult(answer);
@@ -300,9 +304,27 @@ function Award({
         onChange({
           fixtureId: fixture.id,
           status: "finished",
-          scoreA: side === "a" ? score : 0,
-          scoreB: side === "b" ? score : 0,
+          scoreA: side === "a" ? kept : 0,
+          scoreB: side === "b" ? kept : 0,
+          forfeit: side === "a" ? "b" : "a",
         });
+      }
+    });
+  };
+
+  const neither = () => {
+    if (
+      !window.confirm(
+        `Neither ${fixture.teamA} nor ${fixture.teamB} turned up? Recorded as a double forfeit: no winner, no points for either.`,
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const answer = await safely(() => doubleForfeit(fixture.id));
+      setResult(answer);
+      if (answer.ok) {
+        onChange({ fixtureId: fixture.id, status: "finished", scoreA: 0, scoreB: 0, forfeit: "both" });
       }
     });
   };
@@ -310,7 +332,7 @@ function Award({
   return (
     <div className={styles.moveGroup}>
       <p className={styles.moveLabel}>
-        {live ? "Ended early — a team can't carry on?" : "A team didn't turn up?"} Walkover, {score}–0 to:
+        {live ? "Ended early — a team can't carry on?" : "A team didn't turn up?"} Win by forfeit to:
       </p>
       <div className={styles.moveChips}>
         <button type="button" className={styles.moveChip} disabled={pending} onClick={() => award("a")}>
@@ -319,6 +341,11 @@ function Award({
         <button type="button" className={styles.moveChip} disabled={pending} onClick={() => award("b")}>
           {fixture.teamB}
         </button>
+        {live ? null : (
+          <button type="button" className={styles.moveChip} disabled={pending} onClick={neither}>
+            Neither turned up
+          </button>
+        )}
       </div>
       <Result result={result} />
     </div>

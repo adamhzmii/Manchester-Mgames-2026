@@ -104,10 +104,15 @@ export function relative(target: number, now: number): string {
 
 /**
  * The winning side of a finished game, or null for a draw or no result. A
- * knockout level on the score is won on its decider (penalties, overtime).
+ * forfeit is won by the side that turned up, whatever the score, and a double
+ * forfeit by nobody. A knockout level on the score is won on its decider
+ * (penalties, overtime).
  */
 export function winningSide(f: Fixture): "a" | "b" | null {
-  if (f.status !== "finished" || f.scoreA === null || f.scoreB === null) return null;
+  if (f.status !== "finished") return null;
+  if (f.forfeit === "both") return null;
+  if (f.forfeit) return f.forfeit === "a" ? "b" : "a";
+  if (f.scoreA === null || f.scoreB === null) return null;
   if (f.scoreA === f.scoreB) {
     const decider = settledBy(f);
     return decider ? (decider.a > decider.b ? "a" : "b") : null;

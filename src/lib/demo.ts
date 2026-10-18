@@ -243,7 +243,7 @@ export function applyDemo(fixtures: readonly Fixture[], meta: DemoMeta): Fixture
 
     // A rehearsal invents its own day: whatever timings the real database
     // holds from a dry run do not belong in it.
-    f = { ...f, plannedStart: null, startedAt: null, finishedAt: null, deciderA: null, deciderB: null };
+    f = { ...f, plannedStart: null, startedAt: null, finishedAt: null, deciderA: null, deciderB: null, forfeit: null };
     if (!ready || now < start) {
       f = { ...f, status: "upcoming", scoreA: null, scoreB: null };
     } else if (now >= end) {

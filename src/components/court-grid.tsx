@@ -227,7 +227,7 @@ function GameCell({
   const tag = STAGE_TAG[game.stage] ?? categoryCode(game) ?? (game.groupName?.replace(/^Group\s+/i, "GRP ") ?? "");
   const state = game.status === "live" ? "live" : game.status === "finished" ? "done" : next ? "next" : "later";
   // "4–3 pens" in place of FT, for a level knockout settled that way.
-  const decided = deciderNote(game);
+  const decided = game.forfeit && game.status === "finished" ? "W/O" : deciderNote(game);
   const late = game.status === "upcoming" && (expected?.lateMin ?? 0) > 0;
   const moved = late
     ? formatTime(new Date(Date.parse(game.scheduledTime) + expected!.lateMin * 60_000).toISOString())

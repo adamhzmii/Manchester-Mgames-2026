@@ -54,7 +54,8 @@ export function resolveSlot(
     if (!meta || !finished([meta.id])) return null;
     const [table] = computeStandings(fixtures, [meta], sportTeams, fixture.sportSlug);
     const row = table?.rows[ref.place - 1];
-    return row ? { id: row.teamId, name: row.teamName } : null;
+    // Level on every tie-break: the Head of Sport decides, not the alphabet.
+    return row && !row.unresolved ? { id: row.teamId, name: row.teamName } : null;
   }
 
   if (ref.kind === "best") {
@@ -65,7 +66,7 @@ export function resolveSlot(
       ref.place,
     );
     const row = ranked[ref.rank - 1];
-    return row ? { id: row.teamId, name: row.teamName } : null;
+    return row && !row.unresolved ? { id: row.teamId, name: row.teamName } : null;
   }
 
   const feeder = feederGame(label, fixture.categoryId, fixtures);

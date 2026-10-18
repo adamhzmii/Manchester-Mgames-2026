@@ -172,3 +172,11 @@
 .table td:nth-child(n + 3):nth-child(-n + 6) {
   width: 28px;
 }
+
+/* Level on every tie-break once the group is played: who decides. */
+.tieNote {
+  padding: 10px 14px;
+  border-top: 1px solid var(--mg-line);
+  font-size: 13px;
+  color: var(--mg-ink-2);
+}

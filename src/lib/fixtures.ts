@@ -18,6 +18,7 @@ export const FIXTURE_SELECT = `
   planned_start,
   decider_a,
   decider_b,
+  forfeit,
   placeholder_a,
   placeholder_b,
   group_id,
@@ -42,6 +43,7 @@ export type FixtureRow = {
   planned_start: string | null;
   decider_a: number | null;
   decider_b: number | null;
+  forfeit: Forfeit;
   placeholder_a: string | null;
   placeholder_b: string | null;
   group_id: string | null;
@@ -130,7 +132,15 @@ export type Fixture = {
    */
   deciderA: number | null;
   deciderB: number | null;
+  /**
+   * Who forfeited a finished game: "a", "b", or "both" (a double forfeit).
+   * The rulebook keeps such a game's result and standings points but leaves
+   * its score out of the tie-breaks — see standings.ts.
+   */
+  forfeit: Forfeit;
 };
+
+export type Forfeit = "a" | "b" | "both" | null;
 
 const STAGE_LABELS: Record<FixtureStage, string> = {
   group: "Group",
@@ -205,6 +215,7 @@ export function toFixture(row: FixtureRow): Fixture {
     plannedStart: row.planned_start ?? null,
     deciderA: row.decider_a ?? null,
     deciderB: row.decider_b ?? null,
+    forfeit: row.forfeit ?? null,
   };
 }
 

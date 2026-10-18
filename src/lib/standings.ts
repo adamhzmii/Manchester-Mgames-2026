@@ -31,6 +31,16 @@ export type StandingsRow = {
   scoreAgainst: number;
   scoreDifference: number;
   points: number;
+  /** Group games forfeited, a double forfeit included (rulebook H.9.4). */
+  forfeits: number;
+  /**
+   * Level with another team on every tie-break the site can apply: the Head
+   * of Sport settles it (by drawing lots — or, in table tennis, by rally
+   * points, which the site does not record). Shown together, alphabetically.
+   */
+  unresolved: boolean;
+  /** Which dead tie, for naming the teams in it together; null when settled. */
+  tie: number | null;
   /** In a place that goes through, as things stand — drives the tick and the highlight. */
   qualifying: boolean;
   /** The group a row comes from, in a table drawn across groups (the third-placed teams). */
@@ -62,35 +72,157 @@ export type TeamMeta = {
 };
 
 
+/** A finished group game, as the tie-breaks read it. */
+type Result = {
+  a: string;
+  b: string;
+  scoreA: number;
+  scoreB: number;
+  /** Who forfeited, if anyone: the game still gives its points, not its score. */
+  forfeit: Fixture["forfeit"];
+};
+
+type Tally = { points: number; forfeits: number; scoreFor: number; scoreAgainst: number };
+
 /**
- * Strictly better on the tiebreaker chain — the same comparison the table sorts
- * by, minus the alphabetical fallback, which orders tied teams for display
- * without settling anything between them.
- *
- * `below` is undefined when a group holds no more teams than there are
- * qualifying places: nobody to be separated from, so the place is safe.
+ * Points and score from a set of results, for the teams given. A forfeit
+ * gives its standings points (3 to the side that turned up, 0 to the side
+ * that did not, 0 each for a double forfeit) but none of its score: the
+ * rulebook leaves forfeited games out of every score-based measure (H.8).
  */
-function isAheadOf(
-  row: { points: number; scoreDifference: number; scoreFor: number },
-  below: { points: number; scoreDifference: number; scoreFor: number } | undefined,
-): boolean {
-  if (!below) return true;
-  return (
-    row.points !== below.points ||
-    row.scoreDifference !== below.scoreDifference ||
-    row.scoreFor !== below.scoreFor
-  );
+function tally(
+  ids: readonly string[],
+  results: readonly Result[],
+  rules: { win: number; draw: number },
+): Map<string, Tally> {
+  const out = new Map(ids.map((id) => [id, { points: 0, forfeits: 0, scoreFor: 0, scoreAgainst: 0 }]));
+  for (const r of results) {
+    const a = out.get(r.a);
+    const b = out.get(r.b);
+    if (!a || !b) continue;
+    if (r.forfeit) {
+      if (r.forfeit !== "b") a.forfeits += 1;
+      if (r.forfeit !== "a") b.forfeits += 1;
+      if (r.forfeit === "a") b.points += rules.win;
+      if (r.forfeit === "b") a.points += rules.win;
+      continue;
+    }
+    a.scoreFor += r.scoreA;
+    a.scoreAgainst += r.scoreB;
+    b.scoreFor += r.scoreB;
+    b.scoreAgainst += r.scoreA;
+    if (r.scoreA > r.scoreB) a.points += rules.win;
+    else if (r.scoreB > r.scoreA) b.points += rules.win;
+    else {
+      a.points += rules.draw;
+      b.points += rules.draw;
+    }
+  }
+  return out;
 }
 
-/** Points, then difference, then scored — the usual order. */
-function byRanking(a: StandingsRow, b: StandingsRow): number {
-  return (
-    b.points - a.points ||
-    b.scoreDifference - a.scoreDifference ||
-    b.scoreFor - a.scoreFor ||
-    // Alphabetical last so the table never jitters between renders on a dead tie.
-    a.teamName.localeCompare(b.teamName)
-  );
+type Step = "headToHead" | "forfeits" | "miniDifference" | "miniScored" | "difference" | "scored";
+
+/**
+ * The rulebook's order for teams level on points (General Rules H.9). Table
+ * tennis goes on to rally points after the head-to-head game difference,
+ * which the site does not record, so a tie that far is left to the Head of
+ * Sport rather than settled by a later measure out of order.
+ */
+function stepsFor(sportSlug: string): readonly Step[] {
+  return sportSlug === "table-tennis"
+    ? ["headToHead", "forfeits", "miniDifference"]
+    : ["headToHead", "forfeits", "miniDifference", "miniScored", "difference", "scored"];
+}
+
+/**
+ * Orders teams level on points, by H.9: the games between them first
+ * (who won between two; a mini-table between three or more), then fewer
+ * forfeits, then score difference and scored — between them, then across
+ * the group. A step that separates some of them fixes those places; the rest
+ * carry on from the next step, never restarting (H.9.7), and two still level
+ * at any point are settled by their own game if it had a winner. Returns the
+ * order as runs: a run of more than one is a tie the site cannot break.
+ */
+function breakTie(
+  tied: readonly string[],
+  step: number,
+  steps: readonly Step[],
+  results: readonly Result[],
+  overall: ReadonlyMap<string, Tally>,
+  rules: { win: number; draw: number },
+): string[][] {
+  if (tied.length === 1) return [[...tied]];
+
+  const among = (ids: readonly string[]) =>
+    tally(ids, results.filter((r) => ids.includes(r.a) && ids.includes(r.b)), rules);
+
+  if (tied.length === 2 && step > 0) {
+    const [x, y] = tied;
+    const h2h = among(tied);
+    const px = h2h.get(x)!.points;
+    const py = h2h.get(y)!.points;
+    if (px !== py) return px > py ? [[x], [y]] : [[y], [x]];
+  }
+  if (step >= steps.length) return [[...tied]];
+
+  const mini = among(tied);
+  const value = (id: string): number => {
+    const m = mini.get(id)!;
+    const o = overall.get(id)!;
+    switch (steps[step]) {
+      case "headToHead":
+        return m.points;
+      case "forfeits":
+        return -o.forfeits;
+      case "miniDifference":
+        return m.scoreFor - m.scoreAgainst;
+      case "miniScored":
+        return m.scoreFor;
+      case "difference":
+        return o.scoreFor - o.scoreAgainst;
+      case "scored":
+        return o.scoreFor;
+    }
+  };
+
+  const runs = new Map<number, string[]>();
+  for (const id of tied) runs.set(value(id), [...(runs.get(value(id)) ?? []), id]);
+  if (runs.size === 1) return breakTie(tied, step + 1, steps, results, overall, rules);
+  return [...runs.entries()]
+    .sort(([a], [b]) => b - a)
+    .flatMap(([, ids]) => breakTie(ids, step + 1, steps, results, overall, rules));
+}
+
+/**
+ * Positions from runs: one after another, a dead tie together in name order
+ * so the table does not jitter. A place goes through only if it is clear of
+ * any tie the cut runs through: before a group is played every team is
+ * level, and the top two by name have not qualified.
+ */
+function placeRows<T extends { teamName: string; unresolved?: boolean }>(
+  runs: readonly T[][],
+  places: number,
+): (T & { position: number; unresolved: boolean; tie: number | null; qualifying: boolean })[] {
+  const out: (T & { position: number; unresolved: boolean; tie: number | null; qualifying: boolean })[] = [];
+  for (const [index, run] of runs.entries()) {
+    const start = out.length;
+    const end = start + run.length; // exclusive
+    const straddles = start < places && end > places;
+    for (const row of [...run].sort((a, b) => a.teamName.localeCompare(b.teamName))) {
+      // A row already unresolved in its own group (ranked across groups) is
+      // not settled here either: which team holds that place is undecided.
+      const unresolved = run.length > 1 || row.unresolved === true;
+      out.push({
+        ...row,
+        position: out.length + 1,
+        unresolved,
+        tie: run.length > 1 ? index : null,
+        qualifying: out.length < places && !straddles && !(row.unresolved === true),
+      });
+    }
+  }
+  return out;
 }
 
 /**
@@ -99,6 +231,9 @@ function byRanking(a: StandingsRow, b: StandingsRow): number {
  * Only finished group-stage fixtures count. A live match is deliberately not
  * folded in early: a half-played score would reorder the table and then
  * reorder it back, which reads as a bug to anyone watching.
+ *
+ * Order follows the rulebook (General Rules H.9): points, then the tie-breaks
+ * in breakTie. Forfeited games give their points but none of their score.
  *
  * How many go through comes from the knockout slots in `fixtures` (see
  * slots.ts), so pass the sport's knockout games along with its group games.
@@ -110,6 +245,7 @@ export function computeStandings(
   sportSlug: string,
 ): StandingsGroup[] {
   const rules = POINTS_RULES[sportSlug] ?? DEFAULT_POINTS;
+  const steps = stepsFor(sportSlug);
 
   const counted = fixtures.filter(
     (f) =>
@@ -125,81 +261,55 @@ export function computeStandings(
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
     .map((group) => {
       const { places, best } = qualification(group.categoryId, fixtures);
-      const tallies = new Map<string, StandingsRow>();
+      const members = teams.filter((t) => t.groupId === group.id);
+      const ids = members.map((t) => t.id);
+      const results: Result[] = counted
+        .filter((f) => f.groupId === group.id && ids.includes(f.teamAId!) && ids.includes(f.teamBId!))
+        .map((f) => ({ a: f.teamAId!, b: f.teamBId!, scoreA: f.scoreA!, scoreB: f.scoreB!, forfeit: f.forfeit }));
+      const overall = tally(ids, results, rules);
 
-      for (const team of teams) {
-        if (team.groupId !== group.id) continue;
-        tallies.set(team.id, {
-          position: 0,
-          teamId: team.id,
-          teamName: team.name,
-          played: 0,
-          won: 0,
-          drawn: 0,
-          lost: 0,
-          scoreFor: 0,
-          scoreAgainst: 0,
-          scoreDifference: 0,
-          points: 0,
-          qualifying: false,
-        });
+      const rows = new Map(
+        members.map((team) => {
+          const t = overall.get(team.id)!;
+          const mine = results.filter((r) => r.a === team.id || r.b === team.id);
+          const side = (r: Result) => (r.a === team.id ? "a" : "b");
+          const won = mine.filter((r) =>
+            r.forfeit ? r.forfeit !== "both" && r.forfeit !== side(r) : side(r) === "a" ? r.scoreA > r.scoreB : r.scoreB > r.scoreA,
+          ).length;
+          const drawn = mine.filter((r) => !r.forfeit && r.scoreA === r.scoreB).length;
+          const row: Omit<StandingsRow, "position" | "unresolved" | "tie" | "qualifying"> = {
+            teamId: team.id,
+            teamName: team.name,
+            played: mine.length,
+            won,
+            drawn,
+            lost: mine.length - won - drawn,
+            scoreFor: t.scoreFor,
+            scoreAgainst: t.scoreAgainst,
+            scoreDifference: t.scoreFor - t.scoreAgainst,
+            points: t.points,
+            forfeits: t.forfeits,
+          };
+          return [team.id, row] as const;
+        }),
+      );
+
+      // Points first; each set of teams level on points through breakTie.
+      const byPoints = new Map<number, string[]>();
+      for (const id of ids) {
+        const p = overall.get(id)!.points;
+        byPoints.set(p, [...(byPoints.get(p) ?? []), id]);
       }
-
-      for (const fixture of counted) {
-        if (fixture.groupId !== group.id) continue;
-        const home = tallies.get(fixture.teamAId!);
-        const away = tallies.get(fixture.teamBId!);
-        if (!home || !away) continue;
-
-        const scoreA = fixture.scoreA!;
-        const scoreB = fixture.scoreB!;
-
-        home.played += 1;
-        away.played += 1;
-        home.scoreFor += scoreA;
-        home.scoreAgainst += scoreB;
-        away.scoreFor += scoreB;
-        away.scoreAgainst += scoreA;
-
-        if (scoreA > scoreB) {
-          home.won += 1;
-          away.lost += 1;
-          home.points += rules.win;
-        } else if (scoreB > scoreA) {
-          away.won += 1;
-          home.lost += 1;
-          away.points += rules.win;
-        } else {
-          home.drawn += 1;
-          away.drawn += 1;
-          home.points += rules.draw;
-          away.points += rules.draw;
-        }
-      }
-
-      const rows = [...tallies.values()]
-        .map((row) => ({
-          ...row,
-          scoreDifference: row.scoreFor - row.scoreAgainst,
-        }))
-        .sort(byRanking)
-        .map((row, index, sorted) => ({
-          ...row,
-          position: index + 1,
-          // A place inside the cut is not the same as having earned it. Before
-          // a group has been played every team is level, and the order above is
-          // just alphabetical — marking the top two "Q" there would tell a team
-          // it had qualified on the strength of its name. So a row only counts
-          // as qualifying if it is strictly ahead of the first team below the
-          // line; while that tie stands, qualification is genuinely undecided.
-          qualifying: index < places && isAheadOf(row, sorted[places]),
-        }));
+      const runs = [...byPoints.entries()]
+        .sort(([a], [b]) => b - a)
+        .flatMap(([, level]) => breakTie(level, 0, steps, results, overall, rules))
+        .map((run) => run.map((id) => rows.get(id)!));
 
       return {
         groupId: group.id,
         groupName: group.name,
         categoryId: group.categoryId,
-        rows,
+        rows: placeRows(runs, places),
         places,
         best,
       };
@@ -214,6 +324,19 @@ const PLACE_NAME: Record<number, string> = {
 };
 
 /**
+ * Teams from different groups never met, so they are compared on what their
+ * groups give them: points, fewer forfeits, score difference, scored.
+ */
+function acrossGroups(a: StandingsRow, b: StandingsRow): number {
+  return (
+    b.points - a.points ||
+    a.forfeits - b.forfeits ||
+    b.scoreDifference - a.scoreDifference ||
+    b.scoreFor - a.scoreFor
+  );
+}
+
+/**
  * The teams finishing in a given place across a category's groups, ranked
  * against each other, for a format where the best of them go through — "the
  * four best third-placed teams", "the three best runners-up". Ranked and
@@ -225,19 +348,33 @@ export function bestPlaceTable(tables: readonly StandingsGroup[]): StandingsGrou
   if (!first?.best) return null;
   const { place, count } = first.best;
 
-  const rows = rankPlace(tables, place).map((row, index, sorted) => ({
-    ...row,
-    qualifying: index < count && isAheadOf(row, sorted[count]),
-  }));
-
   return {
     groupId: `${first.categoryId}-best-${place}`,
     groupName: PLACE_NAME[place] ?? `Teams finishing ${place}th`,
     categoryId: first.categoryId,
-    rows,
+    rows: rankAcross(tables, place, count),
     places: count,
     best: null,
   };
+}
+
+/** A place's teams across the groups, in runs of teams that cannot be separated. */
+function rankAcross(tables: readonly StandingsGroup[], place: number, count: number): StandingsRow[] {
+  const first = tables[0];
+  if (!first) return [];
+  const sorted = tables
+    .filter((t) => t.categoryId === first.categoryId)
+    .flatMap((t) =>
+      t.rows.filter((r) => r.position === place).map((r) => ({ ...r, group: t.groupName })),
+    )
+    .sort(acrossGroups);
+  const runs: StandingsRow[][] = [];
+  for (const row of sorted) {
+    const last = runs.at(-1);
+    if (last && acrossGroups(last[0], row) === 0) last.push(row);
+    else runs.push([row]);
+  }
+  return placeRows(runs, count);
 }
 
 /**
@@ -246,15 +383,14 @@ export function bestPlaceTable(tables: readonly StandingsGroup[]): StandingsGrou
  * filled in, before every slot naming one is in place.
  */
 export function rankPlace(tables: readonly StandingsGroup[], place: number): StandingsRow[] {
-  const first = tables[0];
-  if (!first) return [];
-  return tables
-    .filter((t) => t.categoryId === first.categoryId)
-    .flatMap((t) =>
-      t.rows.filter((r) => r.position === place).map((r) => ({ ...r, group: t.groupName })),
-    )
-    .sort(byRanking)
-    .map((row, index) => ({ ...row, position: index + 1 }));
+  return rankAcross(tables, place, 0);
+}
+
+/** How teams level on points are separated, in a sentence (rulebook H.9). */
+export function tieBreakLine(sportSlug: string): string {
+  return sportSlug === "table-tennis"
+    ? "Level on points: results between the teams decide, then fewer forfeits, then game difference between them. Still level? The Head of Sport decides on rally points."
+    : "Level on points: results between the teams decide, then fewer forfeits, then score difference and total score — between them first, then across the group.";
 }
 
 export type FormResult = "W" | "D" | "L";
@@ -276,6 +412,8 @@ export function teamForm(fixtures: readonly Fixture[], teamId: string): FormResu
     .sort(byKickoff)
     .map((f) => {
       // Through winningSide, so a knockout won on penalties is a W, not a D.
+      // A double forfeit is a loss for both.
+      if (f.forfeit === "both") return "L";
       const side = winningSide(f);
       if (side === null) return "D";
       return side === (f.teamAId === teamId ? "a" : "b") ? "W" : "L";

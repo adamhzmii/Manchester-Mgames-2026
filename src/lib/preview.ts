@@ -187,6 +187,7 @@ function previewFixtures(meta: FootballMeta): Fixture[] {
       plannedStart: null,
       deciderA: null,
       deciderB: null,
+      forfeit: null,
     };
   };
 

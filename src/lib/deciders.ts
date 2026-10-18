@@ -60,9 +60,23 @@ export function deciderPhrase(kind: DeciderKind): string {
   return kind === "penalties" ? "on penalties" : "in overtime";
 }
 
-/** "1–1 (4–3 pens)", or plain "2–1": a score as one line of text. */
-export function scoreline(f: Parameters<typeof settledBy>[0]): string {
+/**
+ * "Bravo win by forfeit" / "Double forfeit", for a game settled that way
+ * (rulebook H.6–H.10); null for a game that was played out.
+ */
+export function forfeitLabel(f: Pick<Fixture, "status" | "forfeit" | "teamA" | "teamB">): string | null {
+  if (f.status !== "finished" || !f.forfeit) return null;
+  if (f.forfeit === "both") return "Double forfeit";
+  return `${f.forfeit === "a" ? f.teamB : f.teamA} win by forfeit`;
+}
+
+/** "1–1 (4–3 pens)", "0–0 (forfeit)", or plain "2–1": a score as one line of text. */
+export function scoreline(
+  f: Parameters<typeof settledBy>[0] & Pick<Fixture, "forfeit">,
+): string {
+  if (f.status === "finished" && f.forfeit === "both") return "Double forfeit";
   const base = `${f.scoreA ?? 0}–${f.scoreB ?? 0}`;
+  if (f.status === "finished" && f.forfeit) return `${base} (forfeit)`;
   const note = deciderNote(f);
   return note ? `${base} (${note})` : base;
 }

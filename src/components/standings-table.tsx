@@ -26,6 +26,21 @@ export function StandingsTable({
   // No line under the last row: when everyone goes through there is no cut.
   const cut = group.places < group.rows.length ? group.places : 0;
 
+  // Teams level on every tie-break, once their games are all played: the
+  // Head of Sport settles it (rulebook H.9.8). Before then a tie is only how
+  // things stand, and says nothing.
+  const acrossGroups = group.rows.some((r) => r.group);
+  const games = fixtures.filter(
+    (f) => f.stage === "group" && (acrossGroups ? f.categoryId === group.categoryId : f.groupId === group.groupId),
+  );
+  const complete = games.length > 0 && games.every((f) => f.status === "finished");
+  const ties = complete
+    ? [...new Set(group.rows.map((r) => r.tie).filter((t) => t !== null))].map((t) =>
+        group.rows.filter((r) => r.tie === t).map((r) => r.teamName),
+      )
+    : [];
+  const rallyPoints = games[0]?.sportSlug === "table-tennis";
+
   return (
     <div className={styles.card}>
       <table className={styles.table}>
@@ -92,6 +107,12 @@ export function StandingsTable({
           })}
         </tbody>
       </table>
+      {ties.map((names) => (
+        <p key={names.join("|")} className={styles.tieNote}>
+          {names.slice(0, -1).join(", ")} and {names.at(-1)} are level on every tie-break.{" "}
+          {rallyPoints ? "The Head of Sport decides on rally points." : "The Head of Sport decides by drawing lots."}
+        </p>
+      ))}
     </div>
   );
 }

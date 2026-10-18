@@ -19,7 +19,7 @@ import { ScoreConsole } from "@/components/score-console";
 import { ShareButton } from "@/components/share-button";
 import { SportBadge } from "@/components/sport-badge";
 import { StandingsTable } from "@/components/standings-table";
-import { deciderPhrase, settledBy } from "@/lib/deciders";
+import { deciderPhrase, forfeitLabel, settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { formatDay, formatTime } from "@/lib/format";
 import { useLiveFixtures } from "@/lib/live-feed";
@@ -167,6 +167,9 @@ export function MatchView({
                   ) : (
                     <span className={styles.ft}>Full time</span>
                   )}
+                  {forfeitLabel(fixture) ? (
+                    <span className={styles.decided}>{forfeitLabel(fixture)}</span>
+                  ) : null}
                   {decided ? (
                     <span className={styles.decided}>
                       {decided.a > decided.b ? fixture.teamA : fixture.teamB} won{" "}

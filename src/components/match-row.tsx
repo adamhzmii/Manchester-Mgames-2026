@@ -68,7 +68,8 @@ export function MatchRow({ fixture, followed = [], hideSport = false }: MatchRow
           </span>
         ) : fixture.status === "finished" ? (
           <>
-            <span className={styles.ft}>FT</span>
+            {/* W/O: won by forfeit (or a double forfeit) rather than played out. */}
+            <span className={styles.ft}>{fixture.forfeit ? "W/O" : "FT"}</span>
             {/* When it really ended: how far behind the court is, at a glance. */}
             {fixture.finishedAt ? (
               <span className={styles.ended}>

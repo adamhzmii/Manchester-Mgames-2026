@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { Fixture } from "../src/lib/fixtures.ts";
-import { keepsKnockoutOrder, laterTime, nextOnCourt, walkoverScore } from "../src/lib/reschedule.ts";
+import { keepsKnockoutOrder, laterTime, nextOnCourt } from "../src/lib/reschedule.ts";
 import { fixture } from "./helpers.ts";
 
 const at = (time: string) => `2026-10-24T${time}:00+01:00`;
@@ -16,14 +16,6 @@ function game(time: string, overrides: Partial<Fixture> = {}): Fixture {
     ...overrides,
   });
 }
-
-test("walkovers score the sport's usual winning margin", () => {
-  assert.equal(walkoverScore("football", "group"), 3);
-  assert.equal(walkoverScore("badminton", "group"), 21);
-  assert.equal(walkoverScore("badminton", "semifinal"), 30);
-  assert.equal(walkoverScore("pickleball", "final"), 2);
-  assert.equal(walkoverScore("volleyball", "group"), 31);
-});
 
 test("the next game on a court is the next of the same sport there", () => {
   const a = game("10:50");

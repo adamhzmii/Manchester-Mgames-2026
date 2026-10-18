@@ -58,6 +58,7 @@ function match(
     plannedStart: null,
     deciderA: null,
     deciderB: null,
+    forfeit: null,
     ...overrides,
   };
 }

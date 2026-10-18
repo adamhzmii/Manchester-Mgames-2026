@@ -193,6 +193,7 @@ export interface Database {
           planned_start: Timestamptz | null;
           decider_a: number | null;
           decider_b: number | null;
+          forfeit: "a" | "b" | "both" | null;
           created_at: Timestamptz;
           updated_at: Timestamptz;
         };
@@ -208,6 +209,7 @@ export interface Database {
           | "planned_start"
           | "decider_a"
           | "decider_b"
+          | "forfeit"
         > & {
           id?: string;
           created_at?: Timestamptz;
@@ -219,6 +221,7 @@ export interface Database {
           planned_start?: Timestamptz | null;
           decider_a?: number | null;
           decider_b?: number | null;
+          forfeit?: "a" | "b" | "both" | null;
         };
         Update: Partial<Database["public"]["Tables"]["fixtures"]["Insert"]>;
         Relationships: [

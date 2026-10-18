@@ -235,6 +235,7 @@ function applyOverrides(
       scoreB: o.scoreB,
       deciderA: o.decider ? o.decider[0] : o.status === "upcoming" ? null : f.deciderA,
       deciderB: o.decider ? o.decider[1] : o.status === "upcoming" ? null : f.deciderB,
+      forfeit: o.forfeit ?? null,
       startedAt: o.status === "upcoming" ? null : (o.startedAt ?? f.startedAt),
       finishedAt: o.status === "finished" ? (o.finishedAt ?? f.finishedAt) : null,
     };

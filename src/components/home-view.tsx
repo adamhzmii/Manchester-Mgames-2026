@@ -355,12 +355,16 @@ function Champions({ finals }: { finals: Podium[] }) {
               </span>
               <span className={styles.championScore}>
                 Beat {p.silver.name}{" "}
-                <span className={styles.nowrap}>
-                  {a}–{b}
-                  {decided
-                    ? ` (${goldIsA ? decided.a : decided.b}–${goldIsA ? decided.b : decided.a} ${deciderShort(decided.kind)})`
-                    : ""}
-                </span>
+                {p.final.forfeit ? (
+                  "by forfeit"
+                ) : (
+                  <span className={styles.nowrap}>
+                    {a}–{b}
+                    {decided
+                      ? ` (${goldIsA ? decided.a : decided.b}–${goldIsA ? decided.b : decided.a} ${deciderShort(decided.kind)})`
+                      : ""}
+                  </span>
+                )}
               </span>
             </Link>
           );

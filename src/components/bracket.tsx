@@ -3,7 +3,7 @@ import Link from "next/link";
 import { KickoffTime } from "@/components/delays";
 import { TrophyIcon } from "@/components/icons";
 import { Score } from "@/components/score";
-import { settledBy } from "@/lib/deciders";
+import { forfeitLabel, settledBy } from "@/lib/deciders";
 import { byKickoff, type Fixture } from "@/lib/fixtures";
 import { winningSide } from "@/lib/matchday";
 import { bracketOrder } from "@/lib/progression";
@@ -126,7 +126,7 @@ function BracketMatch({ fixture }: { fixture: Fixture }) {
             Live
           </span>
         ) : fixture.status === "finished" ? (
-          "Full time"
+          (forfeitLabel(fixture) ?? "Full time")
         ) : (
           <>
             <KickoffTime fixture={fixture} className={styles.metaTime} />
