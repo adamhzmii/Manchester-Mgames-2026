@@ -1,4 +1,4 @@
-import { InstagramIcon, PinIcon } from "@/components/icons";
+import { InstagramIcon, PhoneIcon, PinIcon } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import type { Vendor, Venue } from "@/lib/queries";
 import { fromPrice, instagramHref, stallDirections } from "@/lib/vendors";
@@ -54,6 +54,25 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
             <InstagramIcon size={14} />
             <span className={styles.handle}>@{vendor.instagram}</span>
           </a>
+        ) : null}
+
+        {vendor.contact ? (
+          vendor.contact.href ? (
+            <a
+              href={vendor.contact.href}
+              target={vendor.contact.href.startsWith("tel:") ? undefined : "_blank"}
+              rel="noreferrer"
+              className={styles.insta}
+            >
+              <PhoneIcon size={14} />
+              <span className={styles.handle}>{vendor.contact.label}</span>
+            </a>
+          ) : (
+            <p className={styles.insta}>
+              <PhoneIcon size={14} />
+              <span className={styles.handle}>{vendor.contact.label}</span>
+            </p>
+          )
         ) : null}
 
         {vendor.menu.length > 0 ? (

@@ -74,6 +74,8 @@ export type Vendor = {
   /** Handle without the @, or null. */
   instagram: string | null;
   tags: string[];
+  /** How to reach the stall — "Pre-order: +44 …" — and where that leads (tel:, WhatsApp, Instagram). */
+  contact: { label: string; href: string | null } | null;
   /** A price is null where the stall has not given one. */
   menu: { id: string; name: string; pricePence: number | null; description: string | null }[];
 };
@@ -442,7 +444,7 @@ async function readVendors(): Promise<Vendor[]> {
       .from("vendors")
       .select(
         `id, name, cuisine, location, photo_url, sort_order, latitude, longitude,
-         tagline, instagram, tags,
+         tagline, instagram, tags, contact, contact_href,
          venue:venues ( slug, short_name ),
          menu_items ( id, name, price_pence, description, sort_order )`,
       )
@@ -460,6 +462,8 @@ async function readVendors(): Promise<Vendor[]> {
     tagline: string | null;
     instagram: string | null;
     tags: string[] | null;
+    contact: string | null;
+    contact_href: string | null;
     venue: { slug: string; short_name: string } | null;
     menu_items: {
       id: string;
@@ -483,6 +487,7 @@ async function readVendors(): Promise<Vendor[]> {
     tagline: v.tagline?.trim() || null,
     instagram: v.instagram?.trim().replace(/^@/, "") || null,
     tags: (v.tags ?? []).filter((t) => t.trim() !== ""),
+    contact: v.contact?.trim() ? { label: v.contact.trim(), href: v.contact_href?.trim() || null } : null,
     // Nested rows come back in insertion order, not the order requested on the
     // parent — sort the menu here so prices read top to bottom as intended.
     menu: [...v.menu_items]
