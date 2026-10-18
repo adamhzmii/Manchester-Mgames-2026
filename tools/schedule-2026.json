@@ -1,0 +1,1875 @@
+[
+ {
+  "sport": "football",
+  "category": "open",
+  "groups": {
+   "A": [
+    "MCCH",
+    "Geng Bangku FC",
+    "DUMAS",
+    "CGB"
+   ],
+   "B": [
+    "Siu",
+    "Avengers FC",
+    "Anak Harimau",
+    "Haram Ballerz"
+   ],
+   "C": [
+    "MSSM",
+    "muiz.pdfc",
+    "Aadi and friends",
+    "Brexit Hasta City FC"
+   ],
+   "D": [
+    "6eer6ellyFC",
+    "Woman United (U21)",
+    "Glasgow",
+    "Asam Pedas"
+   ],
+   "E": [
+    "Hombres FT",
+    "LumFC",
+    "Woxbridge United",
+    "RTJ"
+   ],
+   "F": [
+    "Maui",
+    "Fourteen",
+    "Bankfield All Star FC",
+    "6ola 6oys"
+   ]
+  },
+  "games": [
+   {
+    "time": "09:00",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "MCCH",
+    "b": "Geng Bangku FC"
+   },
+   {
+    "time": "09:00",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Siu",
+    "b": "Avengers FC"
+   },
+   {
+    "time": "09:00",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "MSSM",
+    "b": "muiz.pdfc"
+   },
+   {
+    "time": "09:15",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "DUMAS",
+    "b": "CGB"
+   },
+   {
+    "time": "09:15",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Anak Harimau",
+    "b": "Haram Ballerz"
+   },
+   {
+    "time": "09:15",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "Aadi and friends",
+    "b": "Brexit Hasta City FC"
+   },
+   {
+    "time": "09:30",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "MCCH",
+    "b": "DUMAS"
+   },
+   {
+    "time": "09:30",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Siu",
+    "b": "Anak Harimau"
+   },
+   {
+    "time": "09:30",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "MSSM",
+    "b": "Aadi and friends"
+   },
+   {
+    "time": "09:45",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "Geng Bangku FC",
+    "b": "CGB"
+   },
+   {
+    "time": "09:45",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Avengers FC",
+    "b": "Haram Ballerz"
+   },
+   {
+    "time": "09:45",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "muiz.pdfc",
+    "b": "Brexit Hasta City FC"
+   },
+   {
+    "time": "10:00",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "Geng Bangku FC",
+    "b": "DUMAS"
+   },
+   {
+    "time": "10:00",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Avengers FC",
+    "b": "Anak Harimau"
+   },
+   {
+    "time": "10:00",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "muiz.pdfc",
+    "b": "Aadi and friends"
+   },
+   {
+    "time": "10:15",
+    "court": "Pitch A",
+    "group": "A",
+    "a": "MCCH",
+    "b": "CGB"
+   },
+   {
+    "time": "10:15",
+    "court": "Pitch B",
+    "group": "B",
+    "a": "Siu",
+    "b": "Haram Ballerz"
+   },
+   {
+    "time": "10:15",
+    "court": "Pitch C",
+    "group": "C",
+    "a": "MSSM",
+    "b": "Brexit Hasta City FC"
+   },
+   {
+    "time": "10:30",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "6eer6ellyFC",
+    "b": "Woman United (U21)"
+   },
+   {
+    "time": "10:30",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "Hombres FT",
+    "b": "LumFC"
+   },
+   {
+    "time": "10:30",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Maui",
+    "b": "Fourteen"
+   },
+   {
+    "time": "10:45",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "Glasgow",
+    "b": "Asam Pedas"
+   },
+   {
+    "time": "10:45",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "Woxbridge United",
+    "b": "RTJ"
+   },
+   {
+    "time": "10:45",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Bankfield All Star FC",
+    "b": "6ola 6oys"
+   },
+   {
+    "time": "11:00",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "6eer6ellyFC",
+    "b": "Glasgow"
+   },
+   {
+    "time": "11:00",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "Hombres FT",
+    "b": "Woxbridge United"
+   },
+   {
+    "time": "11:00",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Maui",
+    "b": "Bankfield All Star FC"
+   },
+   {
+    "time": "11:15",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "Woman United (U21)",
+    "b": "Asam Pedas"
+   },
+   {
+    "time": "11:15",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "LumFC",
+    "b": "RTJ"
+   },
+   {
+    "time": "11:15",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Fourteen",
+    "b": "6ola 6oys"
+   },
+   {
+    "time": "11:30",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "Woman United (U21)",
+    "b": "Glasgow"
+   },
+   {
+    "time": "11:30",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "LumFC",
+    "b": "Woxbridge United"
+   },
+   {
+    "time": "11:30",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Fourteen",
+    "b": "Bankfield All Star FC"
+   },
+   {
+    "time": "11:45",
+    "court": "Pitch A",
+    "group": "D",
+    "a": "6eer6ellyFC",
+    "b": "Asam Pedas"
+   },
+   {
+    "time": "11:45",
+    "court": "Pitch B",
+    "group": "E",
+    "a": "Hombres FT",
+    "b": "RTJ"
+   },
+   {
+    "time": "11:45",
+    "court": "Pitch C",
+    "group": "F",
+    "a": "Maui",
+    "b": "6ola 6oys"
+   }
+  ]
+ },
+ {
+  "sport": "basketball",
+  "category": "open",
+  "groups": {
+   "A": [
+    "MSSM",
+    "Dynasty Ballers",
+    "Rasmeena FTC",
+    "Lobsters"
+   ],
+   "B": [
+    "Easy Champion",
+    "Fusion",
+    "Doomsday"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Hall A",
+    "group": "A",
+    "a": "MSSM",
+    "b": "Lobsters"
+   },
+   {
+    "time": "08:50",
+    "court": "Hall A",
+    "group": "B",
+    "a": "Easy Champion",
+    "b": "Fusion"
+   },
+   {
+    "time": "09:10",
+    "court": "Hall A",
+    "group": "A",
+    "a": "MSSM",
+    "b": "Dynasty Ballers"
+   },
+   {
+    "time": "09:30",
+    "court": "Hall A",
+    "group": "A",
+    "a": "Rasmeena FTC",
+    "b": "Lobsters"
+   },
+   {
+    "time": "09:50",
+    "court": "Hall A",
+    "group": "B",
+    "a": "Easy Champion",
+    "b": "Doomsday"
+   },
+   {
+    "time": "10:10",
+    "court": "Hall A",
+    "group": "A",
+    "a": "MSSM",
+    "b": "Rasmeena FTC"
+   },
+   {
+    "time": "10:30",
+    "court": "Hall A",
+    "group": "A",
+    "a": "Dynasty Ballers",
+    "b": "Lobsters"
+   },
+   {
+    "time": "10:50",
+    "court": "Hall A",
+    "group": "B",
+    "a": "Fusion",
+    "b": "Doomsday"
+   },
+   {
+    "time": "11:10",
+    "court": "Hall A",
+    "group": "A",
+    "a": "Dynasty Ballers",
+    "b": "Rasmeena FTC"
+   }
+  ]
+ },
+ {
+  "sport": "netball",
+  "category": "open",
+  "groups": {
+   "A": [
+    "BALL-Z",
+    "Mamazila",
+    "papadomz",
+    "Angie’s angels"
+   ],
+   "B": [
+    "Tako",
+    "MSSMbzzbzz",
+    "Cili Padi"
+   ],
+   "C": [
+    "MSSM 2",
+    "al-Otley",
+    "Bebolumss"
+   ],
+   "D": [
+    "MSSM Kardex",
+    "Vixen",
+    "Papazola"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "BALL-Z",
+    "b": "Mamazila"
+   },
+   {
+    "time": "08:30",
+    "court": "Netball Court B",
+    "group": "B",
+    "a": "Tako",
+    "b": "MSSMbzzbzz"
+   },
+   {
+    "time": "08:50",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "papadomz",
+    "b": "Angie’s angels"
+   },
+   {
+    "time": "09:10",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "BALL-Z",
+    "b": "papadomz"
+   },
+   {
+    "time": "09:10",
+    "court": "Netball Court B",
+    "group": "B",
+    "a": "Tako",
+    "b": "Cili Padi"
+   },
+   {
+    "time": "09:30",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "Mamazila",
+    "b": "Angie’s angels"
+   },
+   {
+    "time": "09:50",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "BALL-Z",
+    "b": "Angie’s angels"
+   },
+   {
+    "time": "09:50",
+    "court": "Netball Court B",
+    "group": "B",
+    "a": "MSSMbzzbzz",
+    "b": "Cili Padi"
+   },
+   {
+    "time": "10:10",
+    "court": "Netball Court A",
+    "group": "A",
+    "a": "Mamazila",
+    "b": "papadomz"
+   },
+   {
+    "time": "10:30",
+    "court": "Netball Court A",
+    "group": "C",
+    "a": "MSSM 2",
+    "b": "al-Otley"
+   },
+   {
+    "time": "10:30",
+    "court": "Netball Court B",
+    "group": "D",
+    "a": "MSSM Kardex",
+    "b": "Vixen"
+   },
+   {
+    "time": "11:10",
+    "court": "Netball Court A",
+    "group": "C",
+    "a": "MSSM 2",
+    "b": "Bebolumss"
+   },
+   {
+    "time": "11:10",
+    "court": "Netball Court B",
+    "group": "D",
+    "a": "MSSM Kardex",
+    "b": "Papazola"
+   },
+   {
+    "time": "11:50",
+    "court": "Netball Court A",
+    "group": "C",
+    "a": "al-Otley",
+    "b": "Bebolumss"
+   },
+   {
+    "time": "11:50",
+    "court": "Netball Court B",
+    "group": "D",
+    "a": "Vixen",
+    "b": "Papazola"
+   }
+  ]
+ },
+ {
+  "sport": "volleyball",
+  "category": "open",
+  "groups": {
+   "A": [
+    "Kopi O Kosong",
+    "Adobo Lumpur",
+    "Karasini",
+    "Eddin"
+   ],
+   "B": [
+    "Jojo Volleyball Club",
+    "kyvo",
+    "Hitam Manis"
+   ],
+   "C": [
+    "BANG BANG",
+    "Kieran n Co",
+    "That's what she set"
+   ],
+   "D": [
+    "MSSM",
+    "Under Cooked",
+    "Set to Grace"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Kopi O Kosong",
+    "b": "Adobo Lumpur"
+   },
+   {
+    "time": "08:52",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Karasini",
+    "b": "Eddin"
+   },
+   {
+    "time": "09:14",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Kopi O Kosong",
+    "b": "Karasini"
+   },
+   {
+    "time": "09:36",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Adobo Lumpur",
+    "b": "Eddin"
+   },
+   {
+    "time": "09:58",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Adobo Lumpur",
+    "b": "Karasini"
+   },
+   {
+    "time": "10:20",
+    "court": "Hall B",
+    "group": "A",
+    "a": "Kopi O Kosong",
+    "b": "Eddin"
+   },
+   {
+    "time": "10:42",
+    "court": "Hall B",
+    "group": "B",
+    "a": "Jojo Volleyball Club",
+    "b": "kyvo"
+   },
+   {
+    "time": "11:04",
+    "court": "Hall B",
+    "group": "B",
+    "a": "Hitam Manis",
+    "b": "Jojo Volleyball Club"
+   },
+   {
+    "time": "11:26",
+    "court": "Hall B",
+    "group": "B",
+    "a": "kyvo",
+    "b": "Hitam Manis"
+   },
+   {
+    "time": "11:48",
+    "court": "Hall B",
+    "group": "C",
+    "a": "BANG BANG",
+    "b": "Kieran n Co"
+   },
+   {
+    "time": "12:10",
+    "court": "Hall B",
+    "group": "C",
+    "a": "That's what she set",
+    "b": "BANG BANG"
+   },
+   {
+    "time": "12:32",
+    "court": "Hall B",
+    "group": "C",
+    "a": "Kieran n Co",
+    "b": "That's what she set"
+   },
+   {
+    "time": "12:54",
+    "court": "Hall B",
+    "group": "D",
+    "a": "MSSM",
+    "b": "Under Cooked"
+   },
+   {
+    "time": "13:16",
+    "court": "Hall B",
+    "group": "D",
+    "a": "Set to Grace",
+    "b": "MSSM"
+   },
+   {
+    "time": "13:38",
+    "court": "Hall B",
+    "group": "D",
+    "a": "Under Cooked",
+    "b": "Set to Grace"
+   }
+  ]
+ },
+ {
+  "sport": "frisbee",
+  "category": "open",
+  "groups": {
+   "A": [
+    "alliGato",
+    "Mamak Roti Canai",
+    "Beefsteaks",
+    "Stallions C"
+   ],
+   "B": [
+    "Bristolen",
+    "Stallions B",
+    "Bounce",
+    "Mamak Maggie Goreng"
+   ],
+   "C": [
+    "ariGato",
+    "Stallions A",
+    "Bristeal"
+   ],
+   "D": [
+    "Bristole",
+    "Mamak Teh Tarik",
+    "jypa,ymfnfe"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "alliGato",
+    "b": "Mamak Roti Canai"
+   },
+   {
+    "time": "08:52",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "Beefsteaks",
+    "b": "Stallions C"
+   },
+   {
+    "time": "09:14",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "alliGato",
+    "b": "Beefsteaks"
+   },
+   {
+    "time": "09:36",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "Mamak Roti Canai",
+    "b": "Stallions C"
+   },
+   {
+    "time": "09:58",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "alliGato",
+    "b": "Stallions C"
+   },
+   {
+    "time": "10:20",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "Mamak Roti Canai",
+    "b": "Beefsteaks"
+   },
+   {
+    "time": "10:42",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Bristolen",
+    "b": "Stallions B"
+   },
+   {
+    "time": "11:04",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Bounce",
+    "b": "Mamak Maggie Goreng"
+   },
+   {
+    "time": "11:26",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Bristolen",
+    "b": "Bounce"
+   },
+   {
+    "time": "11:48",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Stallions B",
+    "b": "Mamak Maggie Goreng"
+   },
+   {
+    "time": "12:10",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Bristolen",
+    "b": "Mamak Maggie Goreng"
+   },
+   {
+    "time": "12:32",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Stallions B",
+    "b": "Bounce"
+   },
+   {
+    "time": "12:54",
+    "court": "Sport Hall",
+    "group": "C",
+    "a": "ariGato",
+    "b": "Stallions A"
+   },
+   {
+    "time": "13:16",
+    "court": "Sport Hall",
+    "group": "D",
+    "a": "Bristole",
+    "b": "Mamak Teh Tarik"
+   },
+   {
+    "time": "13:38",
+    "court": "Sport Hall",
+    "group": "C",
+    "a": "Bristeal",
+    "b": "ariGato"
+   },
+   {
+    "time": "14:00",
+    "court": "Sport Hall",
+    "group": "D",
+    "a": "Mamak Teh Tarik",
+    "b": "jypa,ymfnfe"
+   },
+   {
+    "time": "14:22",
+    "court": "Sport Hall",
+    "group": "C",
+    "a": "Stallions A",
+    "b": "Bristeal"
+   },
+   {
+    "time": "14:44",
+    "court": "Sport Hall",
+    "group": "D",
+    "a": "jypa,ymfnfe",
+    "b": "Bristole"
+   }
+  ]
+ },
+ {
+  "sport": "badminton",
+  "category": "ms",
+  "groups": {
+   "A": [
+    "Chong Cheng Leck",
+    "Faheem Dizhwar",
+    "Rizzqy"
+   ],
+   "B": [
+    "Lam Jin Yong",
+    "Temu Kodai",
+    "See Too Zhi Xiang"
+   ],
+   "C": [
+    "Temu Axelsen",
+    "MSSM (Yung Ee)",
+    "Fahymme"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Chong Cheng Leck",
+    "b": "Faheem Dizhwar"
+   },
+   {
+    "time": "08:30",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Lam Jin Yong",
+    "b": "Temu Kodai"
+   },
+   {
+    "time": "08:30",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Temu Axelsen",
+    "b": "MSSM (Yung Ee)"
+   },
+   {
+    "time": "08:55",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Chong Cheng Leck",
+    "b": "Rizzqy"
+   },
+   {
+    "time": "08:55",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Lam Jin Yong",
+    "b": "See Too Zhi Xiang"
+   },
+   {
+    "time": "08:55",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Temu Axelsen",
+    "b": "Fahymme"
+   },
+   {
+    "time": "09:20",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Faheem Dizhwar",
+    "b": "Rizzqy"
+   },
+   {
+    "time": "09:20",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Temu Kodai",
+    "b": "See Too Zhi Xiang"
+   },
+   {
+    "time": "09:20",
+    "court": "Court C3",
+    "group": "C",
+    "a": "MSSM (Yung Ee)",
+    "b": "Fahymme"
+   }
+  ]
+ },
+ {
+  "sport": "badminton",
+  "category": "wd",
+  "groups": {
+   "A": [
+    "Avacado",
+    "Siaoo lahh",
+    "Queensbads",
+    "PeiYan",
+    "Serumpun Squad"
+   ],
+   "B": [
+    "MSSM (Amanda Helen)",
+    "Serumpun",
+    "Miso Soup",
+    "A&W",
+    "A-Sync"
+   ]
+  },
+  "games": [
+   {
+    "time": "08:30",
+    "court": "Court D1",
+    "group": "A",
+    "a": "Avacado",
+    "b": "Siaoo lahh"
+   },
+   {
+    "time": "08:30",
+    "court": "Court D2",
+    "group": "A",
+    "a": "Queensbads",
+    "b": "PeiYan"
+   },
+   {
+    "time": "08:30",
+    "court": "Court D3",
+    "group": "B",
+    "a": "MSSM (Amanda Helen)",
+    "b": "Serumpun"
+   },
+   {
+    "time": "08:30",
+    "court": "Court D4",
+    "group": "B",
+    "a": "Miso Soup",
+    "b": "A&W"
+   },
+   {
+    "time": "08:45",
+    "court": "Court D1",
+    "group": "A",
+    "a": "Avacado",
+    "b": "Serumpun Squad"
+   },
+   {
+    "time": "08:45",
+    "court": "Court D2",
+    "group": "A",
+    "a": "Siaoo lahh",
+    "b": "Queensbads"
+   },
+   {
+    "time": "08:45",
+    "court": "Court D3",
+    "group": "B",
+    "a": "MSSM (Amanda Helen)",
+    "b": "A-Sync"
+   },
+   {
+    "time": "08:45",
+    "court": "Court D4",
+    "group": "B",
+    "a": "Serumpun",
+    "b": "Miso Soup"
+   },
+   {
+    "time": "09:00",
+    "court": "Court D1",
+    "group": "A",
+    "a": "Siaoo lahh",
+    "b": "PeiYan"
+   },
+   {
+    "time": "09:00",
+    "court": "Court D2",
+    "group": "A",
+    "a": "Queensbads",
+    "b": "Serumpun Squad"
+   },
+   {
+    "time": "09:00",
+    "court": "Court D3",
+    "group": "B",
+    "a": "Serumpun",
+    "b": "A&W"
+   },
+   {
+    "time": "09:00",
+    "court": "Court D4",
+    "group": "B",
+    "a": "Miso Soup",
+    "b": "A-Sync"
+   },
+   {
+    "time": "09:15",
+    "court": "Court D1",
+    "group": "A",
+    "a": "Avacado",
+    "b": "Queensbads"
+   },
+   {
+    "time": "09:15",
+    "court": "Court D2",
+    "group": "A",
+    "a": "PeiYan",
+    "b": "Serumpun Squad"
+   },
+   {
+    "time": "09:15",
+    "court": "Court D3",
+    "group": "B",
+    "a": "MSSM (Amanda Helen)",
+    "b": "Miso Soup"
+   },
+   {
+    "time": "09:15",
+    "court": "Court D4",
+    "group": "B",
+    "a": "A&W",
+    "b": "A-Sync"
+   },
+   {
+    "time": "09:30",
+    "court": "Court D1",
+    "group": "A",
+    "a": "Avacado",
+    "b": "PeiYan"
+   },
+   {
+    "time": "09:30",
+    "court": "Court D2",
+    "group": "A",
+    "a": "Siaoo lahh",
+    "b": "Serumpun Squad"
+   },
+   {
+    "time": "09:30",
+    "court": "Court D3",
+    "group": "B",
+    "a": "MSSM (Amanda Helen)",
+    "b": "A&W"
+   },
+   {
+    "time": "09:30",
+    "court": "Court D4",
+    "group": "B",
+    "a": "Serumpun",
+    "b": "A-Sync"
+   }
+  ]
+ },
+ {
+  "sport": "badminton",
+  "category": "md",
+  "groups": {
+   "A": [
+    "Big H",
+    "Bruh",
+    "BAM",
+    "A1"
+   ],
+   "B": [
+    "MSSM (Aiman Razi)",
+    "Not Too Xabi",
+    "Boomers 2.0",
+    "Team Refinery"
+   ],
+   "C": [
+    "DUMAS",
+    "Team Warwick",
+    "Laiyidian",
+    "maggi sejuk"
+   ],
+   "D": [
+    "Split Step Warrior",
+    "Paddy Power",
+    "RGT on Top"
+   ],
+   "E": [
+    "27 POUNDS",
+    "MCR BADDIES",
+    "Smashvengers"
+   ],
+   "F": [
+    "D2-1F",
+    "Jason and Wilson",
+    "GGEZ"
+   ]
+  },
+  "games": [
+   {
+    "time": "10:00",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Big H",
+    "b": "Bruh"
+   },
+   {
+    "time": "10:00",
+    "court": "Court C2",
+    "group": "B",
+    "a": "MSSM (Aiman Razi)",
+    "b": "Not Too Xabi"
+   },
+   {
+    "time": "10:00",
+    "court": "Court C3",
+    "group": "C",
+    "a": "DUMAS",
+    "b": "Team Warwick"
+   },
+   {
+    "time": "10:00",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Split Step Warrior",
+    "b": "Paddy Power"
+   },
+   {
+    "time": "10:00",
+    "court": "Court D3",
+    "group": "E",
+    "a": "27 POUNDS",
+    "b": "MCR BADDIES"
+   },
+   {
+    "time": "10:15",
+    "court": "Court C1",
+    "group": "A",
+    "a": "BAM",
+    "b": "A1"
+   },
+   {
+    "time": "10:15",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Boomers 2.0",
+    "b": "Team Refinery"
+   },
+   {
+    "time": "10:15",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Laiyidian",
+    "b": "maggi sejuk"
+   },
+   {
+    "time": "10:15",
+    "court": "Court D3",
+    "group": "F",
+    "a": "D2-1F",
+    "b": "Jason and Wilson"
+   },
+   {
+    "time": "10:30",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Big H",
+    "b": "BAM"
+   },
+   {
+    "time": "10:30",
+    "court": "Court C2",
+    "group": "B",
+    "a": "MSSM (Aiman Razi)",
+    "b": "Boomers 2.0"
+   },
+   {
+    "time": "10:30",
+    "court": "Court C3",
+    "group": "C",
+    "a": "DUMAS",
+    "b": "Laiyidian"
+   },
+   {
+    "time": "10:30",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Split Step Warrior",
+    "b": "RGT on Top"
+   },
+   {
+    "time": "10:30",
+    "court": "Court D3",
+    "group": "E",
+    "a": "27 POUNDS",
+    "b": "Smashvengers"
+   },
+   {
+    "time": "10:45",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Bruh",
+    "b": "A1"
+   },
+   {
+    "time": "10:45",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Not Too Xabi",
+    "b": "Team Refinery"
+   },
+   {
+    "time": "10:45",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Team Warwick",
+    "b": "maggi sejuk"
+   },
+   {
+    "time": "10:45",
+    "court": "Court D3",
+    "group": "F",
+    "a": "D2-1F",
+    "b": "GGEZ"
+   },
+   {
+    "time": "11:00",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Big H",
+    "b": "A1"
+   },
+   {
+    "time": "11:00",
+    "court": "Court C2",
+    "group": "B",
+    "a": "MSSM (Aiman Razi)",
+    "b": "Team Refinery"
+   },
+   {
+    "time": "11:00",
+    "court": "Court C3",
+    "group": "C",
+    "a": "DUMAS",
+    "b": "maggi sejuk"
+   },
+   {
+    "time": "11:00",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Paddy Power",
+    "b": "RGT on Top"
+   },
+   {
+    "time": "11:00",
+    "court": "Court D3",
+    "group": "E",
+    "a": "MCR BADDIES",
+    "b": "Smashvengers"
+   },
+   {
+    "time": "11:15",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Bruh",
+    "b": "BAM"
+   },
+   {
+    "time": "11:15",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Not Too Xabi",
+    "b": "Boomers 2.0"
+   },
+   {
+    "time": "11:15",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Team Warwick",
+    "b": "Laiyidian"
+   },
+   {
+    "time": "11:15",
+    "court": "Court D3",
+    "group": "F",
+    "a": "Jason and Wilson",
+    "b": "GGEZ"
+   }
+  ]
+ },
+ {
+  "sport": "badminton",
+  "category": "xd",
+  "groups": {
+   "A": [
+    "Ai-Nai Smash",
+    "Ethiopia Yirgacheffe..",
+    "Team bubadibako",
+    "MSSM (Ian Amanda)"
+   ],
+   "B": [
+    "tiki",
+    "MataHari",
+    "Aiman Helen",
+    "BADMINTON4FUN"
+   ],
+   "C": [
+    "cavill’s secret admire",
+    "dim some",
+    "Paddy Power 2.0",
+    "Boleh Lah"
+   ],
+   "D": [
+    "Boomers",
+    "CheeseCake",
+    "K.O",
+    "A^2"
+   ],
+   "E": [
+    "EngGan",
+    "DUMAS",
+    "MCR BADDY",
+    "A H"
+   ]
+  },
+  "games": [
+   {
+    "time": "11:35",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Ai-Nai Smash",
+    "b": "Ethiopia Yirgacheffe.."
+   },
+   {
+    "time": "11:35",
+    "court": "Court C2",
+    "group": "B",
+    "a": "tiki",
+    "b": "MataHari"
+   },
+   {
+    "time": "11:35",
+    "court": "Court C3",
+    "group": "C",
+    "a": "cavill’s secret admire",
+    "b": "dim some"
+   },
+   {
+    "time": "11:35",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Boomers",
+    "b": "CheeseCake"
+   },
+   {
+    "time": "11:35",
+    "court": "Court D3",
+    "group": "E",
+    "a": "EngGan",
+    "b": "DUMAS"
+   },
+   {
+    "time": "11:50",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Team bubadibako",
+    "b": "MSSM (Ian Amanda)"
+   },
+   {
+    "time": "11:50",
+    "court": "Court C2",
+    "group": "B",
+    "a": "Aiman Helen",
+    "b": "BADMINTON4FUN"
+   },
+   {
+    "time": "11:50",
+    "court": "Court C3",
+    "group": "C",
+    "a": "Paddy Power 2.0",
+    "b": "Boleh Lah"
+   },
+   {
+    "time": "11:50",
+    "court": "Court C4",
+    "group": "D",
+    "a": "K.O",
+    "b": "A^2"
+   },
+   {
+    "time": "11:50",
+    "court": "Court D3",
+    "group": "E",
+    "a": "MCR BADDY",
+    "b": "A H"
+   },
+   {
+    "time": "12:05",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Ai-Nai Smash",
+    "b": "Team bubadibako"
+   },
+   {
+    "time": "12:05",
+    "court": "Court C2",
+    "group": "B",
+    "a": "tiki",
+    "b": "Aiman Helen"
+   },
+   {
+    "time": "12:05",
+    "court": "Court C3",
+    "group": "C",
+    "a": "cavill’s secret admire",
+    "b": "Paddy Power 2.0"
+   },
+   {
+    "time": "12:05",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Boomers",
+    "b": "K.O"
+   },
+   {
+    "time": "12:05",
+    "court": "Court D3",
+    "group": "E",
+    "a": "EngGan",
+    "b": "MCR BADDY"
+   },
+   {
+    "time": "12:20",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Ethiopia Yirgacheffe..",
+    "b": "MSSM (Ian Amanda)"
+   },
+   {
+    "time": "12:20",
+    "court": "Court C2",
+    "group": "B",
+    "a": "MataHari",
+    "b": "BADMINTON4FUN"
+   },
+   {
+    "time": "12:20",
+    "court": "Court C3",
+    "group": "C",
+    "a": "dim some",
+    "b": "Boleh Lah"
+   },
+   {
+    "time": "12:20",
+    "court": "Court C4",
+    "group": "D",
+    "a": "CheeseCake",
+    "b": "A^2"
+   },
+   {
+    "time": "12:20",
+    "court": "Court D3",
+    "group": "E",
+    "a": "DUMAS",
+    "b": "A H"
+   },
+   {
+    "time": "12:35",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Ai-Nai Smash",
+    "b": "MSSM (Ian Amanda)"
+   },
+   {
+    "time": "12:35",
+    "court": "Court C2",
+    "group": "B",
+    "a": "tiki",
+    "b": "BADMINTON4FUN"
+   },
+   {
+    "time": "12:35",
+    "court": "Court C3",
+    "group": "C",
+    "a": "cavill’s secret admire",
+    "b": "Boleh Lah"
+   },
+   {
+    "time": "12:35",
+    "court": "Court C4",
+    "group": "D",
+    "a": "Boomers",
+    "b": "A^2"
+   },
+   {
+    "time": "12:35",
+    "court": "Court D3",
+    "group": "E",
+    "a": "EngGan",
+    "b": "A H"
+   },
+   {
+    "time": "12:50",
+    "court": "Court C1",
+    "group": "A",
+    "a": "Ethiopia Yirgacheffe..",
+    "b": "Team bubadibako"
+   },
+   {
+    "time": "12:50",
+    "court": "Court C2",
+    "group": "B",
+    "a": "MataHari",
+    "b": "Aiman Helen"
+   },
+   {
+    "time": "12:50",
+    "court": "Court C3",
+    "group": "C",
+    "a": "dim some",
+    "b": "Paddy Power 2.0"
+   },
+   {
+    "time": "12:50",
+    "court": "Court C4",
+    "group": "D",
+    "a": "CheeseCake",
+    "b": "K.O"
+   },
+   {
+    "time": "12:50",
+    "court": "Court D3",
+    "group": "E",
+    "a": "DUMAS",
+    "b": "MCR BADDY"
+   }
+  ]
+ },
+ {
+  "sport": "pickleball",
+  "category": "md",
+  "groups": {
+   "A": [
+    "PickleLab",
+    "the goooners",
+    "F39",
+    "H&M"
+   ],
+   "B": [
+    "Short Kings",
+    "santai",
+    "Onzbappe",
+    "Goats of Junus"
+   ],
+   "C": [
+    "MarshalsJeruk (London Division)",
+    "VMX",
+    "Jumbo Pickles"
+   ],
+   "D": [
+    "Nicholas from grafton studying econs",
+    "Pickle Bros",
+    "Uncle"
+   ]
+  },
+  "games": [
+   {
+    "time": "14:00",
+    "court": "Court D1",
+    "group": "A",
+    "a": "PickleLab",
+    "b": "the goooners"
+   },
+   {
+    "time": "14:00",
+    "court": "Court D2",
+    "group": "A",
+    "a": "F39",
+    "b": "H&M"
+   },
+   {
+    "time": "14:00",
+    "court": "Court D3",
+    "group": "C",
+    "a": "MarshalsJeruk (London Division)",
+    "b": "VMX"
+   },
+   {
+    "time": "14:20",
+    "court": "Court D1",
+    "group": "B",
+    "a": "Short Kings",
+    "b": "santai"
+   },
+   {
+    "time": "14:20",
+    "court": "Court D2",
+    "group": "B",
+    "a": "Onzbappe",
+    "b": "Goats of Junus"
+   },
+   {
+    "time": "14:20",
+    "court": "Court D3",
+    "group": "D",
+    "a": "Nicholas from grafton studying econs",
+    "b": "Pickle Bros"
+   },
+   {
+    "time": "14:40",
+    "court": "Court D1",
+    "group": "A",
+    "a": "PickleLab",
+    "b": "F39"
+   },
+   {
+    "time": "14:40",
+    "court": "Court D2",
+    "group": "A",
+    "a": "the goooners",
+    "b": "H&M"
+   },
+   {
+    "time": "14:40",
+    "court": "Court D3",
+    "group": "C",
+    "a": "MarshalsJeruk (London Division)",
+    "b": "Jumbo Pickles"
+   },
+   {
+    "time": "15:00",
+    "court": "Court D1",
+    "group": "B",
+    "a": "Short Kings",
+    "b": "Onzbappe"
+   },
+   {
+    "time": "15:00",
+    "court": "Court D2",
+    "group": "B",
+    "a": "santai",
+    "b": "Goats of Junus"
+   },
+   {
+    "time": "15:00",
+    "court": "Court D3",
+    "group": "D",
+    "a": "Nicholas from grafton studying econs",
+    "b": "Uncle"
+   },
+   {
+    "time": "15:20",
+    "court": "Court D1",
+    "group": "A",
+    "a": "PickleLab",
+    "b": "H&M"
+   },
+   {
+    "time": "15:20",
+    "court": "Court D2",
+    "group": "A",
+    "a": "the goooners",
+    "b": "F39"
+   },
+   {
+    "time": "15:20",
+    "court": "Court D3",
+    "group": "C",
+    "a": "VMX",
+    "b": "Jumbo Pickles"
+   },
+   {
+    "time": "15:40",
+    "court": "Court D1",
+    "group": "B",
+    "a": "Short Kings",
+    "b": "Goats of Junus"
+   },
+   {
+    "time": "15:40",
+    "court": "Court D2",
+    "group": "B",
+    "a": "santai",
+    "b": "Onzbappe"
+   },
+   {
+    "time": "15:40",
+    "court": "Court D3",
+    "group": "D",
+    "a": "Pickle Bros",
+    "b": "Uncle"
+   }
+  ]
+ },
+ {
+  "sport": "pickleball",
+  "category": "xd",
+  "groups": {
+   "A": [
+    "nubshits",
+    "RR",
+    "Rick & Morty",
+    "UMARAI",
+    "DUMAS"
+   ]
+  },
+  "games": [
+   {
+    "time": "14:00",
+    "court": "Court D4",
+    "group": "A",
+    "a": "nubshits",
+    "b": "RR"
+   },
+   {
+    "time": "14:15",
+    "court": "Court D4",
+    "group": "A",
+    "a": "Rick & Morty",
+    "b": "UMARAI"
+   },
+   {
+    "time": "14:30",
+    "court": "Court D4",
+    "group": "A",
+    "a": "nubshits",
+    "b": "DUMAS"
+   },
+   {
+    "time": "14:45",
+    "court": "Court D4",
+    "group": "A",
+    "a": "RR",
+    "b": "Rick & Morty"
+   },
+   {
+    "time": "15:00",
+    "court": "Court D4",
+    "group": "A",
+    "a": "UMARAI",
+    "b": "DUMAS"
+   },
+   {
+    "time": "15:15",
+    "court": "Court D4",
+    "group": "A",
+    "a": "nubshits",
+    "b": "Rick & Morty"
+   },
+   {
+    "time": "15:30",
+    "court": "Court D4",
+    "group": "A",
+    "a": "RR",
+    "b": "UMARAI"
+   },
+   {
+    "time": "15:45",
+    "court": "Court D4",
+    "group": "A",
+    "a": "Rick & Morty",
+    "b": "DUMAS"
+   },
+   {
+    "time": "16:00",
+    "court": "Court D4",
+    "group": "A",
+    "a": "nubshits",
+    "b": "UMARAI"
+   },
+   {
+    "time": "16:15",
+    "court": "Court D4",
+    "group": "A",
+    "a": "RR",
+    "b": "DUMAS"
+   }
+  ]
+ },
+ {
+  "sport": "table-tennis",
+  "category": "open",
+  "groups": {
+   "A": [
+    "Odeon",
+    "Seasonators",
+    "Double Trouble",
+    "Team brum"
+   ],
+   "B": [
+    "MSSM",
+    "RGT KOolKidzz",
+    "GGFREAKINGEZ",
+    "ikut jangan takut, takut jangan ikut"
+   ]
+  },
+  "games": [
+   {
+    "time": "14:00",
+    "court": "Temple Gym 1",
+    "group": "A",
+    "a": "Odeon",
+    "b": "Seasonators"
+   },
+   {
+    "time": "14:00",
+    "court": "Temple Gym 2",
+    "group": "A",
+    "a": "Double Trouble",
+    "b": "Team brum"
+   },
+   {
+    "time": "14:15",
+    "court": "Temple Gym 1",
+    "group": "B",
+    "a": "MSSM",
+    "b": "RGT KOolKidzz"
+   },
+   {
+    "time": "14:15",
+    "court": "Temple Gym 2",
+    "group": "B",
+    "a": "GGFREAKINGEZ",
+    "b": "ikut jangan takut, takut jangan ikut"
+   },
+   {
+    "time": "14:30",
+    "court": "Temple Gym 1",
+    "group": "A",
+    "a": "Odeon",
+    "b": "Double Trouble"
+   },
+   {
+    "time": "14:30",
+    "court": "Temple Gym 2",
+    "group": "A",
+    "a": "Seasonators",
+    "b": "Team brum"
+   },
+   {
+    "time": "14:45",
+    "court": "Temple Gym 1",
+    "group": "B",
+    "a": "MSSM",
+    "b": "GGFREAKINGEZ"
+   },
+   {
+    "time": "14:45",
+    "court": "Temple Gym 2",
+    "group": "B",
+    "a": "RGT KOolKidzz",
+    "b": "ikut jangan takut, takut jangan ikut"
+   },
+   {
+    "time": "15:00",
+    "court": "Temple Gym 1",
+    "group": "A",
+    "a": "Odeon",
+    "b": "Team brum"
+   },
+   {
+    "time": "15:00",
+    "court": "Temple Gym 2",
+    "group": "A",
+    "a": "Seasonators",
+    "b": "Double Trouble"
+   },
+   {
+    "time": "15:15",
+    "court": "Temple Gym 1",
+    "group": "B",
+    "a": "MSSM",
+    "b": "ikut jangan takut, takut jangan ikut"
+   },
+   {
+    "time": "15:15",
+    "court": "Temple Gym 2",
+    "group": "B",
+    "a": "RGT KOolKidzz",
+    "b": "GGFREAKINGEZ"
+   }
+  ]
+ }
+]
