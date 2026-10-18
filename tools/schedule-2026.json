@@ -651,7 +651,7 @@
   "groups": {
    "A": [
     "alliGato",
-    "Mamak Roti Canai",
+    "Mamak Sirap Ais",
     "Beefsteaks",
     "Stallions C"
    ],
@@ -659,7 +659,7 @@
     "Bristolen",
     "Stallions B",
     "Bounce",
-    "Mamak Maggie Goreng"
+    "Mamak Teh Beng Goreng"
    ],
    "C": [
     "ariGato",
@@ -668,7 +668,7 @@
    ],
    "D": [
     "Bristole",
-    "Mamak Teh Tarik",
+    "Mamak Extrajoss",
     "jypa,ymfnfe"
    ]
   },
@@ -678,7 +678,7 @@
     "court": "Sport Hall",
     "group": "A",
     "a": "alliGato",
-    "b": "Mamak Roti Canai"
+    "b": "Mamak Sirap Ais"
    },
    {
     "time": "08:52",
@@ -698,7 +698,7 @@
     "time": "09:36",
     "court": "Sport Hall",
     "group": "A",
-    "a": "Mamak Roti Canai",
+    "a": "Mamak Sirap Ais",
     "b": "Stallions C"
    },
    {
@@ -712,7 +712,7 @@
     "time": "10:20",
     "court": "Sport Hall",
     "group": "A",
-    "a": "Mamak Roti Canai",
+    "a": "Mamak Sirap Ais",
     "b": "Beefsteaks"
    },
    {
@@ -727,7 +727,7 @@
     "court": "Sport Hall",
     "group": "B",
     "a": "Bounce",
-    "b": "Mamak Maggie Goreng"
+    "b": "Mamak Teh Beng Goreng"
    },
    {
     "time": "11:26",
@@ -741,14 +741,14 @@
     "court": "Sport Hall",
     "group": "B",
     "a": "Stallions B",
-    "b": "Mamak Maggie Goreng"
+    "b": "Mamak Teh Beng Goreng"
    },
    {
     "time": "12:10",
     "court": "Sport Hall",
     "group": "B",
     "a": "Bristolen",
-    "b": "Mamak Maggie Goreng"
+    "b": "Mamak Teh Beng Goreng"
    },
    {
     "time": "12:32",
@@ -769,7 +769,7 @@
     "court": "Sport Hall",
     "group": "D",
     "a": "Bristole",
-    "b": "Mamak Teh Tarik"
+    "b": "Mamak Extrajoss"
    },
    {
     "time": "13:38",
@@ -782,7 +782,7 @@
     "time": "14:00",
     "court": "Sport Hall",
     "group": "D",
-    "a": "Mamak Teh Tarik",
+    "a": "Mamak Extrajoss",
     "b": "jypa,ymfnfe"
    },
    {
@@ -1302,7 +1302,6 @@
     "Boleh Lah"
    ],
    "D": [
-    "Boomers",
     "CheeseCake",
     "K.O",
     "A^2"
@@ -1340,8 +1339,8 @@
     "time": "11:35",
     "court": "Court C4",
     "group": "D",
-    "a": "Boomers",
-    "b": "CheeseCake"
+    "a": "K.O",
+    "b": "A^2"
    },
    {
     "time": "11:35",
@@ -1370,13 +1369,6 @@
     "group": "C",
     "a": "Paddy Power 2.0",
     "b": "Boleh Lah"
-   },
-   {
-    "time": "11:50",
-    "court": "Court C4",
-    "group": "D",
-    "a": "K.O",
-    "b": "A^2"
    },
    {
     "time": "11:50",
@@ -1410,8 +1402,8 @@
     "time": "12:05",
     "court": "Court C4",
     "group": "D",
-    "a": "Boomers",
-    "b": "K.O"
+    "a": "CheeseCake",
+    "b": "A^2"
    },
    {
     "time": "12:05",
@@ -1440,13 +1432,6 @@
     "group": "C",
     "a": "dim some",
     "b": "Boleh Lah"
-   },
-   {
-    "time": "12:20",
-    "court": "Court C4",
-    "group": "D",
-    "a": "CheeseCake",
-    "b": "A^2"
    },
    {
     "time": "12:20",
@@ -1480,8 +1465,8 @@
     "time": "12:35",
     "court": "Court C4",
     "group": "D",
-    "a": "Boomers",
-    "b": "A^2"
+    "a": "CheeseCake",
+    "b": "K.O"
    },
    {
     "time": "12:35",
@@ -1510,13 +1495,6 @@
     "group": "C",
     "a": "dim some",
     "b": "Paddy Power 2.0"
-   },
-   {
-    "time": "12:50",
-    "court": "Court C4",
-    "group": "D",
-    "a": "CheeseCake",
-    "b": "K.O"
    },
    {
     "time": "12:50",

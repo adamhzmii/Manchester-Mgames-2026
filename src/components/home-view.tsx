@@ -279,7 +279,7 @@ function DayHero({
       ) : (
         <div className={styles.followCta}>
           <p className={styles.followText}>
-            <strong>{phase === "before" ? "Playing?" : "Playing today?"}</strong> Follow your team,
+            <strong>Playing?</strong> Follow your team,
             and this spot shows your next game: time, court, opponent, and whether it&rsquo;s
             running late.
           </p>
