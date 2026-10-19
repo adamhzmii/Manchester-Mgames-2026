@@ -83,11 +83,7 @@ export function FoodView({
 
       <div className={`mg-wrap ${styles.grid}`}>
         {visible.map((vendor) => (
-          <VendorCard
-            key={vendor.id}
-            vendor={vendor}
-            venue={venues.find((v) => v.slug === vendor.venueSlug)}
-          />
+          <VendorCard key={vendor.id} vendor={vendor} />
         ))}
         {visible.length === 0 ? (
           <p className={styles.empty}>No stalls listed here yet.</p>

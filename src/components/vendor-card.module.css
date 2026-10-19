@@ -158,21 +158,4 @@
   overflow-wrap: anywhere;
 }
 
-.actions {
-  display: flex;
-  margin-top: auto;
-  padding-top: 8px;
-}
 
-.find {
-  flex: 1;
-  background: var(--mg-night);
-  color: #fff;
-}
-
-@media (prefers-color-scheme: dark) {
-  .find {
-    background: var(--mg-gold);
-    color: var(--mg-night);
-  }
-}

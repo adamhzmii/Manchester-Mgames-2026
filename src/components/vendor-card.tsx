@@ -1,7 +1,7 @@
 import { InstagramIcon, PhoneIcon, PinIcon } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
-import type { Vendor, Venue } from "@/lib/queries";
-import { fromPrice, instagramHref, stallDirections } from "@/lib/vendors";
+import type { Vendor } from "@/lib/queries";
+import { fromPrice, instagramHref } from "@/lib/vendors";
 
 import styles from "./vendor-card.module.css";
 
@@ -11,9 +11,8 @@ import styles from "./vendor-card.module.css";
  * Every card has the same shape — no photo or logo slot, since only some
  * stalls would have one to put in it.
  */
-export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue }) {
+export function VendorCard({ vendor }: { vendor: Vendor }) {
   const from = fromPrice(vendor);
-  const directions = stallDirections(vendor, venue);
 
   return (
     // The id is the anchor other pages link to ("Food at Sugden" → this card).
@@ -42,8 +41,7 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
             ? `${vendor.venueShortName}${vendor.location ? ` · ${vendor.location}` : ""}`
             : "Stall location to be confirmed"}
         </p>
-        {/* A line of its own, so the whole handle shows — squeezed into a
-            button beside "Find the stall" it was cut to "@dem…". */}
+        {/* A line of its own, so the whole handle shows rather than "@dem…". */}
         {vendor.instagram ? (
           <a
             href={instagramHref(vendor.instagram)}
@@ -94,13 +92,6 @@ export function VendorCard({ vendor, venue }: { vendor: Vendor; venue?: Venue })
           </ul>
         ) : null}
 
-        {directions ? (
-          <div className={styles.actions}>
-            <a href={directions} target="_blank" rel="noreferrer" className={`mg-btn ${styles.find}`}>
-              Find the stall
-            </a>
-          </div>
-        ) : null}
       </div>
     </article>
   );
