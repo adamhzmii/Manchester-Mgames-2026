@@ -86,44 +86,44 @@
    {
     "time": "09:30",
     "court": "Pitch A",
-    "group": "A",
-    "a": "MCCH",
-    "b": "DUMAS"
+    "group": "D",
+    "a": "6eer6ellyFC",
+    "b": "Glasgow"
    },
    {
     "time": "09:30",
     "court": "Pitch B",
-    "group": "B",
-    "a": "Siu",
-    "b": "Anak Harimau"
+    "group": "E",
+    "a": "Hombres FT",
+    "b": "Woxbridge United"
    },
    {
     "time": "09:30",
     "court": "Pitch C",
-    "group": "C",
-    "a": "MSSM",
-    "b": "Aadi and friends"
+    "group": "F",
+    "a": "Maui",
+    "b": "Bankfield All Star FC"
    },
    {
     "time": "09:45",
     "court": "Pitch A",
-    "group": "A",
-    "a": "Geng Bangku FC",
-    "b": "CGB"
+    "group": "D",
+    "a": "Woman United (U21)",
+    "b": "Asam Pedas"
    },
    {
     "time": "09:45",
     "court": "Pitch B",
-    "group": "B",
-    "a": "Avengers FC",
-    "b": "Haram Ballerz"
+    "group": "E",
+    "a": "LumFC",
+    "b": "RTJ"
    },
    {
     "time": "09:45",
     "court": "Pitch C",
-    "group": "C",
-    "a": "muiz.pdfc",
-    "b": "Brexit Hasta City FC"
+    "group": "F",
+    "a": "Fourteen",
+    "b": "6ola 6oys"
    },
    {
     "time": "10:00",
@@ -212,44 +212,44 @@
    {
     "time": "11:00",
     "court": "Pitch A",
-    "group": "D",
-    "a": "6eer6ellyFC",
-    "b": "Glasgow"
+    "group": "A",
+    "a": "MCCH",
+    "b": "DUMAS"
    },
    {
     "time": "11:00",
     "court": "Pitch B",
-    "group": "E",
-    "a": "Hombres FT",
-    "b": "Woxbridge United"
+    "group": "B",
+    "a": "Siu",
+    "b": "Anak Harimau"
    },
    {
     "time": "11:00",
     "court": "Pitch C",
-    "group": "F",
-    "a": "Maui",
-    "b": "Bankfield All Star FC"
+    "group": "C",
+    "a": "MSSM",
+    "b": "Aadi and friends"
    },
    {
     "time": "11:15",
     "court": "Pitch A",
-    "group": "D",
-    "a": "Woman United (U21)",
-    "b": "Asam Pedas"
+    "group": "A",
+    "a": "Geng Bangku FC",
+    "b": "CGB"
    },
    {
     "time": "11:15",
     "court": "Pitch B",
-    "group": "E",
-    "a": "LumFC",
-    "b": "RTJ"
+    "group": "B",
+    "a": "Avengers FC",
+    "b": "Haram Ballerz"
    },
    {
     "time": "11:15",
     "court": "Pitch C",
-    "group": "F",
-    "a": "Fourteen",
-    "b": "6ola 6oys"
+    "group": "C",
+    "a": "muiz.pdfc",
+    "b": "Brexit Hasta City FC"
    },
    {
     "time": "11:30",
@@ -659,7 +659,7 @@
     "Bristolen",
     "Stallions B",
     "Bounce",
-    "Mamak Teh Beng Goreng"
+    "Mamak Teh Beng"
    ],
    "C": [
     "ariGato",
@@ -683,72 +683,72 @@
    {
     "time": "08:52",
     "court": "Sport Hall",
-    "group": "A",
-    "a": "Beefsteaks",
-    "b": "Stallions C"
+    "group": "B",
+    "a": "Bristolen",
+    "b": "Stallions B"
    },
    {
     "time": "09:14",
     "court": "Sport Hall",
     "group": "A",
-    "a": "alliGato",
-    "b": "Beefsteaks"
+    "a": "Beefsteaks",
+    "b": "Stallions C"
    },
    {
     "time": "09:36",
     "court": "Sport Hall",
-    "group": "A",
-    "a": "Mamak Sirap Ais",
-    "b": "Stallions C"
+    "group": "B",
+    "a": "Bounce",
+    "b": "Mamak Teh Beng"
    },
    {
     "time": "09:58",
     "court": "Sport Hall",
     "group": "A",
     "a": "alliGato",
-    "b": "Stallions C"
-   },
-   {
-    "time": "10:20",
-    "court": "Sport Hall",
-    "group": "A",
-    "a": "Mamak Sirap Ais",
     "b": "Beefsteaks"
    },
    {
-    "time": "10:42",
-    "court": "Sport Hall",
-    "group": "B",
-    "a": "Bristolen",
-    "b": "Stallions B"
-   },
-   {
-    "time": "11:04",
-    "court": "Sport Hall",
-    "group": "B",
-    "a": "Bounce",
-    "b": "Mamak Teh Beng Goreng"
-   },
-   {
-    "time": "11:26",
+    "time": "10:20",
     "court": "Sport Hall",
     "group": "B",
     "a": "Bristolen",
     "b": "Bounce"
    },
    {
-    "time": "11:48",
+    "time": "10:42",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "Mamak Sirap Ais",
+    "b": "Stallions C"
+   },
+   {
+    "time": "11:04",
     "court": "Sport Hall",
     "group": "B",
     "a": "Stallions B",
-    "b": "Mamak Teh Beng Goreng"
+    "b": "Mamak Teh Beng"
+   },
+   {
+    "time": "11:26",
+    "court": "Sport Hall",
+    "group": "A",
+    "a": "alliGato",
+    "b": "Stallions C"
+   },
+   {
+    "time": "11:48",
+    "court": "Sport Hall",
+    "group": "B",
+    "a": "Bristolen",
+    "b": "Mamak Teh Beng"
    },
    {
     "time": "12:10",
     "court": "Sport Hall",
-    "group": "B",
-    "a": "Bristolen",
-    "b": "Mamak Teh Beng Goreng"
+    "group": "A",
+    "a": "Mamak Sirap Ais",
+    "b": "Beefsteaks"
    },
    {
     "time": "12:32",
@@ -812,11 +812,11 @@
    ],
    "B": [
     "Lam Jin Yong",
-    "Temu Kodai",
+    "Faramir",
     "See Too Zhi Xiang"
    ],
    "C": [
-    "Temu Axelsen",
+    "Eason Lee",
     "MSSM (Yung Ee)",
     "Fahymme"
    ]
@@ -834,13 +834,13 @@
     "court": "Court C2",
     "group": "B",
     "a": "Lam Jin Yong",
-    "b": "Temu Kodai"
+    "b": "Faramir"
    },
    {
     "time": "08:30",
     "court": "Court C3",
     "group": "C",
-    "a": "Temu Axelsen",
+    "a": "Eason Lee",
     "b": "MSSM (Yung Ee)"
    },
    {
@@ -861,7 +861,7 @@
     "time": "08:55",
     "court": "Court C3",
     "group": "C",
-    "a": "Temu Axelsen",
+    "a": "Eason Lee",
     "b": "Fahymme"
    },
    {
@@ -875,7 +875,7 @@
     "time": "09:20",
     "court": "Court C2",
     "group": "B",
-    "a": "Temu Kodai",
+    "a": "Faramir",
     "b": "See Too Zhi Xiang"
    },
    {
@@ -1056,7 +1056,7 @@
    "A": [
     "Big H",
     "Bruh",
-    "BAM",
+    "Wing & Wong",
     "A1"
    ],
    "B": [
@@ -1127,7 +1127,7 @@
     "time": "10:15",
     "court": "Court C1",
     "group": "A",
-    "a": "BAM",
+    "a": "Wing & Wong",
     "b": "A1"
    },
    {
@@ -1156,7 +1156,7 @@
     "court": "Court C1",
     "group": "A",
     "a": "Big H",
-    "b": "BAM"
+    "b": "Wing & Wong"
    },
    {
     "time": "10:30",
@@ -1254,7 +1254,7 @@
     "court": "Court C1",
     "group": "A",
     "a": "Bruh",
-    "b": "BAM"
+    "b": "Wing & Wong"
    },
    {
     "time": "11:15",
