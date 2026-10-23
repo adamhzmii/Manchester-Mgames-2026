@@ -49,6 +49,7 @@ const SHEET = JSON.parse(readFileSync(new URL("./schedule-2026.json", import.met
 // Names the committee has confirmed since the sheet was last saved.
 const RENAMES = {
   "Mamak Teh Beng Goreng": "Mamak Teh Beng",
+  "MSSM 2": "MSSM Kebabom",
 };
 for (const entry of SHEET) {
   const rename = (name) => RENAMES[name] ?? name;
