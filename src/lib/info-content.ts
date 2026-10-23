@@ -73,7 +73,6 @@ export const VENUE_CONTACTS: { venue: string; people: VenueContact[] }[] = [
     people: [
       { name: "Shing Hui", role: "MGames Director", display: "+60 11-1639 9665", tel: "+601116399665", whatsapp: true },
       { name: "Hannah Hamidon", role: "Vendors", display: "+44 7384 335338", tel: "+447384335338" },
-      { name: "Aviennash Kannan", role: "Volunteers", display: "+44 7721 150923", tel: "+447721150923" },
     ],
   },
   {
@@ -81,6 +80,7 @@ export const VENUE_CONTACTS: { venue: string; people: VenueContact[] }[] = [
     people: [
       { name: "Max Ng", role: null, display: "+44 7778 742505", tel: "+447778742505" },
       { name: "Yuan Li Tee", role: "First aid", display: "+44 7785 442051", tel: "+447785442051" },
+      { name: "Aviennash Kannan", role: "Volunteers", display: "+44 7721 150923", tel: "+447721150923" },
     ],
   },
 ];
