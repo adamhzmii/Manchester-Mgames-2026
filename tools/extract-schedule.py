@@ -57,11 +57,15 @@ def group_tables(tab):
 def court_name(sport, header, hall):
     h = header.upper()
     if sport == 'football': return 'Pitch ' + re.search(r'PITCH ([A-C])', h).group(1)
-    if sport == 'netball': return 'Netball Court ' + re.search(r'COURT ([AB])', h).group(1)
+    # Netball moved indoors to Sugden's halls (the sheet says "HALL A" and
+    # "COURT C" for the same thing); before, Trinity's outdoor courts A and B.
+    if sport == 'netball':
+        m = re.search(r'SUGDEN (?:HALL|COURT) ([A-D])', h)
+        return f'Hall {m.group(1)}' if m else 'Netball Court ' + re.search(r'COURT ([AB])', h).group(1)
     if sport == 'basketball': return 'Hall A'
     if sport == 'volleyball': return 'Hall B'
     if sport == 'frisbee': return 'Sport Hall'
-    if sport == 'table-tennis': return 'Temple Gym ' + re.search(r'TABLE (\d)', h).group(1)
+    if sport == 'table-tennis': return 'Table ' + re.search(r'TABLE (\d)', h).group(1)
     n = re.search(r'COURT (\d)', h).group(1)
     return f'Court {hall}{n}'
 
@@ -81,7 +85,7 @@ for sport, cat, tab, teamtab in TABS:
             up = v.upper()
             if 'HALL C' in up: hall = 'C'
             if 'HALL D' in up: hall = 'D'
-            if re.search(r'PITCH [A-C]|COURT [A-D1-4]|TABLE \d', up) and not TIME.match(v): header = v
+            if re.search(r'PITCH [A-C]|COURT [A-D1-4]|TABLE \d|SUGDEN HALL [A-D]', up) and not TIME.match(v): header = v
             if TIME.match(v):
                 a, b = cell(r, col+1), cell(r, col+4)
                 if a in member and b in member:
