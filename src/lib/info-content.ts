@@ -48,6 +48,43 @@ export const FIRST_AID = {
   display: "+44 7785 442051",
 };
 
+export type VenueContact = {
+  name: string;
+  /** What to ask them about; null for the person in charge of the venue. */
+  role: string | null;
+  display: string;
+  tel: string;
+  /** Reach them on WhatsApp rather than a call. */
+  whatsapp?: boolean;
+};
+
+/** Who represents each venue on the day, as the committee lists them. */
+export const VENUE_CONTACTS: { venue: string; people: VenueContact[] }[] = [
+  {
+    venue: "Sugden",
+    people: [
+      { name: "Adam", role: "MGames Director", display: "+44 7385 883879", tel: "+447385883879", whatsapp: true },
+      { name: "Ashley Ann Mathews", role: "Volunteers", display: "+60 14-608 2122", tel: "+60146082122" },
+      { name: "Rafiq Rosly", role: "First aid & vendors", display: "+44 7388 216469", tel: "+447388216469" },
+    ],
+  },
+  {
+    venue: "Trinity",
+    people: [
+      { name: "Shing Hui", role: "MGames Director", display: "+60 11-1639 9665", tel: "+601116399665", whatsapp: true },
+      { name: "Hannah Hamidon", role: "Vendors", display: "+44 7384 335338", tel: "+447384335338" },
+      { name: "Aviennash Kannan", role: "Volunteers", display: "+44 7721 150923", tel: "+447721150923" },
+    ],
+  },
+  {
+    venue: "Denmark Road",
+    people: [
+      { name: "Max Ng", role: null, display: "+44 7778 742505", tel: "+447778742505" },
+      { name: "Yuan Li Tee", role: "First aid", display: "+44 7785 442051", tel: "+447785442051" },
+    ],
+  },
+];
+
 export type VenueFacilities = {
   firstAid: string;
   toilets?: string;

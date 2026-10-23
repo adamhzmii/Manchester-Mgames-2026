@@ -23,6 +23,7 @@ import {
   BUSES,
   PRAYER_ROOMS,
   QUOTAS,
+  VENUE_CONTACTS,
   STATIONS,
   TRAVEL_APPS,
   WRISTBANDS,
@@ -115,6 +116,43 @@ export default async function InfoPage() {
             ))}
           </ul>
         ) : null}
+      </section>
+
+      <section className={styles.section} aria-labelledby="venue-contacts">
+        <h2 id="venue-contacts" className={styles.title}>
+          Who to contact at each venue
+        </h2>
+        <div className={styles.travel}>
+          {VENUE_CONTACTS.map(({ venue, people }) => (
+            <div key={venue} className={styles.travelCard}>
+              <p className={styles.travelHead}>{venue}</p>
+              <ul className={styles.contacts}>
+                {people.map((p) => (
+                  <li key={p.tel}>
+                    <a
+                      href={p.whatsapp ? `https://wa.me/${p.tel.replace(/\D/g, "")}` : `tel:${p.tel}`}
+                      target={p.whatsapp ? "_blank" : undefined}
+                      rel="noreferrer"
+                      className={`${styles.contact} ${styles.venueContact}`}
+                    >
+                      <span>
+                        <span className={styles.contactLabel}>{p.name}</span>
+                        <span className={styles.contactNote}>
+                          {p.role ? `${p.role} · ` : ""}
+                          {p.display}
+                        </span>
+                      </span>
+                      <span className={styles.contactCall}>
+                        <PhoneIcon size={15} />
+                        {p.whatsapp ? "WhatsApp" : "Call"}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className={styles.section} aria-labelledby="getting-there">

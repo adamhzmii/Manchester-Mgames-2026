@@ -15,6 +15,17 @@ const LINKS = [
   { href: "/committee", label: "Committee" },
 ] as const;
 
+/**
+ * MGames 2026's sponsors, on white tiles so every logo reads the same in
+ * light and dark mode. Singapore Global Network is the main sponsor: first,
+ * and on a tile of its own.
+ */
+const SPONSORS = [
+  { name: "Singapore Global Network", src: "/sponsors/sgn.png", width: 300, height: 205, main: true },
+  { name: "MABECS", src: "/sponsors/mabecs.png", width: 990, height: 360, main: false },
+  { name: "UKEC — United Kingdom Education Centre", src: "/sponsors/ukec.png", width: 198, height: 290, main: false },
+] as const;
+
 export function SiteFooter() {
   return (
     <footer className={styles.footer}>
@@ -45,6 +56,19 @@ export function SiteFooter() {
             Info pack
           </a>
         </nav>
+
+        <section className={styles.sponsors} aria-labelledby="sponsors-title">
+          <p id="sponsors-title" className={styles.sponsorsTitle}>
+            Supported by
+          </p>
+          <ul className={styles.sponsorList}>
+            {SPONSORS.map((s) => (
+              <li key={s.src} className={`${styles.sponsor} ${s.main ? styles.mainSponsor : ""}`}>
+                <Image src={s.src} alt={s.name} width={s.width} height={s.height} className={styles.sponsorLogo} />
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <div className={styles.bottom}>
           <Link href="/coordinate" className={styles.staff}>

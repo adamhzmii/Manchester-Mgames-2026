@@ -221,6 +221,11 @@
   color: var(--mg-ink);
 }
 
+/* Inside a white venue card: a tinted row rather than a card on a card. */
+.venueContact {
+  background: var(--mg-sunk);
+}
+
 .contactLabel {
   display: block;
   font-family: var(--mg-display);

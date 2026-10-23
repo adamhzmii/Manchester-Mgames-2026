@@ -61,6 +61,74 @@
   color: var(--mg-plum);
 }
 
+.sponsors {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .sponsors {
+    grid-column: 1 / -1;
+  }
+}
+
+.sponsorsTitle {
+  font-family: var(--mg-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mg-ink-3);
+}
+
+/* Phone: the main sponsor across the top, the other two side by side.
+   Wider screens: all three in a row, the main sponsor's tile the widest. */
+.sponsorList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 700px) {
+  .sponsorList {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+
+/* White tiles: the logos are drawn for a white page, whatever the theme. */
+.sponsor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  padding: 14px 18px;
+  border-radius: var(--mg-r-lg);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--mg-line);
+}
+
+.mainSponsor {
+  grid-column: 1 / -1;
+  height: 150px;
+}
+
+@media (min-width: 700px) {
+  .sponsor,
+  .mainSponsor {
+    grid-column: auto;
+    height: 140px;
+  }
+}
+
+.sponsorLogo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .bottom {
   display: flex;
   flex-wrap: wrap;
