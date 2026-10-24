@@ -340,9 +340,6 @@
   order: 2;
   scroll-margin-top: calc(var(--mg-header-height) + 8px);
 }
-.sMedals {
-  order: 2;
-}
 .sNext {
   order: 3;
 }

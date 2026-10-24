@@ -7,7 +7,6 @@ import { FindTeamButton } from "@/components/find-team-button";
 import { CalendarIcon, ChevronRightIcon, PinIcon, TrophyIcon } from "@/components/icons";
 import { LiveScoreboard } from "@/components/live-scoreboard";
 import { MatchList, MatchRow } from "@/components/match-row";
-import { MedalTable } from "@/components/medal-table";
 import { SectionHead } from "@/components/section-head";
 import { SportBadge } from "@/components/sport-badge";
 import { UpdateTypeIcon, UPDATE_TYPE_LABEL } from "@/components/update-type-icon";
@@ -26,7 +25,7 @@ import {
   phaseOf,
   upNext,
 } from "@/lib/matchday";
-import { medalTable, podiums, type Podium } from "@/lib/medals";
+import { podiums, type Podium } from "@/lib/medals";
 import type { Announcement, PickerTeam, Sport, Vendor, Venue } from "@/lib/queries";
 import { fromPrice } from "@/lib/vendors";
 import { useFavouriteTeams } from "@/lib/use-favourite-teams";
@@ -49,7 +48,7 @@ type HomeViewProps = {
  *
  *   before   — a countdown, how to find your team, what is on and where
  *   matchday — what is live, what is next, your next game, the latest news
- *   after    — champions and the medal table
+ *   after    — champions
  *
  * Reads the shared live feed, so a game going live while the page is open
  * flips it into matchday without a reload.
@@ -97,13 +96,6 @@ export function HomeView({
       <div className={`mg-wrap ${styles.body}`}>
         <div className={styles.main}>
           {phase === "matchday" ? <LiveNow fixtures={fixtures} /> : null}
-
-          {phase === "after" ? (
-            <section className={styles.sMedals}>
-              <SectionHead title="Medal table" href="/standings" action="Standings" />
-              <MedalTable rows={medalTable(finals)} />
-            </section>
-          ) : null}
 
           {phase === "matchday" ? (
             <section className={styles.sNext}>
