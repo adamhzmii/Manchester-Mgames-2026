@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { Bracket } from "@/components/bracket";
 import { FilterChips, type ChipOption } from "@/components/filter-chips";
 import { MatchList, MatchRow } from "@/components/match-row";
+import { PodiumSummary } from "@/components/podium-summary";
 import { StandingsTable } from "@/components/standings-table";
 import { SPORT_KEY, byKickoff, categoriesOf, type Fixture } from "@/lib/fixtures";
 import { useLiveFixtures } from "@/lib/live-feed";
@@ -40,9 +41,8 @@ type StandingsViewProps = {
 
 /**
  * Who is winning, one sport at a time: its group tables, knockout bracket
- * and every game. No "all sports" view — each sport is its own competition,
- * and the champions across them are on the home page once finals are
- * played. Selections live in the URL, so "the netball bracket" is a link,
+ * and every game, under a summary of the winners across every sport.
+ * Selections live in the URL, so "the netball bracket" is a link,
  * and the sport is remembered on the phone for next time.
  */
 export function StandingsView({
@@ -97,6 +97,10 @@ export function StandingsView({
     <div className={styles.page}>
       <div className="mg-wrap">
         <h1 className="mg-page-title">Standings</h1>
+      </div>
+
+      <div className={`mg-wrap ${styles.podium}`}>
+        <PodiumSummary fixtures={fixtures} />
       </div>
 
       <div className={styles.chips}>

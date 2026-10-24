@@ -3,6 +3,10 @@
   animation: mg-fade-in 0.2s ease both;
 }
 
+.podium {
+  margin-top: 14px;
+}
+
 .chips {
   margin-top: 14px;
 }

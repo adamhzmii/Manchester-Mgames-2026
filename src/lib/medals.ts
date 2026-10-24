@@ -116,3 +116,47 @@ export function medalTable(list: readonly Podium[]): MedalRow[] {
       b.gold - a.gold || b.silver - a.silver || b.bronze - a.bronze || a.name.localeCompare(b.name),
   );
 }
+
+export type PodiumStatus = {
+  categoryId: string;
+  title: string;
+  sportSlug: string;
+  sportCode: string;
+  sportColor: string;
+  sportOrder: number;
+  /** Null until the final is decided. */
+  gold: Medallist | null;
+  silver: Medallist | null;
+  /** Null until the third-place game is decided, and always where there is none. */
+  bronze: Medallist | null;
+  hasThirdPlace: boolean;
+};
+
+/**
+ * Every category with a final, decided or not — for a page that lists who
+ * won what as the day fills in, with the places still to play shown as such.
+ */
+export function podiumStatus(fixtures: readonly Fixture[]): PodiumStatus[] {
+  return fixtures
+    .filter((f) => f.stage === "final")
+    .map((final) => {
+      const decided = sides(final);
+      const third = fixtures.find((f) => f.stage === "third_place" && f.categoryId === final.categoryId);
+      return {
+        categoryId: final.categoryId,
+        title:
+          final.categoryName && final.categoryName !== "Open"
+            ? `${final.sportName} · ${final.categoryName}`
+            : final.sportName,
+        sportSlug: final.sportSlug,
+        sportCode: final.sportCode,
+        sportColor: final.sportColor,
+        sportOrder: final.sportOrder,
+        gold: decided?.won ?? null,
+        silver: decided?.lost ?? null,
+        bronze: third ? (sides(third)?.won ?? null) : null,
+        hasThirdPlace: third !== undefined,
+      };
+    })
+    .sort((a, b) => a.sportOrder - b.sportOrder || a.title.localeCompare(b.title));
+}

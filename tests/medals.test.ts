@@ -65,3 +65,16 @@ test("teams level on every medal are listed alphabetically", () => {
     ["Bees", "Zebras", "Ants", "Yaks"],
   );
 });
+
+test("every category's podium is listed, with places still to play left open", async () => {
+  const { podiumStatus } = await import("../src/lib/medals.ts");
+  const { fixture } = await import("./helpers.ts");
+  const final = fixture({ stage: "final", status: "finished", scoreA: 2, scoreB: 1, teamAId: "x", teamA: "Xray", teamBId: "y", teamB: "Yankee" });
+  const third = fixture({ stage: "third_place", status: "upcoming" });
+  const other = fixture({ stage: "final", categoryId: "c-other", categoryName: "Mixed Doubles", status: "upcoming" });
+  const list = podiumStatus([final, third, other]);
+  const done = list.find((p) => p.categoryId === final.categoryId)!;
+  assert.deepEqual([done.gold?.name, done.silver?.name, done.bronze, done.hasThirdPlace], ["Xray", "Yankee", null, true]);
+  const open = list.find((p) => p.categoryId === "c-other")!;
+  assert.deepEqual([open.gold, open.hasThirdPlace], [null, false]);
+});
