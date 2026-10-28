@@ -1,246 +1,123 @@
-# MGames 2026
+<p align="center">
+  <img src="public/brand/banner.jpg" alt="Volleyball at MGames 2026, Sugden Sports Centre" width="100%">
+</p>
 
-Web app for **Manchester MGames 2026** — the Malaysian Students' Society of
-Manchester one-day multi-sport tournament, Saturday 24 October 2026 at the
-Trinity and Sugden sports centres.
+<h1 align="center">Manchester MGames 2026</h1>
 
-Two audiences, one app:
+<p align="center">
+  The website that ran a one-day, eight-sport tournament for the Malaysian Students' Society of Manchester.<br>
+  <a href="https://manchestermgames.com"><b>manchestermgames.com</b></a>
+</p>
 
-- **Attendees** browse the schedule, live scores, venue info and food with no
-  account at all.
-- **Coordinators** sign in with their own per-sport account, which reveals
-  inline edit controls on that sport's fixtures for pushing scores during the
-  day. There is no separate admin dashboard.
+---
 
-Built from `mgames26_system_design_spec.md` and the Claude Design prototype.
+On Saturday 24 October 2026, 157 teams played 310 matches across three venues in Manchester:
+football, basketball, netball, volleyball, badminton, table tennis, pickleball and frisbee.
+Every one of those scores went through this site, entered courtside on a phone by the head of
+each sport and shown to everyone else a second later.
 
-## Stack
+There was no printed draw sheet to chase, and no WhatsApp group asking "who's in the semi?".
+Players checked their phones.
 
-| | |
-|---|---|
-| Framework | Next.js 16 (App Router, React 19, TypeScript) |
-| Data + auth | Supabase (Postgres, Auth, Realtime) |
-| Maps | Google Maps JavaScript API via `@vis.gl/react-google-maps` |
-| Styling | CSS Modules over the design tokens in `src/app/globals.css` |
-| Hosting | Vercel (free tier is sufficient for this event's scale) |
+## The day in numbers
 
-## Getting started
+|                     |                                                |
+| ------------------- | ---------------------------------------------- |
+| **1,506**           | people used the site on match day              |
+| **17,902**          | pages viewed that day, about 12 each           |
+| **310 / 310**       | matches scored live, 08:30 to 19:18            |
+| **6,874**           | points and goals recorded                      |
+| **683,581**         | requests served, peaking at 75k in one hour    |
+| **90%**             | of visitors were on a phone                    |
+| **15+**             | countries, including family watching from Malaysia |
+
+## What it does
+
+**For everyone at the event.** No account and no app to install.
+
+- **Schedule.** Every match, filterable by sport, venue and stage. Live games update in place.
+- **Standings.** Group tables are worked out from the results using the rulebook's tie-breakers:
+  head-to-head, then forfeits, then score difference. A tie the rules can't break is flagged for
+  the head of sport rather than guessed. A Winners summary at the top shows 1st, 2nd and 3rd in
+  every sport.
+- **Knockouts fill themselves in.** "Winner QF1" becomes a real team the moment QF1 finishes.
+  This includes penalty shoot-outs, basketball overtime and forfeits.
+- **Follow your team.** Pick a team and the site shows only their games, then sends a push
+  notification at kick-off, at full time, and if their court is running late.
+- **Food, venues, info.** Stalls with menus and prices, walking times between venues, contacts
+  for each venue and how to get there.
+
+**For the committee.**
+
+- **Court sheet** (`/coordinate`). Each head of sport signs in and sees only their courts. They
+  can start a game, tap the score up, end it, award a forfeit, or record penalties.
+- **Delays handle themselves.** When a court runs late, every game after it on that court shifts
+  to match, and followers of those teams are told.
+- **Mistakes can be undone.** Wrong score, wrong start time or wrong winner can all be fixed
+  after the fact, and the brackets downstream recalculate.
+
+Only the head of each sport can change that sport's scores. This is enforced by the database's
+row-level security, not by hiding buttons, so a netball account can't touch a football result
+even with a forged request.
+
+## Built with
+
+[Next.js 16](https://nextjs.org) · [Supabase](https://supabase.com) (Postgres, Auth, Realtime) ·
+[Vercel](https://vercel.com) · Web Push · CSS Modules
+
+No UI framework and no component library: the styling is plain CSS over a small set of design
+tokens.
+
+## Running it locally
 
 ```bash
 npm install
-cp .env.example .env.local     # then fill in your Supabase project settings
-npm run dev                    # http://localhost:3000
+cp .env.example .env.local   # Supabase URL + keys, VAPID keys for push
+npm run dev                  # http://localhost:3000
 ```
 
-The app boots without configuration, but every data-backed page will report
-that it cannot reach Supabase until `.env.local` is filled in.
-
-### Running without Supabase
-
-`.env.local` points at the real project, so `npm run dev` is all you need.
-`tools/mock-supabase.mjs` remains as a local stand-in for Supabase's REST API,
-useful for working offline or on the UI without touching the live project:
+To rehearse match day without touching real data, replay it in memory at a point in the day:
 
 ```bash
-npm run mock     # serves fixed rows on :54999
-npm run dev      # with NEXT_PUBLIC_SUPABASE_URL=http://localhost:54999
+MGAMES_DEMO=midday npm run dev   # also: eve, morning, post
 ```
 
-It returns a handful of canned rows in the shape `src/lib/queries.ts` expects.
-It is not a database: no filtering, no writes, no auth, no realtime — so
-coordinator sign-in and live score updates do nothing against it. Delete
-`tools/` once a real project is up.
-
-### Setting up the database
-
-The schema lives in `supabase/` as ordinary SQL, so it can be applied with the
-Supabase CLI or pasted into the dashboard's SQL editor.
+Nothing is written to the database, and demo mode is switched off on every Vercel deployment.
 
 ```bash
-supabase link --project-ref <your-project-ref>
-supabase db push                       # applies supabase/migrations/*
-psql "$DATABASE_URL" -f supabase/seed.sql   # optional: prototype data
-```
-
-- `migrations/20260822120000_init_schema.sql` — tables, enums, constraints, indexes
-- `migrations/20260822120100_rls_and_realtime.sql` — RLS policies and the realtime publication
-- `seed.sql` — a full day of realistic fixtures, vendors and announcements for
-  local development. Truncates first, so it is safe to re-run and **must not**
-  be run against production once real data exists.
-
-### Dry runs
-
-`seed.sql` loads a deliberately mid-tournament snapshot (37 played, 2 live) so
-every screen has something to render. For a rehearsal with the committee that
-is the wrong starting point — the day should be walked forward from nothing:
-
-```bash
-npm run reset:pre-event
-```
-
-Every fixture goes back to `upcoming` with no score, knockout slots fed by an
-earlier match go back to showing "Winner QF1" rather than a hardcoded winner,
-and the announcement feed is trimmed to a single pre-doors notice. It edits in
-place rather than reseeding, so `seed.sql` stays the only description of the
-data, and it is safe to re-run between practice rounds.
-
-The work is done by `reset_demo_day_to_pre_event()`, which is granted to
-`service_role` only — wiping every score is exactly what a stranger would want
-to do during the event, so it is not reachable with the anon key. Coordinator
-logins and notification sign-ups survive a reset.
-
-Both migrations have been applied to the **Manchester-Mgames-2026** project
-(`wtpujwtubqasofesvwki`, eu-west-2), and `seed.sql` has been loaded there.
-Verified after the push: all ten tables readable by `anon`, anonymous writes
-refused by RLS, the `fixtures` embed query resolving both team foreign keys,
-and a score change propagating over realtime to an open page without a reload.
-
-### Creating coordinator accounts
-
-Each coordinator is a Supabase auth user plus a row in `coordinators` naming
-the sport they cover. A row with a null `sport_id` is a committee admin who can
-edit every sport.
-
-1. **Authentication → Users → Add user**, with **Auto Confirm User** on — an
-   unconfirmed account cannot sign in, and no SMTP is configured to send the
-   verification email.
-2. Add the matching row (SQL editor, which runs as the service role):
-
-```sql
-insert into coordinators (user_id, name, sport_id)
-values (
-  '<the new user id>',
-  'Aisyah — Netball',
-  (select id from sports where slug = 'netball')   -- or NULL for an admin
-);
-```
-
-The restriction is enforced by the RLS policy on `fixtures`, not by the UI: a
-netball coordinator who forges a request to change a football score has it
-rejected by Postgres. Verified with a scoped test account — its own sport
-wrote one row, another sport wrote zero.
-
-### Regenerating database types
-
-`src/lib/supabase/types.ts` is currently hand-written to mirror the migrations.
-Once the project is linked it can be replaced wholesale:
-
-```bash
-npx supabase gen types typescript --linked > src/lib/supabase/types.ts
-```
-
-### Setting up Google Maps
-
-`/map` embeds a real Google Map (via `@vis.gl/react-google-maps`) once
-`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set; without it, the page falls back to a
-plain venue list and a `geo:` directions link — no crash, no broken embed.
-
-1. In [Google Cloud Console](https://console.cloud.google.com), create a
-   project (or reuse one) and enable the **Maps JavaScript API**.
-2. **APIs & Services → Credentials → Billing** — link a billing account. A
-   card is required to activate the API at all, even to stay within the free
-   tier (10,000 map loads/month; well above what a one-day, ~1,000-attendee
-   event will use). Google does not hard-stop at the free quota — set a budget
-   alert in Cloud Console so an unexpected traffic spike doesn't run up a
-   real bill unnoticed.
-3. **Credentials → Create Credentials → API Key.**
-4. **Restrict the key** before using it anywhere real — an unrestricted key is
-   visible in the browser's page source and can be used from any site:
-   - *Application restrictions* → **Websites**, add
-     `localhost:3000/*` (dev) and your production domain (`*.vercel.app/*`
-     or your custom domain once one is set).
-   - *API restrictions* → restrict to **Maps JavaScript API** only.
-5. Add it to `.env.local` and to Vercel's Environment Variables (Production
-   *and* Preview, since preview deployments run on `*.vercel.app` too):
-
-```bash
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-key-here
-```
-
-### Pinning food stalls on the map
-
-`vendors` carries nullable `latitude` / `longitude`. A stall with coordinates
-gets a gold pin on its venue's map; one without is still listed, just not
-pinned — so nothing has to be guessed before the day. To place one:
-
-```sql
-update vendors
-set latitude = 53.4712, longitude = -2.2360
-where name = 'Nasi Lemak Corner';
-```
-
-The easiest way to read a coordinate off Google Maps is to right-click the
-spot and copy the pair it shows.
-
-## Routes
-
-| Route | Realtime | Notes |
-|---|---|---|
-| `/` | ✅ | Hero, latest announcement, "Happening now" rail |
-| `/schedule` | ✅ | All fixtures; sport/venue/stage filters, My Games, coordinator editing |
-| `/scores` | ✅ | Group tables (computed client-side) and knockout brackets |
-| `/map` | — | Pannable Google Map with venue and food-stall pins, plus a per-venue list |
-| `/food` | — | Vendors and menus |
-| `/info` | — | First aid, prayer rooms, emergency contacts, FAQ |
-| `/announcements` | ✅ | Committee feed, newest first |
-| `/login` | — | Per-sport coordinator sign-in |
-
-"Your team" is not a route. It is a sport → category → team drill-down
-(`team-picker.tsx`), surfaced on the home page and as a filter toggle on
-`/schedule`, backed by team ids in `localStorage` so attendees never need an
-account. The drill-down exists because a flat roster does not disambiguate:
-several clubs field a same-named side in more than one sport, and the category
-is the only thing that tells them apart.
-
-## How it fits together
-
-```
-src/
-  app/                    routes; each data page is force-dynamic
-  components/             presentational + client-interactive pieces
-  lib/
-    queries.ts            every server-side read, in one place
-    coordinator.ts        coordinator identity + per-sport edit predicate
-    fixtures.ts           fixture row → view model, filtering, sorting
-    standings.ts          group tables computed from finished fixtures
-    use-live-fixtures.ts  realtime subscription that patches scores in place
-    use-favourite-teams.ts  localStorage store behind useSyncExternalStore
-    actions/              server actions (score updates, auth)
-    supabase/             browser + server clients, env, database types
-  proxy.ts                session refresh (Next 16's renamed middleware)
-```
-
-**Security model.** Every page is public and read-only for anonymous visitors.
-The only write is a coordinator updating a fixture, and the boundary that
-enforces it is the RLS policy on `fixtures` — not the UI. The React tree
-decides whether an Edit button *renders*; Postgres decides whether the write
-*lands*, and it scopes that to the coordinator's own sport. A forged client can
-show itself the edit sheet for another sport and still be refused.
-
-**Realtime.** Fixture payloads carry the bare row, with no joined team or venue,
-so `use-live-fixtures.ts` patches the three columns coordinators actually touch
-(`score_a`, `score_b`, `status`) onto data the page already holds, and falls
-back to `router.refresh()` for anything structural. Announcements are
-self-contained and are prepended straight from the payload.
-
-## Testing
-
-```bash
-npm test        # Node's test runner over the pure logic
+npm test             # standings, tie-breaks, brackets, delays, BST/GMT edge cases
 npm run lint
 npx tsc --noEmit
 ```
 
-The tests cover the parts where a bug would be silent and wrong rather than
-loud and broken: standings maths (including the per-sport points rules and
-excluding in-progress matches), fixture filtering, and time formatting across
-the BST/GMT boundary — the event is on the last BST weekend of 2026.
+The tests focus on the logic where a bug would be quietly wrong rather than obviously broken:
+who goes through, who gets a medal, and what time a delayed game actually starts.
 
-## Still open
+## Where things live
 
-Carried over from the spec, none of them blocking:
+```
+src/app/            pages: schedule, standings, match, team, food, venues, info, coordinate
+src/lib/
+  standings.ts      group tables + rulebook tie-breaks
+  progression.ts    fills knockout slots from earlier results
+  deciders.ts       penalties, overtime and forfeits
+  delays.ts         pushes a late court's later games back
+  medals.ts         podiums and the winners summary
+  actions/          server actions: scoring, forfeits, announcements, push
+supabase/           schema migrations, RLS policies, seed data
+tools/              turns the organisers' schedule spreadsheet into fixtures
+tests/              Node's built-in test runner, no framework
+```
 
-- **Announcements linking to a fixture** — deferred, no schema support yet.
-- **Splitting coordinator editing into `/coordinator`** — the route structure
-  supports it cleanly if the inline approach proves awkward on the day.
-- **`.live` vs `.com` domain** — currently `mgames26.live`.
+The schedule came from a spreadsheet the committee kept editing until the week of the event.
+`tools/extract-schedule.py` reads it, checks every group pairing plays exactly once, and
+generates the fixtures. Re-running it after each new version kept the site matching the sheet
+exactly.
+
+## Credits
+
+Built by [Adam Hazmi](https://github.com/adamhzmii) for MGames 2026, run by the
+**Malaysian Students' Society of Manchester**.
+
+Thanks to the heads of sport who scored every game, the committee and volunteers,
+and our sponsors: **SGN**, **MABECS** and **UKEC**.
